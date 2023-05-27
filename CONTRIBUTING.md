@@ -21,8 +21,8 @@ Pull requests are the best way to propose changes to the codebase. We actively w
 5. Make sure your code lints.
 6. Issue that pull request!
 
-## Any contributions you make will be under the MIT License (LICENSE.md)
-In short, when you submit code changes, your submissions are understood to be under the same MIT License (LICENSE.md) that covers the project. Feel free to contact the maintainers if that's a concern.
+## Any contributions you make will be under the MIT License (LICENSE)
+In short, when you submit code changes, your submissions are understood to be under the same MIT License (LICENSE) that covers the project. Feel free to contact the maintainers if that's a concern.
 
 ## Report bugs using Github's [issues](https://github.com/briandk/transcriptase-atom/issues)
 We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/briandk/transcriptase-atom/issues); it's that easy!
@@ -31,7 +31,7 @@ We use GitHub issues to track public bugs. Report a bug by [opening a new issue]
 Here's [an example](http://stackoverflow.com/q/12488905/180626) of a bug report. The more information you can provide, the easier it is for us to understand and solve the problem.
 
 ## License
-By contributing, you agree that your contributions will be licensed under its [Software License](LICENSE.md).
+By contributing, you agree that your contributions will be licensed under its MIT License(LICENSE).
 
 ## References
 This document was adapted from the open-source contribution guidelines for [Facebook's Draft](https://github.com/facebook/draft-js/blob/master/CONTRIBUTING.md)
