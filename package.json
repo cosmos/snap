@@ -2,7 +2,7 @@
     "name": "@cosmos/snap",
     "version": "0.1.0",
     "private": true,
-    "description": "",
+    "description": "The Cosmos extension for your Metamask wallet.",
     "homepage": "https://github.com/cosmos/snap#README.md",
     "bugs": {
       "url": "https://github.com/cosmos/snap/issues"
