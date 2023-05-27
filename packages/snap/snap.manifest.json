@@ -1,0 +1,28 @@
+{
+  "version": "0.1.0",
+  "description": "An example Snap written in TypeScript.",
+  "proposedName": "TypeScript Example Snap",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+  },
+  "source": {
+    "shasum": "usoZPr0F4J12BaVbuDQRCCIW2cj/N5gZD7ccOJfDZV8=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "iconPath": "images/icon.svg",
+        "packageName": "snap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "snap_dialog": {},
+    "endowment:rpc": {
+      "dapps": true,
+      "snaps": false
+    }
+  },
+  "manifestVersion": "0.1"
+}
