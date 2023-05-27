@@ -1,4 +1,8 @@
-import { describe, it, expect } from 'vitest';
+/**
+ * @jest-environment jsdom
+ */
+
+import "@testing-library/jest-dom";
 
 describe('sum test', () => {
 	it('adds 1 + 2 to equal 3', () => {
