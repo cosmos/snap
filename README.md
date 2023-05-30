@@ -16,7 +16,7 @@ MetaMask Snaps is an extensible platform for permissionless innovation that allo
 
 ## Security
 
-Security is paramount when it comes to MetaMask Snaps. Snaps execute in a sandboxed environment based on Hardened JavaScript by Agoric. MetaMask Snaps use a permissions model for protecting user data and respecting user consent.
+Security is paramount when it comes to MetaMask Snaps. Snaps execute in a sandboxed environment based on Hardened JavaScript (SES) by Agoric. MetaMask Snaps use a permissions model for protecting user data and respecting user consent.
 
 ## Developer Preview Software
 
