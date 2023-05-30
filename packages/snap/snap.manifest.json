@@ -1,10 +1,10 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example Snap",
+  "description": "Cosmos Metamask Snap that adds Cosmos support to Metamask.",
+  "proposedName": "Cosmos Metamask Snap",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/cosmos/snap.git"
   },
   "source": {
     "shasum": "gdaR6PQ98kRJ0PxpnvwRXnQCqLVGXuDxgAwLXN+uzik=",
