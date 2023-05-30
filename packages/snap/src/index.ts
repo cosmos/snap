@@ -13,24 +13,24 @@ import { Chains } from './types/chains';
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   switch (request.method) {
-    case 'init':
-      // Ensure user confirms initializing wallets
+    case 'initialize':
+      // Ensure user confirms initializing Cosmos snap
       let confirmation = await snap.request({
         method: 'snap_dialog',
         params: {
           type: 'confirmation',
           content: panel([
-            text('Would you like to initialize Cosmos within your Metamask?'),
+            text('Would you like to add Cosmos chain support within your Metamask wallet?'),
           ]),
         },
       });
-      let chains: Chains = { chains: [] }
+      let chains = new Chains([]);
       if (confirmation) {
         chains = await initializeChains();
       }
       let res = await snap.request({
         method: 'snap_manageState',
-        params: { operation: 'update', newState: { chains: JSON.stringify(chains) } },
+        params: { operation: 'update', newState: { chains: chains.string() } },
       });
       return res
     default:

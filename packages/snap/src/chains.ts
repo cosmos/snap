@@ -1,4 +1,4 @@
-import { Chains, Chain, Gas } from "./types/chains"
+import { Chains } from "./types/chains"
 import { registry } from "./types/registry";
 
 /**
@@ -9,23 +9,27 @@ import { registry } from "./types/registry";
  * @throws If an error occurs.
  */
 export const initializeChains = async (): Promise<Chains> => {
+    // Call each default chain from chain registry urls using hardcoded list of default chains
     let retPromises = registry.map(chain => fetch(chain.url));
-    let rets = Promise.all(retPromises);
+    let rets = await Promise.all(retPromises);
+    let all = await Promise.all(rets.map(ret => ret.json()))
 
-    let chains: Chains = {
-        chains: [
-            {
-                chain_id: "cosmos-4",
-                name: "Cosmos Hub",
-                rpc: "",
-                coin_type: "",
-                prefix: "",
-                gas: {
-                    default: 100000,
-                    denom: "uatom",
-                },
-            }
-        ]
-    }
+    // Map all registry chain data for all chains to our Chain type
+    let chainList = all.map(data => {
+        return {
+            chain_id: data.chain_id,
+            name: data.name,
+            rpc: data.rpc,
+            coin_type: data.coin_type,
+            prefix: data.prefix,
+            gas: {
+                default: data.gas.default,
+                denom: data.gas.denom
+            },
+        }
+    })
+
+    // Initialize a chains class with all the default chains
+    let chains = new Chains(chainList);
     return chains
 }
