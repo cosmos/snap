@@ -26,7 +26,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       });
       let chains: Chains = { chains: [] }
       if (confirmation) {
-        chains = initializeChains();
+        chains = await initializeChains();
       }
       let res = await snap.request({
         method: 'snap_manageState',
