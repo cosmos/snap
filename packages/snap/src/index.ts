@@ -1,6 +1,7 @@
-import { OnRpcRequestHandler } from '@metamask/snaps-types';
+import { JsonRpcRequest, OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
 import { initializeChains } from './chains';
+import { Chains } from './types/chains';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -23,10 +24,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           ]),
         },
       });
-      let res;
+      let chains: Chains = { chains: [] }
       if (confirmation) {
-        res = initializeChains();
+        chains = initializeChains();
       }
+      let res = await snap.request({
+        method: 'snap_manageState',
+        params: { operation: 'update', newState: { chains: JSON.stringify(chains) } },
+      });
       return res
     default:
       throw new Error('Method not found.');
