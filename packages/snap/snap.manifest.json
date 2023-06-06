@@ -7,21 +7,28 @@
     "url": "https://github.com/cosmos/snap.git"
   },
   "source": {
-    "shasum": "gdaR6PQ98kRJ0PxpnvwRXnQCqLVGXuDxgAwLXN+uzik=",
+    "shasum": "8jKsYin/ff0paVBpQZQYmLFqfCiPiNf2exFAzvERiDw=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "snap",
+        "packageName": "cosmos-snap",
         "registry": "https://registry.npmjs.org/"
       }
     }
   },
   "initialPermissions": {
     "snap_dialog": {},
+    "endowment:network-access": {},
+    "snap_getBip44Entropy": [
+      {
+        "coinType": 118
+      }
+    ],
+    "snap_manageState": {},
     "endowment:rpc": {
-      "dapps": true,
-      "snaps": false
+      "snaps": false,
+      "dapps": true
     }
   },
   "manifestVersion": "0.1"

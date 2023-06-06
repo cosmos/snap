@@ -2,6 +2,7 @@
   "name": "@cosmos/snap",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "The Cosmos extension for your Metamask wallet.",
   "homepage": "https://github.com/cosmos/snap#README.md",
   "bugs": {
@@ -20,7 +21,7 @@
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
     "lint:misc": "prettier '**/*.json' '**/*.md' '!**/CHANGELOG.md' '**/*.yml' --ignore-path .gitignore",
     "start": "yarn workspaces foreach --parallel --interlaced --verbose run start",
-    "test": "echo \"TODO\""
+    "test": "yarn workspaces foreach run test"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^10.0.0",
@@ -45,5 +46,13 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "ava": {
+    "extensions": {
+      "ts": "module"
+    },
+    "require": [
+      "ts-node/register"
+    ]
+  }
 }
