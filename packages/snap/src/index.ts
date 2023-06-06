@@ -1,4 +1,4 @@
-import { JsonRpcRequest, OnRpcRequestHandler } from '@metamask/snaps-types';
+import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
 import { initializeChains } from './chains';
 import { Chains } from './types/chains';
