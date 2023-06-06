@@ -25,6 +25,8 @@ export const initializeChains = async (): Promise<Chains> => {
         return data
     });
 
+    console.log(chainList);
+
     // Initialize a chains class with all the default chains
     let chains = new Chains(chainList);
     return chains

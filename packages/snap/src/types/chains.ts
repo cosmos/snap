@@ -1,11 +1,55 @@
 export interface Chain {
+    chain_name: string;
     chain_id: string;
-    name: string;
-    rpc: string;
-    coin_type: string;
+    pretty_name: string;
+    // Coin type
+    slip44: string;
     // Address prefix
-    prefix: string;
-    gas: Gas;
+    bech32_prefix: string;
+    fees: Fees;
+    staking: Staking,
+    logo_URIs: Logos,
+    apis: {
+        "rpc": Api[];
+        "rest": Api[];
+        "grpc": Api[];
+    },
+    explorers: Explorer[];
+}
+
+export interface Explorer {
+    kind: string;
+    url: string;
+    tx_page: string;
+    account_page: string;
+}
+
+export interface Api {
+    address: string;
+    provider: string;
+}
+
+export interface Staking {
+    staking_tokens: {
+        denom: string
+    }
+}
+
+export interface Fees {
+    fee_tokens: FeeToken[]
+}
+
+export interface Logos {
+    png: string;
+    svg: string;
+}
+
+export interface FeeToken {
+    denom: string;
+    fixed_min_gas_price: number;
+    low_gas_price: number;
+    average_gas_price: number;
+    high_gas_price: number;
 }
 
 export interface Gas {
