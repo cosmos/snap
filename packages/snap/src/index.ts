@@ -1,7 +1,7 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
-import { initializeChains } from './chains';
-import { Chains } from './types/chains';
+import { initializeChains } from './initialize';
+import { ChainState } from './utils/state';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -13,6 +13,10 @@ import { Chains } from './types/chains';
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
   switch (request.method) {
+    case 'chains':
+      const data = await ChainState.getChains()
+      console.debug(data);
+      return true
     case 'initialize':
       // Ensure user confirms initializing Cosmos snap
       let confirmation = await snap.request({
@@ -24,14 +28,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           ]),
         },
       });
-      let chains = new Chains([]);
-      if (confirmation) {
-        chains = await initializeChains();
+      if (!confirmation) {
+        throw new Error("Confirmation to add snap denied...")
       }
-      let res = await snap.request({
-        method: 'snap_manageState',
-        params: { operation: 'update', newState: { chains: chains.string() } },
-      });
+      let res = await initializeChains();
+
       return res
     default:
       throw new Error('Method not found.');
