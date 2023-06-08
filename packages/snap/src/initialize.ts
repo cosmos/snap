@@ -10,7 +10,7 @@ import { ChainState } from "./utils/state";
  * @returns The result of the method (boolean).
  * @throws If an error occurs.
  */
-export const initializeChains = async (): Promise<Boolean> => {
+export const initializeChains = async (): Promise<Chain[]> => {
     // Call each default chain from chain registry urls using hardcoded list of default chains
     let retPromises = registry.map(chain => fetch(chain.url));
     let rets = await Promise.all(retPromises);
@@ -26,10 +26,5 @@ export const initializeChains = async (): Promise<Boolean> => {
         return data
     });
 
-    // Initialize a chains class with all the default chains
-    let chains = new Chains(chainList);
-    // add all the default chains into Metamask state
-    let res = await ChainState.addChains(chains);
-
-    return res
+    return chainList
 }

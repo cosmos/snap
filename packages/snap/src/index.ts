@@ -1,6 +1,6 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
-import { initializeChains } from './chains';
+import { initializeChains } from './initialize';
 import { Chains } from './types/chains';
 import { ChainState } from './state';
 
@@ -27,9 +27,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       });
       let chains = new Chains([]);
       if (confirmation) {
-        chains = await initializeChains();
+        let chainList = await initializeChains();
+        chains = new Chains(chainList);
       }
-      let res = await ChainState.addChains(chains)
+      // add all the default chains into Metamask state
+      let res = await ChainState.addChains(chains);
       return res
     case 'transact':
       // Send a transaction to the wallet
