@@ -16,9 +16,9 @@ export class Addresses{
     };
 
     /**
-     * Turn all chains into a JSON string using JSON stringify.
+     * Turn all addresses into a JSON string using JSON stringify.
      *
-     * @returns Stringified JSON of chains.
+     * @returns Stringified JSON of addresses.
      * @throws If an error occurs.
      */
     string() {
