@@ -4,9 +4,9 @@ export interface Address {
     chain_id: string;
 }
 
-export class Addresses{
-    constructor(address: Address[]) {
-        this.addresses = address
+export class Addresses {
+    constructor(addresses: Address[]) {
+        this.addresses = addresses
     };
 
     addresses: Address[];
