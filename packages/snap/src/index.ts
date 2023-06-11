@@ -2,7 +2,8 @@ import { OnRpcRequestHandler } from "@metamask/snaps-types";
 import { panel, text } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
 import { Chains } from "./types/chains";
-import { ChainState } from "./state";
+import { Address} from "./types/address"
+import { ChainState, AddressState } from "./state";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -48,7 +49,22 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       return;
     case "addAddress":
       // Add a new address into the address book in wallet state
-      return;
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "address" in request.params &&
+          request.params.address == "string"
+        )
+      ) {
+        throw new Error("Invalid addAddress request");
+      }
+
+      let new_address : Address = JSON.parse(request.params.address);
+
+      let ret = await AddressState.addAddress(new_address)
+
+      return ret;
     case "deleteAddress":
       // Delete an address from the address book in wallet state
       return;
