@@ -134,7 +134,7 @@ export class AddressState {
         }
 
         // convert into a Addresses object and return the object
-        return JSON.parse(data?.addresses)
+        return JSON.parse(data?.addresses as string)
     }
     
     /**
@@ -155,7 +155,7 @@ export class AddressState {
         }
 
         // remember we keep address stores as a json string so convert into a Addresses object
-        let addresses = new Addresses(JSON.parse(data?.addresses));
+        let addresses = new Addresses(JSON.parse(data?.addresses as string));
 
         let addressList = addresses.addresses.filter(item => item.chain_id === chain_id);
 
@@ -181,7 +181,7 @@ export class AddressState {
             });
 
             // remember we keep address stores as a json string so convert into a Addresses object
-            let addresses = new Addresses(JSON.parse(data?.addresses));
+            let addresses = new Addresses(JSON.parse(data?.addresses as string));
 
             // add the address into addresses class
             addresses.addAddress(address);
@@ -231,7 +231,7 @@ export class AddressState {
         }
 
         // remember we keep address stores as a json string so convert into a Addresses object
-        let addresses = new Addresses(JSON.parse(data?.addresses));
+        let addresses = new Addresses(JSON.parse(data?.addresses as string));
         let keepAddresses = addresses.addresses.filter(item => item.chain_id !== chain_id);
        
         // update addresses
