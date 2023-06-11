@@ -133,6 +133,10 @@ export class AddressState {
             throw new Error("Address book was not found. Add an address to address book to initialize.")
         }
 
+        if (typeof data?.addresses !== 'string') {
+            throw new Error("Invalid address book data. Addresses should be a string.");
+        }
+
         // convert into a Addresses object and return the object
         return JSON.parse(data?.addresses as string)
     }
@@ -152,6 +156,10 @@ export class AddressState {
         
         if (data?.addresses == undefined || data?.addresses == null) {
             throw new Error("Address book was not found. Add an address to address book to initialize.")
+        }
+
+        if (typeof data?.addresses !== 'string') {
+            throw new Error("Invalid address book data. Addresses should be a string.");
         }
 
         // remember we keep address stores as a json string so convert into a Addresses object
@@ -179,6 +187,10 @@ export class AddressState {
                 method: 'snap_manageState',
                 params: { operation: 'get' },
             });
+
+            if (typeof data?.addresses !== 'string') {
+                throw new Error("Invalid address book data. Addresses should be a string.");
+            }
 
             // remember we keep address stores as a json string so convert into a Addresses object
             let addresses = new Addresses(JSON.parse(data?.addresses as string));
@@ -209,6 +221,10 @@ export class AddressState {
             params: { operation: 'get' },
         });
 
+        if (typeof data?.addresses !== 'string') {
+            throw new Error("Invalid address book data. Addresses should be a string.");
+        }
+
         // update Metamask state with new addresses state
         await snap.request({
             method: 'snap_manageState',
@@ -228,6 +244,10 @@ export class AddressState {
         
         if (data?.addresses == undefined || data?.addresses == null) {
             throw new Error("Snap has not been initialized. Please initialize snap.")
+        }
+
+        if (typeof data?.addresses !== 'string') {
+            throw new Error("Invalid address book data. Addresses should be a string.");
         }
 
         // remember we keep address stores as a json string so convert into a Addresses object
