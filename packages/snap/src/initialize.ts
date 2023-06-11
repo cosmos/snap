@@ -1,7 +1,6 @@
-import { Chain, Chains } from "./types/chains"
+import { Chain } from "./types/chains"
 import { registry } from "./types/registry";
 import fetch from "node-fetch";
-import { ChainState } from "./utils/state";
 
 /**
  * Initialize initial Cosmos chains into local storage from the chain registry.
