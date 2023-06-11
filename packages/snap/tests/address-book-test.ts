@@ -45,6 +45,7 @@ test.before(() => {
   (globalThis as any).snap = snapMock;
 });
 
+
 test.serial('getAddressBook function should return current state of address book', async t => {
 
   //get current state of AddressBook
@@ -78,6 +79,7 @@ test.serial('getAddress function should return the address matching the given ch
                       })
 });
 
+
 test.serial('addAddress function should add address ', async t => {
 
   //Initialize new address
@@ -103,7 +105,6 @@ test.serial('addAddress function should add address ', async t => {
 });
 
 
-
 test.serial('removeAddress function should delete the address matching the given chain_id', async t => {
 
   await AddressState.removeAddress('3');
@@ -119,6 +120,30 @@ test.serial('removeAddress function should delete the address matching the given
 
 //TODO
 test.serial('addAddresses function should replace the current Address book with a new one', async t => {
-  t.true(true);
+  
+  //Initialize new address
+  const new_address: Address = {
+    name: "User4",
+    address: "0xghijkl",
+    chain_id: "4"
+  };
+
+  //Initialize new address book
+  let new_address_book = new Addresses([new_address])
+
+
+  //Add new address to Address Book
+  await AddressState.addAddresses(new_address_book);
+  
+  //Get updated Address Book
+  const result = await AddressState.getAddressBook();
+
+  t.deepEqual(result, [
+    {
+      name: "User4",
+      address: "0xghijkl",
+      chain_id: "4"
+    }
+  ])
 })
 
