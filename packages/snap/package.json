@@ -15,8 +15,6 @@
     "snap.manifest.json"
   ],
   "scripts": {
-    "test": "npx ava tests/*",
-    "watch": "npx ava -w",
     "build": "mm-snap build",
     "build:clean": "yarn clean && yarn build",
     "clean": "rimraf dist",
@@ -24,8 +22,19 @@
     "lint:eslint": "eslint . --cache --ext js,ts",
     "lint:fix": "yarn lint:eslint --fix && yarn lint:misc --write",
     "lint:misc": "prettier '**/*.json' '**/*.md' '!CHANGELOG.md' --ignore-path .gitignore",
+    "pretty": "yarn prettier . --write",
     "serve": "mm-snap serve",
-    "start": "mm-snap watch"
+    "start": "mm-snap watch",
+    "test": "npx ava tests/*",
+    "watch": "npx ava -w"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register/transpile-only"
+    ]
   },
   "dependencies": {
     "@metamask/snaps-types": "^0.32.2",
@@ -66,13 +75,5 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  },
-  "ava": {
-    "extensions": [
-      "ts"
-    ],
-    "require": [
-      "ts-node/register/transpile-only"
-    ]
   }
 }
