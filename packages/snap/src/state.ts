@@ -123,6 +123,7 @@ export class AddressState {
      */
 
     public static async getAddressBook() : Promise<Addresses> {
+        // get the current state of addresses in Metamask
         const data = await snap.request({
             method: 'snap_manageState',
             params: { operation: 'get' },
@@ -132,7 +133,8 @@ export class AddressState {
             throw new Error("Address book was not found. Add an address to address book to initialize.")
         }
 
-        return JSON.parse(JSON.stringify(data?.addresses))
+        // convert into a Addresses object and return the object
+        return JSON.parse(data?.addresses)
     }
     
     /**
@@ -147,14 +149,20 @@ export class AddressState {
             method: 'snap_manageState',
             params: { operation: 'get' },
         });
-        let addresses: Addresses = JSON.parse(data?.Addresses?.toString()!);
+        
         if (data?.addresses == undefined || data?.addresses == null) {
             throw new Error("Address book was not found. Add an address to address book to initialize.")
         }
+
+        // remember we keep address stores as a json string so convert into a Addresses object
+        let addresses = new Addresses(JSON.parse(data?.addresses));
+
         let addressList = addresses.addresses.filter(item => item.chain_id === chain_id);
+
         if (addressList.length == 0) {
             throw new Error(`${chain_id} is not found. Add the address to your address book at https://wallet.mysticlabs.xyz`)
         }
+
         return addressList[0]
     }
 
@@ -171,8 +179,9 @@ export class AddressState {
                 method: 'snap_manageState',
                 params: { operation: 'get' },
             });
+
             // remember we keep address stores as a json string so convert into a Addresses object
-            let addresses: Addresses = JSON.parse(JSON.stringify(data?.addresses));
+            let addresses = new Addresses(JSON.parse(data?.addresses));
 
             // add the address into addresses class
             addresses.addAddress(address);
@@ -199,11 +208,13 @@ export class AddressState {
             method: 'snap_manageState',
             params: { operation: 'get' },
         });
+
         // update Metamask state with new addresses state
         await snap.request({
             method: 'snap_manageState',
             params: { operation: 'update', newState: { ...data, addresses: addresses.string() } },
         });
+        
         return true
     }
 
@@ -218,9 +229,11 @@ export class AddressState {
         if (data?.addresses == undefined || data?.addresses == null) {
             throw new Error("Snap has not been initialized. Please initialize snap.")
         }
+
         // remember we keep address stores as a json string so convert into a Addresses object
-        let addresses: Addresses = JSON.parse(data?.addresses?.toString()!);
+        let addresses = new Addresses(JSON.parse(data?.addresses));
         let keepAddresses = addresses.addresses.filter(item => item.chain_id !== chain_id);
+       
         // update addresses
         addresses.addresses = keepAddresses;
 
