@@ -2,7 +2,7 @@ import { OnRpcRequestHandler } from "@metamask/snaps-types";
 import { panel, text } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
 import { Chains } from "./types/chains";
-import { Address} from "./types/address"
+import { Address, Addresses } from "./types/address"
 import { ChainState, AddressState } from "./state";
 
 /**
@@ -54,7 +54,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           request.params != null &&
           typeof request.params == "object" &&
           "address" in request.params &&
-          request.params.address == "string"
+          typeof request.params.address == "string"
         )
       ) {
         throw new Error("Invalid addAddress request");
@@ -62,15 +62,27 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       let new_address : Address = JSON.parse(request.params.address);
 
-      let ret = await AddressState.addAddress(new_address)
+      return await AddressState.addAddress(new_address)
 
-      return ret;
     case "deleteAddress":
       // Delete an address from the address book in wallet state
-      return;
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "chain_id" in request.params &&
+          typeof request.params.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid addAddress request");
+      }
+
+      return await AddressState.removeAddress(request.params.chain_id)
+
     case "getAddresses":
       // Get all addresses from the address book in wallet state
-      return;
+      return await AddressState.getAddressBook();
+
     default:
       throw new Error("Method not found.");
   }
