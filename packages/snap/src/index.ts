@@ -1,7 +1,8 @@
 import { OnRpcRequestHandler } from '@metamask/snaps-types';
 import { panel, text } from '@metamask/snaps-ui';
-import { initializeChains } from './chains';
+import { initializeChains } from './initialize';
 import { Chains } from './types/chains';
+import { ChainState } from './state';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -26,13 +27,32 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       });
       let chains = new Chains([]);
       if (confirmation) {
-        chains = await initializeChains();
+        let chainList = await initializeChains();
+        chains = new Chains(chainList);
       }
-      let res = await snap.request({
-        method: 'snap_manageState',
-        params: { operation: 'update', newState: { chains: chains.string() } },
-      });
+      // add all the default chains into Metamask state
+      let res = await ChainState.addChains(chains);
       return res
+    case 'transact':
+      // Send a transaction to the wallet
+      return
+    case 'addChain':
+      return
+    case 'deleteChain':
+      // Delete a cosmos chain from the wallet state
+      return
+    case 'getChains':
+      // Get all chains from the wallet state
+      return
+    case 'addAddress':
+      // Add a new address into the address book in wallet state
+      return
+    case 'deleteAddress':
+      // Delete an address from the address book in wallet state
+      return
+    case 'getAddresses':
+      // Get all addresses from the address book in wallet state
+      return
     default:
       throw new Error('Method not found.');
   }
