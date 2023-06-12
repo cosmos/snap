@@ -1,11 +1,14 @@
 <script>
-    import NavBar from "../components/NavBar.svelte";
+	import '../app.postcss';
+	import NavBar from '../components/NavBar.svelte';
 </script>
 
-<NavBar/>
-<main>
-    <slot/>
-</main>
+<body class="w-full h-full bg-black">
+    <div class="bg-black">
+        <NavBar />
+    </div>
+    <slot />
+</body>
 
 <style>
 </style>
