@@ -225,6 +225,8 @@ export class AddressState {
         newState: { addresses: addresses.string() },
       },
     });
+
+    return true;
   }
 
   /**
@@ -295,5 +297,7 @@ export class AddressState {
         newState: { addresses: addresses.string() },
       },
     });
+
+    return true;
   }
 }
