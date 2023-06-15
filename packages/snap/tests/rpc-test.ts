@@ -2,7 +2,8 @@ import test from "ava";
 import { onRpcRequest } from "../src/index";
 import { Address, Addresses } from "../src/types/address";
 import { Json, JsonRpcRequest } from "@metamask/utils";
-import { boolean } from "superstruct";
+
+const origin = "test-origin";
 
 class PassingOnRpcRequestTests {
   //Initialize Sample Address
@@ -47,22 +48,14 @@ class PassingOnRpcRequestTests {
     },
   };
 
-  constructor() {
-    test.before(() => {
-      (globalThis as any).snap = this.snapMock;
-    });
-  }
-
   //onRpcRequet function should handle the "addAddress" case correctly
-  async caseAddAddress(t: any) {
+  async casePassAddAddress(t: any) {
     //Initialize new address
     const new_address: Address = {
       name: "User3",
       address: "0x456789",
       chain_id: "3",
     };
-
-    const origin = "test-origin";
 
     // Define the JSON-RPC request variable{}
     let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
@@ -81,9 +74,7 @@ class PassingOnRpcRequestTests {
   }
 
   //onRpcRequet function should handle the "deleteAddress" case correctly
-  async caseDeleteAddress(t: any) {
-    const origin = "test-origin";
-
+  async casePassDeleteAddress(t: any) {
     // Define the JSON-RPC request variable{}
     let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
       method: "deleteAddress",
@@ -101,9 +92,7 @@ class PassingOnRpcRequestTests {
   }
 
   //onRpcRequest function should handle the "getAddresses" case correctly
-  async caseGetAddresses(t: any) {
-    const origin = "test-origin";
-
+  async casePassGetAddresses(t: any) {
     // Define the JSON-RPC request variable{}
     let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
       method: "getAddresses",
@@ -130,10 +119,112 @@ class PassingOnRpcRequestTests {
   }
 }
 
-const tests = new PassingOnRpcRequestTests();
+class FailingOnRpcRequestTests {
+  //Mock snap object for 'data?.addresses == undefined'
+  snapMock1 = {
+    request: (params: any) => {
+      return {
+        addresses: undefined,
+      };
+    },
+  };
 
-test.serial("onRpcRequest Tests", async (t) => {
-  await tests.caseGetAddresses(t);
-  await tests.caseAddAddress(t);
-  await tests.caseDeleteAddress(t);
+  //Mock snap object for 'typeof data?.addresses !== "string"'
+  snapMock2 = {
+    request: (params: any) => {
+      return {
+        addresses: 1,
+      };
+    },
+  };
+
+  //onRpcRequet function should throw error on "addAddress" case
+  async caseFailAddAddress(t: any) {
+    //Initialize new address
+    const new_address: Address = {
+      name: "User3",
+      address: "0x456789",
+      chain_id: "3",
+    };
+
+    // Define the JSON-RPC request variable{}
+    let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
+      method: "addAddress",
+      jsonrpc: "2.0",
+      id: null,
+      params: {
+        address: JSON.stringify(new_address),
+      },
+    };
+
+    await t.throwsAsync(
+      async () => {
+        await onRpcRequest({ origin, request });
+      },
+      { instanceOf: Error }
+    );
+  }
+
+  //onRpcRequet function should throw error on "deleteAddress" case
+  async caseFailDeleteAddress(t: any) {
+    // Define the JSON-RPC request variable{}
+    let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
+      method: "deleteAddress",
+      jsonrpc: "2.0",
+      id: null,
+      params: {
+        chain_id: "3",
+      },
+    };
+
+    await t.throwsAsync(
+      async () => {
+        await onRpcRequest({ origin, request });
+      },
+      { instanceOf: Error }
+    );
+  }
+
+  //onRpcRequest function should throw error on "getAddresses" case
+  async caseFailGetAddresses(t: any) {
+    // Define the JSON-RPC request variable{}
+    let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
+      method: "getAddresses",
+      jsonrpc: "2.0",
+      id: null,
+      params: [],
+    };
+
+    await t.throwsAsync(
+      async () => {
+        await onRpcRequest({ origin, request });
+      },
+      { instanceOf: Error }
+    );
+  }
+}
+
+const passing_tests = new PassingOnRpcRequestTests();
+const failing_tests = new FailingOnRpcRequestTests();
+
+test.serial("onRpcRequest Passing Tests", async (t) => {
+  (globalThis as any).snap = passing_tests.snapMock;
+
+  await passing_tests.casePassGetAddresses(t);
+  await passing_tests.casePassAddAddress(t);
+  await passing_tests.casePassDeleteAddress(t);
+});
+
+test.serial("onRpcRequest Failing Tests", async (t) => {
+  (globalThis as any).snap = failing_tests.snapMock1;
+
+  await failing_tests.caseFailGetAddresses(t);
+  await failing_tests.caseFailAddAddress(t);
+  await failing_tests.caseFailDeleteAddress(t);
+
+  (globalThis as any).snap = failing_tests.snapMock2;
+
+  await failing_tests.caseFailGetAddresses(t);
+  await failing_tests.caseFailAddAddress(t);
+  await failing_tests.caseFailDeleteAddress(t);
 });

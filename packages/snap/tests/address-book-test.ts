@@ -3,6 +3,47 @@ import { AddressState } from "../src/state";
 import { Addresses, Address } from "../src//types/address";
 
 class PassingAddressStateTests {
+  //Initialize Sample Address
+  address1: Address = {
+    name: "User1",
+    address: "0x123456",
+    chain_id: "1",
+  };
+
+  address2: Address = {
+    name: "User2",
+    address: "0xabcdef",
+    chain_id: "2",
+  };
+
+  //Initialize Sample Address Book
+  SampleAddresses = new Addresses([this.address1, this.address2]);
+
+  // Mock the Metamask snap object and its request method
+  snapMock = {
+    request: (params: any) => {
+      if (
+        params.method === "snap_manageState" &&
+        params.params.operation === "get"
+      ) {
+        return {
+          addresses: this.SampleAddresses.string(),
+        };
+      }
+
+      if (
+        params.method === "snap_manageState" &&
+        params.params.operation === "update"
+      ) {
+        // Modify the SampleAddresses and return true
+        this.SampleAddresses.addresses = JSON.parse(
+          params.params.newState.addresses
+        );
+        return true;
+      }
+    },
+  };
+
   //getAddressBook function should return current state of address book
   async getAddressBookPassTest(t: any) {
     //get current state of AddressBook
@@ -97,6 +138,24 @@ class PassingAddressStateTests {
 }
 
 class FailingAddressStateTests {
+  //Mock snap object for 'data?.addresses == undefined'
+  snapMock1 = {
+    request: (params: any) => {
+      return {
+        addresses: undefined,
+      };
+    },
+  };
+
+  //Mock snap object for 'typeof data?.addresses !== "string"'
+  snapMock2 = {
+    request: (params: any) => {
+      return {
+        addresses: 1,
+      };
+    },
+  };
+
   //getAddressBook function should throw error
   async getAddressBookFailTest(t: any) {
     await t.throwsAsync(
@@ -170,48 +229,7 @@ const passing_tests = new PassingAddressStateTests();
 const failing_tests = new FailingAddressStateTests();
 
 test.serial("AddressState Passing Tests", async (t) => {
-  //Initialize Sample Address
-  const address1: Address = {
-    name: "User1",
-    address: "0x123456",
-    chain_id: "1",
-  };
-
-  const address2: Address = {
-    name: "User2",
-    address: "0xabcdef",
-    chain_id: "2",
-  };
-
-  //Initialize Sample Address Book
-  const SampleAddresses = new Addresses([address1, address2]);
-
-  // Mock the Metamask snap object and its request method
-  const snapMock = {
-    request: (params: any) => {
-      if (
-        params.method === "snap_manageState" &&
-        params.params.operation === "get"
-      ) {
-        return {
-          addresses: SampleAddresses.string(),
-        };
-      }
-
-      if (
-        params.method === "snap_manageState" &&
-        params.params.operation === "update"
-      ) {
-        // Modify the SampleAddresses and return true
-        SampleAddresses.addresses = JSON.parse(
-          params.params.newState.addresses
-        );
-        return true;
-      }
-    },
-  };
-
-  (globalThis as any).snap = snapMock;
+  (globalThis as any).snap = passing_tests.snapMock;
 
   await passing_tests.getAddressBookPassTest(t);
   await passing_tests.getAddressPassTest(t);
@@ -221,17 +239,7 @@ test.serial("AddressState Passing Tests", async (t) => {
 });
 
 test.serial("AddressState Failing Tests", async (t) => {
-  // test data?.addresses == undefined
-  //Mock snap object
-  const snapMock1 = {
-    request: (params: any) => {
-      return {
-        addresses: undefined,
-      };
-    },
-  };
-
-  (globalThis as any).snap = snapMock1;
+  (globalThis as any).snap = failing_tests.snapMock1;
 
   await failing_tests.getAddressBookFailTest(t);
   await failing_tests.getAddressFailTest(t);
@@ -239,17 +247,7 @@ test.serial("AddressState Failing Tests", async (t) => {
   await failing_tests.removeAddressFailTest(t);
   await failing_tests.addAddressesFailTest(t);
 
-  // test typeof data?.addresses !== "string"
-  //Mock snap object
-  const snapMock2 = {
-    request: (params: any) => {
-      return {
-        addresses: 1,
-      };
-    },
-  };
-
-  (globalThis as any).snap = snapMock2;
+  (globalThis as any).snap = failing_tests.snapMock2;
 
   await failing_tests.getAddressBookFailTest(t);
   await failing_tests.getAddressFailTest(t);
