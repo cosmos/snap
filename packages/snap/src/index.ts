@@ -14,10 +14,13 @@ import { ChainState, AddressState } from "./state";
  * @throws If the request method is not valid for this snap.
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
+
+  let confirmation : any;
+
   switch (request.method) {
     case "initialize":
       // Ensure user confirms initializing Cosmos snap
-      let confirmation = await snap.request({
+      confirmation = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
@@ -28,14 +31,20 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           ]),
         },
       });
+
       let chains = new Chains([]);
-      if (confirmation) {
-        let chainList = await initializeChains();
-        chains = new Chains(chainList);
+
+      if (!confirmation) {
+        throw new Error("Initialization declined");
       }
+
+      let chainList = await initializeChains();
+      chains = new Chains(chainList);
+
       // add all the default chains into Metamask state
       let res = await ChainState.addChains(chains);
       return res;
+
     case "transact":
       // Send a transaction to the wallet
       return;
@@ -48,6 +57,26 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       // Get all chains from the wallet state
       return;
     case "addAddress":
+       // Ensure user confirms the new address
+       confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            text(
+              "Confirm to add following address to your Metamask wallet's address book"
+            ),
+            text(
+              "${request.params.address}"
+            )
+          ]),
+        },
+      });
+
+      if (!confirmation) {
+        throw new Error("Add address action declined");
+      }
+      
       // Add a new address into the address book in wallet state
       if (
         !(
@@ -65,6 +94,23 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       return await AddressState.addAddress(new_address);
 
     case "deleteAddress":
+      // Ensure user confirms the chain_id of the address to be deleted
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            text(
+              "Confirm to delete address with chain ID - ${request.params.chain_id}"
+            ),
+          ]),
+        },
+      });
+
+      if (!confirmation) {
+        throw new Error("Delete address action declined");
+      }
+
       // Delete an address from the address book in wallet state
       if (
         !(
