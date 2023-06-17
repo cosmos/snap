@@ -14,8 +14,7 @@ import { ChainState, AddressState } from "./state";
  * @throws If the request method is not valid for this snap.
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
-
-  let confirmation : any;
+  let confirmation: any;
 
   switch (request.method) {
     case "initialize":
@@ -57,8 +56,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       // Get all chains from the wallet state
       return;
     case "addAddress":
-       // Ensure user confirms the new address
-       confirmation = await snap.request({
+      // Ensure user confirms the new address
+      confirmation = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
@@ -66,9 +65,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
             text(
               "Confirm to add following address to your Metamask wallet's address book"
             ),
-            text(
-              "${request.params.address}"
-            )
+            text("${request.params.address}"),
           ]),
         },
       });
@@ -76,14 +73,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       if (!confirmation) {
         throw new Error("Add address action declined");
       }
-      
+
       // Add a new address into the address book in wallet state
       if (
         !(
-          request.params != null &&
-          typeof request.params == "object" &&
+          request.params !== null &&
+          typeof request.params === "object" &&
           "address" in request.params &&
-          typeof request.params.address == "string"
+          typeof request.params.address === "string"
         )
       ) {
         throw new Error("Invalid addAddress request");
@@ -114,10 +111,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       // Delete an address from the address book in wallet state
       if (
         !(
-          request.params != null &&
-          typeof request.params == "object" &&
+          request.params !== null &&
+          typeof request.params === "object" &&
           "chain_id" in request.params &&
-          typeof request.params.chain_id == "string"
+          typeof request.params.chain_id === "string"
         )
       ) {
         throw new Error("Invalid addAddress request");

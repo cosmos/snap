@@ -45,6 +45,13 @@ class PassingOnRpcRequestTests {
 
         return true;
       }
+
+      if (
+        params.method === "snap_dialog" &&
+        params.params.type === "confirmation"
+      ) {
+        return true;
+      }
     },
   };
 
@@ -138,8 +145,20 @@ class FailingOnRpcRequestTests {
     },
   };
 
+  //Mock snap object for declining confirmation
+  snapMock3 = {
+    request: (params: any) => {
+      if (
+        params.method === "snap_dialog" &&
+        params.params.type === "confirmation"
+      ) {
+        return false;
+      }
+    },
+  };
+
   //onRpcRequet function should throw error on "addAddress" case
-  async caseFailAddAddress(t: any) {
+  async caseFailAddAddress(t: any, message: string) {
     //Initialize new address
     const new_address: Address = {
       name: "User3",
@@ -152,41 +171,37 @@ class FailingOnRpcRequestTests {
       method: "addAddress",
       jsonrpc: "2.0",
       id: null,
-      params: {
-        address: JSON.stringify(new_address),
-      },
+      params: []
     };
 
     await t.throwsAsync(
       async () => {
         await onRpcRequest({ origin, request });
       },
-      { instanceOf: Error }
+      { instanceOf: Error, message: message}
     );
   }
 
   //onRpcRequet function should throw error on "deleteAddress" case
-  async caseFailDeleteAddress(t: any) {
+  async caseFailDeleteAddress(t: any, message: string) {
     // Define the JSON-RPC request variable{}
     let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
       method: "deleteAddress",
       jsonrpc: "2.0",
       id: null,
-      params: {
-        chain_id: "3",
-      },
+      params: []
     };
 
     await t.throwsAsync(
       async () => {
         await onRpcRequest({ origin, request });
       },
-      { instanceOf: Error }
+      { instanceOf: Error, message: message }
     );
   }
 
   //onRpcRequest function should throw error on "getAddresses" case
-  async caseFailGetAddresses(t: any) {
+  async caseFailGetAddresses(t: any, message: string) {
     // Define the JSON-RPC request variable{}
     let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
       method: "getAddresses",
@@ -199,7 +214,7 @@ class FailingOnRpcRequestTests {
       async () => {
         await onRpcRequest({ origin, request });
       },
-      { instanceOf: Error }
+      { instanceOf: Error, message: message }
     );
   }
 }
@@ -216,15 +231,20 @@ test.serial("onRpcRequest Passing Tests", async (t) => {
 });
 
 test.serial("onRpcRequest Failing Tests", async (t) => {
+  let error = "Invalid addAddress request";
   (globalThis as any).snap = failing_tests.snapMock1;
 
-  await failing_tests.caseFailGetAddresses(t);
-  await failing_tests.caseFailAddAddress(t);
-  await failing_tests.caseFailDeleteAddress(t);
+  await failing_tests.caseFailGetAddresses(t, "Address book was not found. Add an address to address book to initialize.");
+  await failing_tests.caseFailAddAddress(t, error);
+  await failing_tests.caseFailDeleteAddress(t, error);
 
   (globalThis as any).snap = failing_tests.snapMock2;
 
-  await failing_tests.caseFailGetAddresses(t);
-  await failing_tests.caseFailAddAddress(t);
-  await failing_tests.caseFailDeleteAddress(t);
+  await failing_tests.caseFailAddAddress(t, error);
+  await failing_tests.caseFailDeleteAddress(t, error);
+
+  (globalThis as any).snap = failing_tests.snapMock3;
+
+  await failing_tests.caseFailAddAddress(t, "Add address action declined");
+  await failing_tests.caseFailDeleteAddress(t, "Delete address action declined");
 });
