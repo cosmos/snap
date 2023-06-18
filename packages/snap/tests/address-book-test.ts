@@ -238,6 +238,8 @@ class FailingAddressStateTests {
 const passing_tests = new PassingAddressStateTests();
 const failing_tests = new FailingAddressStateTests();
 
+
+//tests for all passing scenarios of AddressState functions
 test.serial("AddressState Passing Tests", async (t) => {
   (globalThis as any).snap = passing_tests.snapMock;
 
@@ -248,6 +250,7 @@ test.serial("AddressState Passing Tests", async (t) => {
   await passing_tests.addAddressesPassTest(t);
 });
 
+//tests for all failing scenarios of AddressState functions
 test.serial("AddressState Failing Tests", async (t) => {
   (globalThis as any).snap = failing_tests.snapMock1;
 

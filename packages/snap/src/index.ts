@@ -70,6 +70,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         },
       });
 
+      //If user declined confirmation, throw error
       if (!confirmation) {
         throw new Error("Add address action declined");
       }
@@ -86,6 +87,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         throw new Error("Invalid addAddress request");
       }
 
+      //create Address object with new address
       let new_address: Address = JSON.parse(request.params.address);
 
       return await AddressState.addAddress(new_address);
@@ -103,7 +105,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           ]),
         },
       });
-
+      
+      //If user declined confirmation, throw error
       if (!confirmation) {
         throw new Error("Delete address action declined");
       }
