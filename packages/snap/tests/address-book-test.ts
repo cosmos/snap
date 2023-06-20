@@ -44,12 +44,6 @@ class PassingAddressStateTests {
     },
   };
 
-  constructor() {
-    test.before(() => {
-      (globalThis as any).snap = this.snapMock;
-    });
-  }
-
   //getAddressBook function should return current state of address book
   async getAddressBookPassTest(t: any) {
     //get current state of AddressBook
@@ -143,12 +137,121 @@ class PassingAddressStateTests {
   }
 }
 
-const tests = new PassingAddressStateTests();
+class FailingAddressStateTests {
+  //Mock snap object for 'data?.addresses == undefined'
+  snapMock1 = {
+    request: (params: any) => {
+      return {
+        addresses: undefined,
+      };
+    },
+  };
 
-test.serial("AddressState Tests", async (t) => {
-  await tests.getAddressBookPassTest(t);
-  await tests.getAddressPassTest(t);
-  await tests.addAddressPassTest(t);
-  await tests.removeAddressPassTest(t);
-  await tests.addAddressesPassTest(t);
+  //Mock snap object for 'typeof data?.addresses !== "string"'
+  snapMock2 = {
+    request: (params: any) => {
+      return {
+        addresses: 1,
+      };
+    },
+  };
+
+  //getAddressBook function should throw error
+  async getAddressBookFailTest(t: any) {
+    await t.throwsAsync(
+      async () => {
+        await AddressState.getAddressBook();
+      },
+      { instanceOf: Error }
+    );
+  }
+
+  //getAddress function should throw error
+  async getAddressFailTest(t: any) {
+    await t.throwsAsync(
+      async () => {
+        await AddressState.getAddress("1");
+      },
+      { instanceOf: Error }
+    );
+  }
+
+  //addAddress function should throw error
+  async addAddressFailTest(t: any) {
+    //Initialize new address
+    const new_address: Address = {
+      name: "User4",
+      address: "0xghijkl",
+      chain_id: "4",
+    };
+
+    await t.throwsAsync(
+      async () => {
+        await AddressState.addAddress(new_address);
+      },
+      { instanceOf: Error }
+    );
+  }
+
+  //removeAddress function should throw error
+  async removeAddressFailTest(t: any) {
+    await t.throwsAsync(
+      async () => {
+        await AddressState.removeAddress("1");
+      },
+      { instanceOf: Error }
+    );
+  }
+
+  //addAddresses function should throw error
+  async addAddressesFailTest(t: any) {
+    //Initialize new address
+    const new_address: Address = {
+      name: "User4",
+      address: "0xghijkl",
+      chain_id: "4",
+    };
+
+    //Initialize new address book
+    let new_address_book = new Addresses([new_address]);
+
+    await t.throwsAsync(
+      async () => {
+        await AddressState.addAddresses(new_address_book);
+      },
+      { instanceOf: Error }
+    );
+  }
+}
+
+//Intialize test classes
+const passing_tests = new PassingAddressStateTests();
+const failing_tests = new FailingAddressStateTests();
+
+test.serial("AddressState Passing Tests", async (t) => {
+  (globalThis as any).snap = passing_tests.snapMock;
+
+  await passing_tests.getAddressBookPassTest(t);
+  await passing_tests.getAddressPassTest(t);
+  await passing_tests.addAddressPassTest(t);
+  await passing_tests.removeAddressPassTest(t);
+  await passing_tests.addAddressesPassTest(t);
+});
+
+test.serial("AddressState Failing Tests", async (t) => {
+  (globalThis as any).snap = failing_tests.snapMock1;
+
+  await failing_tests.getAddressBookFailTest(t);
+  await failing_tests.getAddressFailTest(t);
+  await failing_tests.addAddressFailTest(t);
+  await failing_tests.removeAddressFailTest(t);
+  await failing_tests.addAddressesFailTest(t);
+
+  (globalThis as any).snap = failing_tests.snapMock2;
+
+  await failing_tests.getAddressBookFailTest(t);
+  await failing_tests.getAddressFailTest(t);
+  await failing_tests.addAddressFailTest(t);
+  await failing_tests.removeAddressFailTest(t);
+  await failing_tests.addAddressesFailTest(t);
 });
