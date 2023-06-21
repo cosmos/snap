@@ -142,7 +142,7 @@ export class AddressState {
 
     if (typeof data?.addresses !== "string") {
       throw new Error(
-        "Invalid address book data. Addresses should be a string."
+        "Invalid address book data. Addresses should be a JSON string."
       );
     }
 

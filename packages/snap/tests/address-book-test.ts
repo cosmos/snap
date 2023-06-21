@@ -99,7 +99,7 @@ class PassingAddressStateTests {
 
   //removeAddress function should delete the address matching the given chain_id
   async removeAddressPassTest(t: any) {
-    await AddressState.removeAddress("3");
+    await AddressState.removeAddress("0x456789");
 
     const result = await AddressState.getAddressBook();
 
@@ -276,8 +276,9 @@ test.serial("AddressState Failing Tests", async (t) => {
 
   (globalThis as any).snap = failing_tests.snapMock2;
   let error = "Invalid address book data. Addresses should be a string.";
+  let errorJson = "Invalid address book data. Addresses should be a JSON string.";
 
-  await failing_tests.getAddressBookFailTest(t, error);
+  await failing_tests.getAddressBookFailTest(t, errorJson);
   await failing_tests.getAddressFailTest(t, "1", error);
   await failing_tests.addAddressFailTest(t, error);
   await failing_tests.removeAddressFailTest(t, error);

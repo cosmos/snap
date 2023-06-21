@@ -2,7 +2,7 @@ import { OnRpcRequestHandler } from "@metamask/snaps-types";
 import { panel, text } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
 import { Chains } from "./types/chains";
-import { Address, Addresses } from "./types/address";
+import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 
 /**
@@ -127,7 +127,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
 
       //If user declined confirmation, throw error
       if (!confirmation) {
-        throw new Error("deleteAddress action declined");
+        throw new Error("Delete address action declined");
       }
 
       return await AddressState.removeAddress(request.params.address);

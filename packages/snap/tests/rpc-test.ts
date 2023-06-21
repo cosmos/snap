@@ -70,7 +70,9 @@ class PassingOnRpcRequestTests {
       jsonrpc: "2.0",
       id: null,
       params: {
-        address: JSON.stringify(new_address),
+        address: new_address.name,
+        chain_id: new_address.chain_id,
+        name: new_address.name,
       },
     };
 
@@ -88,7 +90,7 @@ class PassingOnRpcRequestTests {
       jsonrpc: "2.0",
       id: null,
       params: {
-        chain_id: "3",
+        address: "0x456789",
       },
     };
 
@@ -168,7 +170,9 @@ class FailingOnRpcRequestTests {
         jsonrpc: "2.0",
         id: null,
         params: {
-          address: "sample string",
+          name: "user_test",
+          address: "test_address",
+          chain_id: "chain_id_test",
         },
       };
     } else {
@@ -199,7 +203,7 @@ class FailingOnRpcRequestTests {
         jsonrpc: "2.0",
         id: null,
         params: {
-          chain_id: "3",
+          address: "0x456789",
         },
       };
     } else {
