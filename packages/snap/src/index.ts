@@ -56,26 +56,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       // Get all chains from the wallet state
       return;
     case "addAddress":
-      // Ensure user confirms the new address
-      confirmation = await snap.request({
-        method: "snap_dialog",
-        params: {
-          type: "confirmation",
-          content: panel([
-            text(
-              "Confirm to add following address to your Metamask wallet's address book"
-            ),
-            text("${request.params.address}"),
-          ]),
-        },
-      });
-
-      //If user declined confirmation, throw error
-      if (!confirmation) {
-        throw new Error("Add address action declined");
-      }
-
-      // Add a new address into the address book in wallet state
+      //Ensure addAddress request is valid
       if (
         !(
           request.params !== null &&
@@ -87,31 +68,32 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         throw new Error("Invalid addAddress request");
       }
 
-      //create Address object with new address
-      let new_address: Address = JSON.parse(request.params.address);
-
-      return await AddressState.addAddress(new_address);
-
-    case "deleteAddress":
-      // Ensure user confirms the chain_id of the address to be deleted
+      // Ensure user confirms the new address
       confirmation = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
           content: panel([
             text(
-              "Confirm to delete address with chain ID - ${request.params.chain_id}"
+              "Confirm to add following address to your Metamask wallet's address book"
             ),
+            text(`${request.params.address}`),
           ]),
         },
       });
-      
+
       //If user declined confirmation, throw error
       if (!confirmation) {
-        throw new Error("Delete address action declined");
+        throw new Error("Add address action declined");
       }
 
-      // Delete an address from the address book in wallet state
+      //create Address object with new address
+      let new_address: Address = JSON.parse(request.params.address);
+
+      return await AddressState.addAddress(new_address);
+
+    case "deleteAddress":
+      // Ensure deleteAddress request is valid
       if (
         !(
           request.params !== null &&
@@ -120,7 +102,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           typeof request.params.chain_id === "string"
         )
       ) {
-        throw new Error("Invalid addAddress request");
+        throw new Error("Invalid deleteAddress request");
+      }
+
+      // Ensure user confirms the chain_id of the address to be deleted
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            text(
+              `Confirm to delete address with chain ID - ${request.params.chain_id}`
+            ),
+          ]),
+        },
+      });
+      
+      //If user declined confirmation, throw error
+      if (!confirmation) {
+        throw new Error("Delete address action declined");
       }
 
       return await AddressState.removeAddress(request.params.chain_id);
