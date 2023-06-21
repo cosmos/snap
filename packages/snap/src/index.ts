@@ -62,7 +62,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           request.params !== null &&
           typeof request.params === "object" &&
           "address" in request.params &&
-          typeof request.params.address === "string"
+          typeof request.params.address === "string" &&
+          "chain_id" in request.params &&
+          typeof request.params.chain_id === "string" &&
+          "name" in request.params &&
+          typeof request.params.name === "string"
         )
       ) {
         throw new Error("Invalid addAddress request");
@@ -75,9 +79,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           type: "confirmation",
           content: panel([
             text(
-              "Confirm to add following address to your Metamask wallet's address book"
+              `Do you want to add ${request.params.address} to the chain ${request.params.chain_id}?`
             ),
-            text(`${request.params.address}`),
           ]),
         },
       });
@@ -88,7 +91,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
       }
 
       //create Address object with new address
-      let new_address: Address = JSON.parse(request.params.address);
+      let new_address: Address = {
+        name: request.params.name,
+        address: request.params.address,
+        chain_id: request.params.chain_id,
+      };
 
       return await AddressState.addAddress(new_address);
 
@@ -98,8 +105,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
         !(
           request.params !== null &&
           typeof request.params === "object" &&
-          "chain_id" in request.params &&
-          typeof request.params.chain_id === "string"
+          "address" in request.params &&
+          typeof request.params.address === "string"
         )
       ) {
         throw new Error("Invalid deleteAddress request");
@@ -112,18 +119,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }) => {
           type: "confirmation",
           content: panel([
             text(
-              `Confirm to delete address with chain ID - ${request.params.chain_id}`
+              `Do you want to delete the address ${request.params.address} from your address book?`
             ),
           ]),
         },
       });
-      
+
       //If user declined confirmation, throw error
       if (!confirmation) {
-        throw new Error("Delete address action declined");
+        throw new Error("deleteAddress action declined");
       }
 
-      return await AddressState.removeAddress(request.params.chain_id);
+      return await AddressState.removeAddress(request.params.address);
 
     case "getAddresses":
       // Get all addresses from the address book in wallet state

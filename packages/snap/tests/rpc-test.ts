@@ -159,33 +159,32 @@ class FailingOnRpcRequestTests {
 
   //onRpcRequet function should throw error on "addAddress" case
   async caseFailAddAddress(t: any, message: string) {
-
     let request: JsonRpcRequest<Json[] | Record<string, Json>>;
 
     // Define the JSON-RPC request variable for different snap objects
-    if ((globalThis as any).snap === this.snapMock3){
+    if ((globalThis as any).snap === this.snapMock3) {
       request = {
         method: "addAddress",
         jsonrpc: "2.0",
         id: null,
         params: {
-          address: "sample string"
-        }
+          address: "sample string",
+        },
       };
     } else {
       request = {
         method: "addAddress",
         jsonrpc: "2.0",
         id: null,
-        params: []
+        params: [],
       };
     }
-    
+
     await t.throwsAsync(
       async () => {
         await onRpcRequest({ origin, request });
       },
-      { instanceOf: Error, message: message}
+      { instanceOf: Error, message: message }
     );
   }
 
@@ -194,21 +193,21 @@ class FailingOnRpcRequestTests {
     let request: JsonRpcRequest<Json[] | Record<string, Json>>;
 
     // Define the JSON-RPC request variable for different snap objects
-    if ((globalThis as any).snap === this.snapMock3){
+    if ((globalThis as any).snap === this.snapMock3) {
       request = {
         method: "deleteAddress",
         jsonrpc: "2.0",
         id: null,
         params: {
-          chain_id: "3"
-        }
+          chain_id: "3",
+        },
       };
     } else {
       request = {
         method: "deleteAddress",
         jsonrpc: "2.0",
         id: null,
-        params: []
+        params: [],
       };
     }
 
@@ -253,7 +252,10 @@ test.serial("onRpcRequest Passing Tests", async (t) => {
 test.serial("onRpcRequest Failing Tests", async (t) => {
   (globalThis as any).snap = failing_tests.snapMock1;
 
-  await failing_tests.caseFailGetAddresses(t, "Address book was not found. Add an address to address book to initialize.");
+  await failing_tests.caseFailGetAddresses(
+    t,
+    "Address book was not found. Add an address to address book to initialize."
+  );
   await failing_tests.caseFailAddAddress(t, "Invalid addAddress request");
   await failing_tests.caseFailDeleteAddress(t, "Invalid deleteAddress request");
 
@@ -264,5 +266,8 @@ test.serial("onRpcRequest Failing Tests", async (t) => {
   (globalThis as any).snap = failing_tests.snapMock3;
 
   await failing_tests.caseFailAddAddress(t, "Add address action declined");
-  await failing_tests.caseFailDeleteAddress(t, "Delete address action declined");
+  await failing_tests.caseFailDeleteAddress(
+    t,
+    "Delete address action declined"
+  );
 });

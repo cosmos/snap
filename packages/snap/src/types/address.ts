@@ -25,3 +25,5 @@ export class Addresses {
     return JSON.stringify(this.addresses);
   }
 }
+
+export interface addAddressParams {}
