@@ -142,7 +142,7 @@ export class AddressState {
 
     if (typeof data?.addresses !== "string") {
       throw new Error(
-        "Invalid address book data. Addresses should be a string."
+        "Invalid address book data. Addresses should be a JSON string."
       );
     }
 
@@ -263,7 +263,7 @@ export class AddressState {
     return true;
   }
 
-  public static async removeAddress(chain_id: string) {
+  public static async removeAddress(address: string) {
     // get the current state of addresses in Metamask we will add address into
     const data = await snap.request({
       method: "snap_manageState",
@@ -283,7 +283,7 @@ export class AddressState {
     // remember we keep address stores as a json string so convert into a Addresses object
     let addresses = new Addresses(JSON.parse(data?.addresses as string));
     let keepAddresses = addresses.addresses.filter(
-      (item) => item.chain_id !== chain_id
+      (item) => item.address !== address
     );
 
     // update addresses

@@ -99,7 +99,7 @@ class PassingAddressStateTests {
 
   //removeAddress function should delete the address matching the given chain_id
   async removeAddressPassTest(t: any) {
-    await AddressState.removeAddress("3");
+    await AddressState.removeAddress("0x456789");
 
     const result = await AddressState.getAddressBook();
 
@@ -156,28 +156,37 @@ class FailingAddressStateTests {
     },
   };
 
+  //Mock snap object for 'chain_id not found'
+  snapMock3 = {
+    request: (params: any) => {
+      return {
+        addresses: "",
+      };
+    },
+  };
+
   //getAddressBook function should throw error
-  async getAddressBookFailTest(t: any) {
+  async getAddressBookFailTest(t: any, message: string) {
     await t.throwsAsync(
       async () => {
         await AddressState.getAddressBook();
       },
-      { instanceOf: Error }
+      { instanceOf: Error, message: message }
     );
   }
 
   //getAddress function should throw error
-  async getAddressFailTest(t: any) {
+  async getAddressFailTest(t: any, chain_id: string, message: string) {
     await t.throwsAsync(
       async () => {
-        await AddressState.getAddress("1");
+        await AddressState.getAddress(chain_id);
       },
-      { instanceOf: Error }
+      { instanceOf: Error, message: message }
     );
   }
 
   //addAddress function should throw error
-  async addAddressFailTest(t: any) {
+  async addAddressFailTest(t: any, message: string) {
     //Initialize new address
     const new_address: Address = {
       name: "User4",
@@ -189,22 +198,22 @@ class FailingAddressStateTests {
       async () => {
         await AddressState.addAddress(new_address);
       },
-      { instanceOf: Error }
+      { instanceOf: Error, message: message }
     );
   }
 
   //removeAddress function should throw error
-  async removeAddressFailTest(t: any) {
+  async removeAddressFailTest(t: any, message: string) {
     await t.throwsAsync(
       async () => {
         await AddressState.removeAddress("1");
       },
-      { instanceOf: Error }
+      { instanceOf: Error, message: message }
     );
   }
 
   //addAddresses function should throw error
-  async addAddressesFailTest(t: any) {
+  async addAddressesFailTest(t: any, message: string) {
     //Initialize new address
     const new_address: Address = {
       name: "User4",
@@ -219,7 +228,7 @@ class FailingAddressStateTests {
       async () => {
         await AddressState.addAddresses(new_address_book);
       },
-      { instanceOf: Error }
+      { instanceOf: Error, message: message }
     );
   }
 }
@@ -228,6 +237,7 @@ class FailingAddressStateTests {
 const passing_tests = new PassingAddressStateTests();
 const failing_tests = new FailingAddressStateTests();
 
+//tests for all passing scenarios of AddressState functions
 test.serial("AddressState Passing Tests", async (t) => {
   (globalThis as any).snap = passing_tests.snapMock;
 
@@ -238,20 +248,46 @@ test.serial("AddressState Passing Tests", async (t) => {
   await passing_tests.addAddressesPassTest(t);
 });
 
+//tests for all failing scenarios of AddressState functions
 test.serial("AddressState Failing Tests", async (t) => {
   (globalThis as any).snap = failing_tests.snapMock1;
 
-  await failing_tests.getAddressBookFailTest(t);
-  await failing_tests.getAddressFailTest(t);
-  await failing_tests.addAddressFailTest(t);
-  await failing_tests.removeAddressFailTest(t);
-  await failing_tests.addAddressesFailTest(t);
+  await failing_tests.getAddressBookFailTest(
+    t,
+    "Address book was not found. Add an address to address book to initialize."
+  );
+  await failing_tests.getAddressFailTest(
+    t,
+    "1",
+    "Address book was not found. Add an address to address book to initialize."
+  );
+  await failing_tests.addAddressFailTest(
+    t,
+    "Invalid address book data. Addresses should be a string."
+  );
+  await failing_tests.removeAddressFailTest(
+    t,
+    "Snap has not been initialized. Please initialize snap."
+  );
+  await failing_tests.addAddressesFailTest(
+    t,
+    "Invalid address book data. Addresses should be a string."
+  );
 
   (globalThis as any).snap = failing_tests.snapMock2;
+  let error = "Invalid address book data. Addresses should be a string.";
+  let errorJson = "Invalid address book data. Addresses should be a JSON string.";
 
-  await failing_tests.getAddressBookFailTest(t);
-  await failing_tests.getAddressFailTest(t);
-  await failing_tests.addAddressFailTest(t);
-  await failing_tests.removeAddressFailTest(t);
-  await failing_tests.addAddressesFailTest(t);
+  await failing_tests.getAddressBookFailTest(t, errorJson);
+  await failing_tests.getAddressFailTest(t, "1", error);
+  await failing_tests.addAddressFailTest(t, error);
+  await failing_tests.removeAddressFailTest(t, error);
+  await failing_tests.addAddressesFailTest(t, error);
+
+  (globalThis as any).snap = passing_tests.snapMock;
+  await failing_tests.getAddressFailTest(
+    t,
+    "5",
+    "5 is not found. Add the address to your address book at https://wallet.mysticlabs.xyz"
+  );
 });
