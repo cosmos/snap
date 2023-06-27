@@ -6,7 +6,7 @@ export interface Chain {
   slip44: string;
   // Address prefix
   bech32_prefix: string;
-  fees: Fees;
+  fees: ChainFees;
   staking: Staking;
   logo_URIs: Logos;
   apis: {
@@ -35,7 +35,7 @@ export interface Staking {
   };
 }
 
-export interface Fees {
+export interface ChainFees {
   fee_tokens: FeeToken[];
 }
 
@@ -77,4 +77,14 @@ export class Chains {
   string() {
     return JSON.stringify(this.chains);
   }
+}
+
+export interface Amount {
+  denom: string;
+  amount: string;
+}
+
+export interface Fees {
+  amount: Amount[];
+  gas: string;
 }

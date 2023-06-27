@@ -48,10 +48,10 @@ export class ChainState {
    * Adds a new Cosmos chain into the current Metamask snap state.
    *
    * @param chain Chain object to add into state.
-   * @returns Boolean indicating success or not.
+   * @returns The current state of Chains.
    * @throws If an error occurs.
    */
-  public static async addChain(chain: Chain) {
+  public static async addChain(chain: Chain): Promise<Chains> {
     // get the current state of chains in Metamask we will add chain into
     const data = await snap.request({
       method: "snap_manageState",
@@ -67,6 +67,8 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "update", newState: { chains: chains.string() } },
     });
+
+    return chains
   }
   /**
    * Adds a list of Chains as state into Metamask snap.
@@ -74,10 +76,10 @@ export class ChainState {
    * WARNING: This replaces the entire state within Metamask so any chains in state will be replaced.
    *
    * @param chains Chains to replace entire Metamask chain state with.
-   * @returns Boolean indicating success or not.
+   * @returns Returns the current state of Chains.
    * @throws If an error occurs.
    */
-  public static async addChains(chains: Chains): Promise<Boolean> {
+  public static async addChains(chains: Chains): Promise<Chains> {
     // get current state
     const data = await snap.request({
       method: "snap_manageState",
@@ -91,9 +93,9 @@ export class ChainState {
         newState: { ...data, chains: chains.string() },
       },
     });
-    return true;
+    return chains;
   }
-  public static async removeChain(chain_id: string) {
+  public static async removeChain(chain_id: string): Promise<Chains> {
     // get the current state of chains in Metamask we will add chain into
     const data = await snap.request({
       method: "snap_manageState",
@@ -113,6 +115,8 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "update", newState: { chains: chains.string() } },
     });
+
+    return chains
   }
 }
 
@@ -198,7 +202,7 @@ export class AddressState {
    * @returns Boolean indicating success or not.
    * @throws If an error occurs.
    */
-  public static async addAddress(address: Address) {
+  public static async addAddress(address: Address): Promise<Addresses> {
     // get the current state of addresses in Metamask we will add address into
     const data = await snap.request({
       method: "snap_manageState",
@@ -225,6 +229,8 @@ export class AddressState {
         newState: { addresses: addresses.string() },
       },
     });
+
+    return addresses
   }
 
   /**
@@ -261,7 +267,7 @@ export class AddressState {
     return true;
   }
 
-  public static async removeAddress(chain_id: string) {
+  public static async removeAddress(chain_id: string): Promise<Addresses> {
     // get the current state of addresses in Metamask we will add address into
     const data = await snap.request({
       method: "snap_manageState",
@@ -295,5 +301,7 @@ export class AddressState {
         newState: { addresses: addresses.string() },
       },
     });
+
+    return addresses
   }
 }
