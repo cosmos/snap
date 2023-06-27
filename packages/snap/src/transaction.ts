@@ -15,10 +15,11 @@ export const submitTransaction = async (chain_id: string, msgs: any[], fees: Fee
     let chain = await ChainState.getChain(chain_id);
     
     // if fees are not specified then just use default fees + gas
+    let ugas = chain.fees.fee_tokens[0].average_gas_price * 1000000;
     if (fees == null) {
         fees = {
-            amount: [{ denom: "uatom", amount: "500" }],
-            gas: "200000",
+            amount: [{ denom: chain.fees.fee_tokens[0].denom, amount: "500" }],
+            gas: ugas.toString(),
         }
     }
 
@@ -26,7 +27,7 @@ export const submitTransaction = async (chain_id: string, msgs: any[], fees: Fee
     let node = await snap.request({
         method: 'snap_getBip44Entropy',
         params: {
-          coinType: 3,
+          coinType: Number(chain.slip44),
         },
     });
 
