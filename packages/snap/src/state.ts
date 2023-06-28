@@ -32,17 +32,12 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "get" },
     });
-    let chains: Chains = JSON.parse(data?.chains?.toString()!);
     if (data?.chains == undefined || data?.chains == null) {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
-    let chainList = chains.chains.filter((item) => item.chain_id === chain_id);
-    if (chainList.length == 0) {
-      throw new Error(
-        `${chain_id} is not found. Add the chain to your wallet at https://wallet.mysticlabs.xyz`
-      );
-    }
-    return chainList[0];
+    let chains = new Chains(JSON.parse(data?.chains?.toString()!));
+    let chain = chains.getChain(chain_id);
+    return chain;
   }
   /**
    * Adds a new Cosmos chain into the current Metamask snap state.
@@ -57,11 +52,16 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "get" },
     });
-    // remember we keep chain stores as a json string so convert into a Chains object
-    let chains: Chains = JSON.parse(data?.chains?.toString()!);
+
+    // parse the JSON data into a plain object
+    let parsedData = JSON.parse(data?.chains?.toString()!);
+
+    // create a new Chains object and populate it with the parsed data
+    let chains = new Chains(parsedData);
 
     // add the chain into chains class
     chains.addChain(chain);
+
     // update Metamask state with new chain state
     await snap.request({
       method: "snap_manageState",
@@ -105,7 +105,7 @@ export class ChainState {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
     // remember we keep chain stores as a json string so convert into a Chains object
-    let chains: Chains = JSON.parse(data?.chains?.toString()!);
+    let chains = new Chains(JSON.parse(data?.chains?.toString()!));
     let keepChains = chains.chains.filter((item) => item.chain_id !== chain_id);
     // update chains
     chains.chains = keepChains;

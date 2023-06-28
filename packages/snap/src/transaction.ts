@@ -43,7 +43,7 @@ export const submitTransaction = async (chain_id: string, msgs: any[], fees: Fee
         throw new Error("CLIENT ERROR: Mismatching Chain Id")
     }
 
-    // get the result and react to errors
+    // get the result and return it
     let result = await client.signAndBroadcast(address, msgs, fees);
 
     return result

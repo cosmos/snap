@@ -3,7 +3,7 @@ export interface Chain {
   chain_id: string;
   pretty_name: string;
   // Coin type
-  slip44: string;
+  slip44: number;
   // Address prefix
   bech32_prefix: string;
   fees: ChainFees;
@@ -20,19 +20,19 @@ export interface Chain {
 export interface Explorer {
   kind: string;
   url: string;
-  tx_page: string;
-  account_page: string;
+  tx_page?: string;
+  account_page?: string;
 }
 
 export interface Api {
   address: string;
-  provider: string;
+  provider?: string;
 }
 
 export interface Staking {
   staking_tokens: {
     denom: string;
-  };
+  }[];
 }
 
 export interface ChainFees {
@@ -46,7 +46,7 @@ export interface Logos {
 
 export interface FeeToken {
   denom: string;
-  fixed_min_gas_price: number;
+  fixed_min_gas_price?: number;
   low_gas_price: number;
   average_gas_price: number;
   high_gas_price: number;
@@ -66,6 +66,21 @@ export class Chains {
 
   addChain(chain: Chain) {
     this.chains.push(chain);
+  }
+
+  getChain(chain_id: string) {
+    let chainList = this.chains.filter(item => item.chain_id === chain_id);
+    if (chainList.length == 0) {
+      throw new Error(
+        `${chain_id} is not found. Add the chain to your wallet at https://wallet.mysticlabs.xyz`
+      );
+    }
+    return chainList[0]
+  }
+
+  removeChain(chain_id: string) {
+    let chainList = this.chains.filter(item => item.chain_id != chain_id);
+    return chainList
   }
 
   /**
