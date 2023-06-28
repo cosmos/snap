@@ -1,7 +1,7 @@
 import test from "ava";
 import { ChainState } from "../src/state";
 import { Chains, Chain } from "../src/types/chains";
-import chainsJson from './public/chain-test.json'
+import chainsJson from './public/chain-test.json';
 
 class PassingChainStateTests {
   //Initialize Sample Chains
