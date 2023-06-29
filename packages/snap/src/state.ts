@@ -32,41 +32,43 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "get" },
     });
-    let chains: Chains = JSON.parse(data?.chains?.toString()!);
     if (data?.chains == undefined || data?.chains == null) {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
-    let chainList = chains.chains.filter((item) => item.chain_id === chain_id);
-    if (chainList.length == 0) {
-      throw new Error(
-        `${chain_id} is not found. Add the chain to your wallet at https://wallet.mysticlabs.xyz`
-      );
-    }
-    return chainList[0];
+    let chains = new Chains(JSON.parse(data?.chains?.toString()!));
+    let chain = chains.getChain(chain_id);
+    return chain;
   }
   /**
    * Adds a new Cosmos chain into the current Metamask snap state.
    *
    * @param chain Chain object to add into state.
-   * @returns Boolean indicating success or not.
+   * @returns The current state of Chains.
    * @throws If an error occurs.
    */
-  public static async addChain(chain: Chain) {
+  public static async addChain(chain: Chain): Promise<Chains> {
     // get the current state of chains in Metamask we will add chain into
     const data = await snap.request({
       method: "snap_manageState",
       params: { operation: "get" },
     });
-    // remember we keep chain stores as a json string so convert into a Chains object
-    let chains: Chains = JSON.parse(data?.chains?.toString()!);
+
+    // parse the JSON data into a plain object
+    let parsedData = JSON.parse(data?.chains?.toString()!);
+
+    // create a new Chains object and populate it with the parsed data
+    let chains = new Chains(parsedData);
 
     // add the chain into chains class
     chains.addChain(chain);
+
     // update Metamask state with new chain state
     await snap.request({
       method: "snap_manageState",
       params: { operation: "update", newState: { chains: chains.string() } },
     });
+
+    return chains
   }
   /**
    * Adds a list of Chains as state into Metamask snap.
@@ -74,10 +76,10 @@ export class ChainState {
    * WARNING: This replaces the entire state within Metamask so any chains in state will be replaced.
    *
    * @param chains Chains to replace entire Metamask chain state with.
-   * @returns Boolean indicating success or not.
+   * @returns Returns the current state of Chains.
    * @throws If an error occurs.
    */
-  public static async addChains(chains: Chains): Promise<Boolean> {
+  public static async addChains(chains: Chains): Promise<Chains> {
     // get current state
     const data = await snap.request({
       method: "snap_manageState",
@@ -91,9 +93,9 @@ export class ChainState {
         newState: { ...data, chains: chains.string() },
       },
     });
-    return true;
+    return chains;
   }
-  public static async removeChain(chain_id: string) {
+  public static async removeChain(chain_id: string): Promise<Chains> {
     // get the current state of chains in Metamask we will add chain into
     const data = await snap.request({
       method: "snap_manageState",
@@ -103,7 +105,7 @@ export class ChainState {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
     // remember we keep chain stores as a json string so convert into a Chains object
-    let chains: Chains = JSON.parse(data?.chains?.toString()!);
+    let chains = new Chains(JSON.parse(data?.chains?.toString()!));
     let keepChains = chains.chains.filter((item) => item.chain_id !== chain_id);
     // update chains
     chains.chains = keepChains;
@@ -113,6 +115,8 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "update", newState: { chains: chains.string() } },
     });
+
+    return chains
   }
 }
 
@@ -198,7 +202,7 @@ export class AddressState {
    * @returns Boolean indicating success or not.
    * @throws If an error occurs.
    */
-  public static async addAddress(address: Address) {
+  public static async addAddress(address: Address): Promise<Addresses> {
     // get the current state of addresses in Metamask we will add address into
     const data = await snap.request({
       method: "snap_manageState",
@@ -226,7 +230,7 @@ export class AddressState {
       },
     });
 
-    return true;
+    return addresses
   }
 
   /**
@@ -263,7 +267,7 @@ export class AddressState {
     return true;
   }
 
-  public static async removeAddress(address: string) {
+  public static async removeAddress(address: string): Promise<Addresses> {
     // get the current state of addresses in Metamask we will add address into
     const data = await snap.request({
       method: "snap_manageState",
@@ -298,6 +302,6 @@ export class AddressState {
       },
     });
 
-    return true;
+    return addresses
   }
 }

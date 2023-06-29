@@ -3,10 +3,10 @@ export interface Chain {
   chain_id: string;
   pretty_name: string;
   // Coin type
-  slip44: string;
+  slip44: number;
   // Address prefix
   bech32_prefix: string;
-  fees: Fees;
+  fees: ChainFees;
   staking: Staking;
   logo_URIs: Logos;
   apis: {
@@ -20,22 +20,22 @@ export interface Chain {
 export interface Explorer {
   kind: string;
   url: string;
-  tx_page: string;
-  account_page: string;
+  tx_page?: string;
+  account_page?: string;
 }
 
 export interface Api {
   address: string;
-  provider: string;
+  provider?: string;
 }
 
 export interface Staking {
   staking_tokens: {
     denom: string;
-  };
+  }[];
 }
 
-export interface Fees {
+export interface ChainFees {
   fee_tokens: FeeToken[];
 }
 
@@ -46,7 +46,7 @@ export interface Logos {
 
 export interface FeeToken {
   denom: string;
-  fixed_min_gas_price: number;
+  fixed_min_gas_price?: number;
   low_gas_price: number;
   average_gas_price: number;
   high_gas_price: number;
@@ -68,6 +68,21 @@ export class Chains {
     this.chains.push(chain);
   }
 
+  getChain(chain_id: string) {
+    let chainList = this.chains.filter(item => item.chain_id === chain_id);
+    if (chainList.length == 0) {
+      throw new Error(
+        `${chain_id} is not found. Add the chain to your wallet at https://wallet.mysticlabs.xyz`
+      );
+    }
+    return chainList[0]
+  }
+
+  removeChain(chain_id: string) {
+    let chainList = this.chains.filter(item => item.chain_id != chain_id);
+    return chainList
+  }
+
   /**
    * Turn all chains into a JSON string using JSON stringify.
    *
@@ -77,4 +92,14 @@ export class Chains {
   string() {
     return JSON.stringify(this.chains);
   }
+}
+
+export interface Amount {
+  denom: string;
+  amount: string;
+}
+
+export interface Fees {
+  amount: Amount[];
+  gas: string;
 }
