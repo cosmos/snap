@@ -4,6 +4,7 @@
     "target": "ESNext",
     "module": "nodenext",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
   }
 }
