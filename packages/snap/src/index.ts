@@ -17,10 +17,11 @@ import { submitTransaction } from "./transaction";
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Result> => {
   let res: Object = {};
+  let confirmation: string | boolean | null = false;
   switch (request.method) {
     case "initialize":
       // Ensure user confirms initializing Cosmos snap
-      let confirmation = await snap.request({
+      confirmation = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",

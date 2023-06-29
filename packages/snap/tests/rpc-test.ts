@@ -2,6 +2,7 @@ import test from "ava";
 import { onRpcRequest } from "../src/index";
 import { Address, Addresses } from "../src/types/address";
 import { Json, JsonRpcRequest } from "@metamask/utils";
+import { Result } from "../src/types/result";
 
 const origin = "test-origin";
 
@@ -76,10 +77,22 @@ class PassingOnRpcRequestTests {
       },
     };
 
-    let result = await onRpcRequest({ origin, request });
+    let value = await onRpcRequest({ origin, request });
+    let result: Result
+    result = value as Result
+
+    let addr = [
+      { name: 'User1', address: '0x123456', chain_id: '1' },
+      { name: 'User2', address: '0xabcdef', chain_id: '2' },
+      { name: 'User3', address: 'User3', chain_id: '3' }
+    ]
 
     // Check that the correct result is returned
-    t.deepEqual(result, true);
+    t.deepEqual(result, {
+      data: new Addresses(addr),
+      success: true,
+      statusCode: 201
+    });
   }
 
   //onRpcRequet function should handle the "deleteAddress" case correctly
@@ -94,10 +107,22 @@ class PassingOnRpcRequestTests {
       },
     };
 
-    let result = await onRpcRequest({ origin, request });
+    let value = await onRpcRequest({ origin, request });
+    let result: Result
+    result = value as Result
+
+    let addr = [
+      { name: 'User1', address: '0x123456', chain_id: '1' },
+      { name: 'User2', address: '0xabcdef', chain_id: '2' },
+      { name: 'User3', address: 'User3', chain_id: '3' }
+    ]
 
     // Check that the correct result is returned
-    t.deepEqual(result, true);
+    t.deepEqual(result, {
+      data: new Addresses(addr),
+      success: true,
+      statusCode: 201
+    });
   }
 
   //onRpcRequest function should handle the "getAddresses" case correctly
@@ -113,18 +138,22 @@ class PassingOnRpcRequestTests {
     let result = await onRpcRequest({ origin, request });
 
     // Check that the correct result is returned
-    t.deepEqual(result, [
-      {
-        address: "0x123456",
-        chain_id: "1",
-        name: "User1",
-      },
-      {
-        address: "0xabcdef",
-        chain_id: "2",
-        name: "User2",
-      },
-    ]);
+    t.deepEqual(result, {
+      data: [
+        {
+          address: '0x123456',
+          chain_id: '1',
+          name: 'User1',
+        },
+        {
+          address: '0xabcdef',
+          chain_id: '2',
+          name: 'User2',
+        },
+      ],
+      statusCode: 200,
+      success: true,
+    });
   }
 }
 
