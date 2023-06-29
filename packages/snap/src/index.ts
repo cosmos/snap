@@ -15,7 +15,9 @@ import { submitTransaction } from "./transaction";
  * @returns A result object.
  * @throws If the request method is not valid for this snap.
  */
-export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Result> => {
+export const onRpcRequest: OnRpcRequestHandler = async ({
+  request,
+}): Promise<Result> => {
   let res: Object = {};
   let confirmation: string | boolean | null = false;
   switch (request.method) {
@@ -43,7 +45,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
       return {
         data: res,
         success: true,
-        statusCode: 200
+        statusCode: 200,
       };
     case "transact":
       // Send a transaction to the wallet
@@ -62,20 +64,24 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
 
       let fees: Fees = {
         amount: [],
-        gas: "200000"
-      }
+        gas: "200000",
+      };
       if (request.params.fees) {
         if (typeof request.params.fees == "string") {
-          fees = JSON.parse(request.params.fees)
+          fees = JSON.parse(request.params.fees);
         }
       }
 
-      let result = await submitTransaction(request.params.chain_id, JSON.parse(request.params.msgs), fees)
+      let result = await submitTransaction(
+        request.params.chain_id,
+        JSON.parse(request.params.msgs),
+        fees
+      );
 
       return {
         data: result,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
     case "addChain":
       if (
@@ -96,7 +102,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
       return {
         data: new_chains,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
     case "deleteChain":
       // Delete a cosmos chain from the wallet state
@@ -111,12 +117,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
         throw new Error("Invalid deleteChain request");
       }
 
-      res = await ChainState.removeChain(request.params.chain_id)
+      res = await ChainState.removeChain(request.params.chain_id);
 
       return {
         data: res,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
     case "getChains":
       // Get all chains from the wallet state
@@ -125,7 +131,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
       return {
         data: res,
         success: true,
-        statusCode: 200
+        statusCode: 200,
       };
     case "addAddress":
       //Ensure addAddress request is valid
@@ -174,7 +180,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
       return {
         data: res,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
 
     case "deleteAddress":
@@ -208,12 +214,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
         throw new Error("Delete address action declined");
       }
 
-      res = await AddressState.removeAddress(request.params.address)
+      res = await AddressState.removeAddress(request.params.address);
 
       return {
         data: res,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
 
     case "getAddresses":
@@ -223,7 +229,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
       return {
         data: res,
         success: true,
-        statusCode: 200
+        statusCode: 200,
       };
 
     default:

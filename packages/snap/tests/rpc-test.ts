@@ -78,20 +78,20 @@ class PassingOnRpcRequestTests {
     };
 
     let value = await onRpcRequest({ origin, request });
-    let result: Result
-    result = value as Result
+    let result: Result;
+    result = value as Result;
 
     let addr = [
-      { name: 'User1', address: '0x123456', chain_id: '1' },
-      { name: 'User2', address: '0xabcdef', chain_id: '2' },
-      { name: 'User3', address: 'User3', chain_id: '3' }
-    ]
+      { name: "User1", address: "0x123456", chain_id: "1" },
+      { name: "User2", address: "0xabcdef", chain_id: "2" },
+      { name: "User3", address: "User3", chain_id: "3" },
+    ];
 
     // Check that the correct result is returned
     t.deepEqual(result, {
       data: new Addresses(addr),
       success: true,
-      statusCode: 201
+      statusCode: 201,
     });
   }
 
@@ -108,20 +108,20 @@ class PassingOnRpcRequestTests {
     };
 
     let value = await onRpcRequest({ origin, request });
-    let result: Result
-    result = value as Result
+    let result: Result;
+    result = value as Result;
 
     let addr = [
-      { name: 'User1', address: '0x123456', chain_id: '1' },
-      { name: 'User2', address: '0xabcdef', chain_id: '2' },
-      { name: 'User3', address: 'User3', chain_id: '3' }
-    ]
+      { name: "User1", address: "0x123456", chain_id: "1" },
+      { name: "User2", address: "0xabcdef", chain_id: "2" },
+      { name: "User3", address: "User3", chain_id: "3" },
+    ];
 
     // Check that the correct result is returned
     t.deepEqual(result, {
       data: new Addresses(addr),
       success: true,
-      statusCode: 201
+      statusCode: 201,
     });
   }
 
@@ -141,14 +141,14 @@ class PassingOnRpcRequestTests {
     t.deepEqual(result, {
       data: [
         {
-          address: '0x123456',
-          chain_id: '1',
-          name: 'User1',
+          address: "0x123456",
+          chain_id: "1",
+          name: "User1",
         },
         {
-          address: '0xabcdef',
-          chain_id: '2',
-          name: 'User2',
+          address: "0xabcdef",
+          chain_id: "2",
+          name: "User2",
         },
       ],
       statusCode: 200,

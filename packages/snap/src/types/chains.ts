@@ -69,18 +69,18 @@ export class Chains {
   }
 
   getChain(chain_id: string) {
-    let chainList = this.chains.filter(item => item.chain_id === chain_id);
+    let chainList = this.chains.filter((item) => item.chain_id === chain_id);
     if (chainList.length == 0) {
       throw new Error(
         `${chain_id} is not found. Add the chain to your wallet at https://wallet.mysticlabs.xyz`
       );
     }
-    return chainList[0]
+    return chainList[0];
   }
 
   removeChain(chain_id: string) {
-    let chainList = this.chains.filter(item => item.chain_id != chain_id);
-    return chainList
+    let chainList = this.chains.filter((item) => item.chain_id != chain_id);
+    return chainList;
   }
 
   /**

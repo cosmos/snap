@@ -1,7 +1,7 @@
 import test from "ava";
 import { ChainState } from "../src/state";
 import { Chains, Chain } from "../src/types/chains";
-import chainsJson from './public/chain-test.json';
+import chainsJson from "./public/chain-test.json";
 
 class PassingChainStateTests {
   //Initialize Sample Chains
@@ -28,9 +28,7 @@ class PassingChainStateTests {
         params.params.operation === "update"
       ) {
         // Modify the SampleChains and return true
-        this.SampleChains.chains = JSON.parse(
-          params.params.newState.chains
-        );
+        this.SampleChains.chains = JSON.parse(params.params.newState.chains);
         return true;
       }
     },
@@ -78,10 +76,7 @@ class PassingChainStateTests {
 
     const result = await ChainState.getChains();
 
-    t.deepEqual(result, [
-      chainsJson[0],
-      chainsJson[2],
-    ]);
+    t.deepEqual(result, [chainsJson[0], chainsJson[2]]);
   }
 
   //addChains function should replace the current Chains with a new one
@@ -98,9 +93,7 @@ class PassingChainStateTests {
     //Get updated Chains
     const result = await ChainState.getChains();
 
-    t.deepEqual(result, [
-        chainsJson[2],
-    ]);
+    t.deepEqual(result, [chainsJson[2]]);
   }
 }
 

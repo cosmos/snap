@@ -68,7 +68,7 @@ export class ChainState {
       params: { operation: "update", newState: { chains: chains.string() } },
     });
 
-    return chains
+    return chains;
   }
   /**
    * Adds a list of Chains as state into Metamask snap.
@@ -116,7 +116,7 @@ export class ChainState {
       params: { operation: "update", newState: { chains: chains.string() } },
     });
 
-    return chains
+    return chains;
   }
 }
 
@@ -230,7 +230,7 @@ export class AddressState {
       },
     });
 
-    return addresses
+    return addresses;
   }
 
   /**
@@ -302,6 +302,6 @@ export class AddressState {
       },
     });
 
-    return addresses
+    return addresses;
   }
 }
