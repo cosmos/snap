@@ -123,7 +123,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           content: panel([
             heading("Transaction Successful"),
             text(
-              `Transaction with the hash ${result.transactionHash} has been broadcasted to the chain.`
+              `Transaction with the hash ${result.transactionHash} has been broadcasted to the chain ${request.params.chain_id}.`
             ),
             copyable(`${result.transactionHash}`)
           ]),
