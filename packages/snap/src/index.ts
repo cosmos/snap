@@ -1,5 +1,5 @@
 import { OnRpcRequestHandler } from "@metamask/snaps-types";
-import { panel, text } from "@metamask/snaps-ui";
+import { panel, text, heading, divider } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
 import { Chain, Chains, Fees } from "./types/chains";
 import { Address } from "./types/address";
@@ -34,11 +34,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           ]),
         },
       });
-      let chains = new Chains([]);
-      if (confirmation) {
-        let chainList = await initializeChains();
-        chains = new Chains(chainList);
+      if (!confirmation) {
+        throw new Error("Initialize Cosmos chain support was denied.")
       }
+      let chains = new Chains([]);
+      let chainList = await initializeChains();
+      chains = new Chains(chainList);
       // add all the default chains into Metamask state
       res = await ChainState.addChains(chains);
 
@@ -60,6 +61,30 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         )
       ) {
         throw new Error("Invalid transact request");
+      }
+
+      // Ensure user confirms transaction
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading("Confirm Transaction"),
+            divider(),
+            heading("Chain"),
+            text(
+              `${request.params.chain_id}`
+            ),
+            divider(),
+            heading("Chain"),
+            text(
+              `${request.params.msgs}`
+            ),
+          ]),
+        },
+      });
+      if (!confirmation) {
+        throw new Error("Transaction was denied.")
       }
 
       let fees: Fees = {
@@ -95,6 +120,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error("Invalid addAddress request");
       }
 
+      // Ensure user confirms addChain
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading("Confirm Chain Addition"),
+            divider(),
+            heading("Chain Info"),
+            text(
+              `${request.params.chain_info}`
+            ),
+          ]),
+        },
+      });
+      if (!confirmation) {
+        throw new Error("Chain addition was denied.")
+      }
+
       let new_chain: Chain = JSON.parse(request.params.chain_info);
 
       let new_chains = await ChainState.addChain(new_chain);
@@ -115,6 +159,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         )
       ) {
         throw new Error("Invalid deleteChain request");
+      }
+
+      // Ensure user confirms deleteChain
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading("Confirm Chain Deletion"),
+            divider(),
+            heading("Chain To Delete"),
+            text(
+              `${request.params.chain_id}`
+            ),
+          ]),
+        },
+      });
+      if (!confirmation) {
+        throw new Error("Chain deletion was denied.")
       }
 
       res = await ChainState.removeChain(request.params.chain_id);
@@ -156,8 +219,19 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         params: {
           type: "confirmation",
           content: panel([
+            heading("Confirm Address Book Addition"),
+            divider(),
+            heading("Chain"),
             text(
-              `Do you want to add ${request.params.address} to the chain ${request.params.chain_id}?`
+              `${request.params.chain_id}`
+            ),
+            heading("Name"),
+            text(
+              `${request.params.name}`
+            ),
+            heading("Address"),
+            text(
+              `${request.params.address}`
             ),
           ]),
         },
@@ -202,8 +276,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         params: {
           type: "confirmation",
           content: panel([
+            heading("Confirm Address Book Deletion"),
+            divider(),
+            heading("Address"),
             text(
-              `Do you want to delete the address ${request.params.address} from your address book?`
+              `${request.params.address}`
             ),
           ]),
         },
