@@ -276,7 +276,8 @@ test.serial("AddressState Failing Tests", async (t) => {
 
   (globalThis as any).snap = failing_tests.snapMock2;
   let error = "Invalid address book data. Addresses should be a string.";
-  let errorJson = "Invalid address book data. Addresses should be a JSON string.";
+  let errorJson =
+    "Invalid address book data. Addresses should be a JSON string.";
 
   await failing_tests.getAddressBookFailTest(t, errorJson);
   await failing_tests.getAddressFailTest(t, "1", error);

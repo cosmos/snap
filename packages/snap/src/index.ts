@@ -1,5 +1,5 @@
 import { OnRpcRequestHandler } from "@metamask/snaps-types";
-import { panel, text } from "@metamask/snaps-ui";
+import { panel, text, heading, divider, copyable } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
 import { Chain, Chains, Fees } from "./types/chains";
 import { Address } from "./types/address";
@@ -15,7 +15,9 @@ import { submitTransaction } from "./transaction";
  * @returns A result object.
  * @throws If the request method is not valid for this snap.
  */
-export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Result> => {
+export const onRpcRequest: OnRpcRequestHandler = async ({
+  request,
+}): Promise<Result> => {
   let res: Object = {};
   let confirmation: string | boolean | null = false;
   switch (request.method) {
@@ -32,18 +34,32 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
           ]),
         },
       });
-      let chains = new Chains([]);
-      if (confirmation) {
-        let chainList = await initializeChains();
-        chains = new Chains(chainList);
+      if (!confirmation) {
+        throw new Error("Initialize Cosmos chain support was denied.")
       }
+      let chains = new Chains([]);
+      let chainList = await initializeChains();
+      chains = new Chains(chainList);
       // add all the default chains into Metamask state
       res = await ChainState.addChains(chains);
+
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Initialization Successful"),
+            text(
+              "Cosmos has been added and initialized into your Metamask wallet."
+            ),
+          ]),
+        },
+      });
 
       return {
         data: res,
         success: true,
-        statusCode: 200
+        statusCode: 201,
       };
     case "transact":
       // Send a transaction to the wallet
@@ -60,22 +76,64 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
         throw new Error("Invalid transact request");
       }
 
+      // Ensure user confirms transaction
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading("Confirm Transaction"),
+            divider(),
+            heading("Chain"),
+            text(
+              `${request.params.chain_id}`
+            ),
+            divider(),
+            heading("Chain"),
+            text(
+              `${request.params.msgs}`
+            ),
+          ]),
+        },
+      });
+      if (!confirmation) {
+        throw new Error("Transaction was denied.")
+      }
+
       let fees: Fees = {
         amount: [],
-        gas: "200000"
-      }
+        gas: "200000",
+      };
       if (request.params.fees) {
         if (typeof request.params.fees == "string") {
-          fees = JSON.parse(request.params.fees)
+          fees = JSON.parse(request.params.fees);
         }
       }
 
-      let result = await submitTransaction(request.params.chain_id, JSON.parse(request.params.msgs), fees)
+      let result = await submitTransaction(
+        request.params.chain_id,
+        JSON.parse(request.params.msgs),
+        fees
+      );
+
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Transaction Successful"),
+            text(
+              `Transaction with the hash ${result.transactionHash} has been broadcasted to the chain ${request.params.chain_id}.`
+            ),
+            copyable(`${result.transactionHash}`)
+          ]),
+        },
+      });
 
       return {
         data: result,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
     case "addChain":
       if (
@@ -89,14 +147,46 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
         throw new Error("Invalid addAddress request");
       }
 
+      // Ensure user confirms addChain
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading("Confirm Chain Addition"),
+            divider(),
+            heading("Chain Info"),
+            text(
+              `${request.params.chain_info}`
+            ),
+          ]),
+        },
+      });
+      if (!confirmation) {
+        throw new Error("Chain addition was denied.")
+      }
+
       let new_chain: Chain = JSON.parse(request.params.chain_info);
 
       let new_chains = await ChainState.addChain(new_chain);
 
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Chain Added"),
+            text(
+              `The chain ${new_chain.chain_id} has been added to your wallet.`
+            )
+          ]),
+        },
+      });
+
       return {
         data: new_chains,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
     case "deleteChain":
       // Delete a cosmos chain from the wallet state
@@ -111,12 +201,44 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
         throw new Error("Invalid deleteChain request");
       }
 
-      res = await ChainState.removeChain(request.params.chain_id)
+      // Ensure user confirms deleteChain
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading("Confirm Chain Deletion"),
+            divider(),
+            heading("Chain To Delete"),
+            text(
+              `${request.params.chain_id}`
+            ),
+          ]),
+        },
+      });
+      if (!confirmation) {
+        throw new Error("Chain deletion was denied.")
+      }
+
+      res = await ChainState.removeChain(request.params.chain_id);
+
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Chain Removed"),
+            text(
+              `The chain ${request.params.chain_id} has been removed from your wallet.`
+            )
+          ]),
+        },
+      });
 
       return {
         data: res,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
     case "getChains":
       // Get all chains from the wallet state
@@ -125,7 +247,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
       return {
         data: res,
         success: true,
-        statusCode: 200
+        statusCode: 200,
       };
     case "addAddress":
       //Ensure addAddress request is valid
@@ -150,8 +272,19 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
         params: {
           type: "confirmation",
           content: panel([
+            heading("Confirm Address Book Addition"),
+            divider(),
+            heading("Chain"),
             text(
-              `Do you want to add ${request.params.address} to the chain ${request.params.chain_id}?`
+              `${request.params.chain_id}`
+            ),
+            heading("Name"),
+            text(
+              `${request.params.name}`
+            ),
+            heading("Address"),
+            text(
+              `${request.params.address}`
             ),
           ]),
         },
@@ -171,10 +304,23 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
 
       res = await AddressState.addAddress(new_address);
 
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Address Added"),
+            text(
+              `The address ${request.params.address} has been added to your wallet address book for chain ${request.params.chain_id} as ${request.params.name}.`
+            )
+          ]),
+        },
+      });
+
       return {
         data: res,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
 
     case "deleteAddress":
@@ -196,8 +342,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
         params: {
           type: "confirmation",
           content: panel([
+            heading("Confirm Address Book Deletion"),
+            divider(),
+            heading("Address"),
             text(
-              `Do you want to delete the address ${request.params.address} from your address book?`
+              `${request.params.address}`
             ),
           ]),
         },
@@ -208,12 +357,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
         throw new Error("Delete address action declined");
       }
 
-      res = await AddressState.removeAddress(request.params.address)
+      res = await AddressState.removeAddress(request.params.address);
+
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Address Deleted"),
+            text(
+              `The address ${request.params.address} has been deleted from your wallets address book.`
+            )
+          ]),
+        },
+      });
 
       return {
         data: res,
         success: true,
-        statusCode: 201
+        statusCode: 201,
       };
 
     case "getAddresses":
@@ -223,7 +385,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ request }): Promise<Re
       return {
         data: res,
         success: true,
-        statusCode: 200
+        statusCode: 200,
       };
 
     default:
