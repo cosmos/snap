@@ -1,5 +1,5 @@
 import { OnRpcRequestHandler } from "@metamask/snaps-types";
-import { panel, text, heading, divider } from "@metamask/snaps-ui";
+import { panel, text, heading, divider, copyable } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
 import { Chain, Chains, Fees } from "./types/chains";
 import { Address } from "./types/address";
@@ -43,10 +43,23 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       // add all the default chains into Metamask state
       res = await ChainState.addChains(chains);
 
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Initialization Successful"),
+            text(
+              "Cosmos has been added and initialized into your Metamask wallet."
+            ),
+          ]),
+        },
+      });
+
       return {
         data: res,
         success: true,
-        statusCode: 200,
+        statusCode: 201,
       };
     case "transact":
       // Send a transaction to the wallet
@@ -103,6 +116,20 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         fees
       );
 
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Transaction Successful"),
+            text(
+              `Transaction with the hash ${result.transactionHash} has been broadcasted to the chain.`
+            ),
+            copyable(`${result.transactionHash}`)
+          ]),
+        },
+      });
+
       return {
         data: result,
         success: true,
@@ -143,6 +170,19 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       let new_chains = await ChainState.addChain(new_chain);
 
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Chain Added"),
+            text(
+              `The chain ${new_chain.chain_id} has been added to your wallet.`
+            )
+          ]),
+        },
+      });
+
       return {
         data: new_chains,
         success: true,
@@ -181,6 +221,19 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       res = await ChainState.removeChain(request.params.chain_id);
+
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Chain Removed"),
+            text(
+              `The chain ${request.params.chain_id} has been removed from your wallet.`
+            )
+          ]),
+        },
+      });
 
       return {
         data: res,
@@ -251,6 +304,19 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       res = await AddressState.addAddress(new_address);
 
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Address Added"),
+            text(
+              `The address ${request.params.address} has been added to your wallet address book for chain ${request.params.chain_id} as ${request.params.name}.`
+            )
+          ]),
+        },
+      });
+
       return {
         data: res,
         success: true,
@@ -292,6 +358,19 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       res = await AddressState.removeAddress(request.params.address);
+
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Address Deleted"),
+            text(
+              `The address ${request.params.address} has been deleted from your wallets address book.`
+            )
+          ]),
+        },
+      });
 
       return {
         data: res,
