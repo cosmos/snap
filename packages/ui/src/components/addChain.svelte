@@ -287,12 +287,6 @@
   box-sizing: border-box;
 }
 
-.hidden,
-.hidden * {
-  pointer-events: none;
-  visibility: hidden;
-}
-
 .x4a-add-new-chain-popup .line {
   height: 1px;
   object-fit: cover;
