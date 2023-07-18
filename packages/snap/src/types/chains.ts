@@ -15,6 +15,8 @@ export interface Chain {
     grpc: Api[];
   };
   explorers: Explorer[];
+  // users bech32 address for this chain
+  address: string;
 }
 
 export interface Explorer {
@@ -55,6 +57,11 @@ export interface FeeToken {
 export interface Gas {
   default: number;
   denom: string;
+}
+
+export interface CosmosAddress {
+  chain_id: string;
+  address: string;
 }
 
 export class Chains {
