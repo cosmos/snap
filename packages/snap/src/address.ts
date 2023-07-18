@@ -13,7 +13,7 @@ export const getAddress = async (chain: Chain): Promise<string> => {
   let node = await snap.request({
     method: "snap_getBip44Entropy",
     params: {
-      coinType: Number(chain.slip44),
+      "coinType": chain.slip44,
     },
   });
 

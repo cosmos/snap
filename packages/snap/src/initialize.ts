@@ -1,6 +1,5 @@
 import { Chain } from "./types/chains";
 import { registry } from "./types/registry";
-import { getAddress } from "./address";
 
 /**
  * Initialize initial Cosmos chains into local storage from the chain registry.
@@ -21,17 +20,5 @@ export const initializeChains = async (): Promise<Chain[]> => {
     })
   );
 
-  // Get all addresses
-  let addressesP = all.map((data) => {
-    return getAddress(data);
-  });
-
-  let addresses = await Promise.all(addressesP);
-
-  let chainList = all.map((item, index) => {
-    item.address = addresses[index];
-    return item;
-  });
-
-  return chainList;
+  return all;
 };

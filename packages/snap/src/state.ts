@@ -1,10 +1,70 @@
-import { Chains, Chain } from "./types/chains";
+import { Chains, Chain, CosmosAddress } from "./types/chains";
 import { Addresses, Address } from "./types/address";
+import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
 
 /**
  * ChainState is the class to manage all Chain state within Metamask.
  */
 export class ChainState {
+  /**
+   * Get the chain ids bech32 addresses for all chains in state.
+   *
+   * @returns The bech32 prefixed addresses in a list.
+   * @throws If an error occurs.
+   */
+  public static async getChainAddresses(): Promise<CosmosAddress[]> {
+    let chains = await this.getChains();
+
+    let addressesP = chains.chains.map(async item => {
+      return this.getChainAddress(item.chain_id)
+    })
+    let addresses = await Promise.all(addressesP);
+
+    return addresses
+  }
+  /**
+   * Get the chain ids bech32 address.
+   *
+   * @returns The bech32 prefixed address.
+   * @throws If an error occurs.
+   */
+  public static async getChainAddress(chain_id: string): Promise<CosmosAddress> {
+    let chain = await this.getChain(chain_id);
+    if (chain == null) {
+      throw new Error(`Chain with Chain Id ${chain_id} does not exist.`)
+    }
+
+    // get signer info
+    let node = await snap.request({
+      method: "snap_getBip44Entropy",
+      params: {
+        coinType: typeof chain.slip44 == "number" ? chain.slip44 : 118,
+      },
+    });
+
+    if (typeof node.privateKey === "undefined") {
+      throw Error("Private key from node is undefined");
+    }
+
+    // Create bytes key
+    let pk = node.privateKey;
+    if (pk.startsWith("0x")) {
+      pk = pk.substring(2);
+    }
+
+    // create the wallet
+    let wallet = await DirectSecp256k1Wallet.fromKey(
+      Uint8Array.from(Buffer.from(pk, "hex")),
+      chain.bech32_prefix
+    );
+
+    let address = (await wallet.getAccounts())[0].address;
+
+    return {
+      address,
+      chain_id
+    };
+  }
   /**
    * Gets all Cosmos chains from Metamask snap state.
    *
@@ -27,7 +87,7 @@ export class ChainState {
    * @returns Chain object you want.
    * @throws If an error occurs.
    */
-  public static async getChain(chain_id: string): Promise<Chain> {
+  public static async getChain(chain_id: string): Promise<Chain | null> {
     const data = await snap.request({
       method: "snap_manageState",
       params: { operation: "get" },
@@ -65,7 +125,7 @@ export class ChainState {
     // update Metamask state with new chain state
     await snap.request({
       method: "snap_manageState",
-      params: { operation: "update", newState: { chains: chains.string() } },
+      params: { operation: "update", newState: { ...data, chains: chains.string() } },
     });
 
     return chains;
@@ -113,7 +173,7 @@ export class ChainState {
     // update Metamask state with new chain state
     await snap.request({
       method: "snap_manageState",
-      params: { operation: "update", newState: { chains: chains.string() } },
+      params: { operation: "update", newState: { ...data, chains: chains.string() } },
     });
 
     return chains;
@@ -226,7 +286,7 @@ export class AddressState {
       method: "snap_manageState",
       params: {
         operation: "update",
-        newState: { addresses: addresses.string() },
+        newState: { ...data, addresses: addresses.string() },
       },
     });
 
@@ -298,7 +358,7 @@ export class AddressState {
       method: "snap_manageState",
       params: {
         operation: "update",
-        newState: { addresses: addresses.string() },
+        newState: { ...data, addresses: addresses.string() },
       },
     });
 

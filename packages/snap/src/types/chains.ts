@@ -15,8 +15,6 @@ export interface Chain {
     grpc: Api[];
   };
   explorers: Explorer[];
-  // users bech32 address for this chain
-  address: string;
 }
 
 export interface Explorer {
@@ -78,9 +76,7 @@ export class Chains {
   getChain(chain_id: string) {
     let chainList = this.chains.filter((item) => item.chain_id === chain_id);
     if (chainList.length == 0) {
-      throw new Error(
-        `${chain_id} is not found. Add the chain to your wallet at https://wallet.mysticlabs.xyz`
-      );
+      return null
     }
     return chainList[0];
   }

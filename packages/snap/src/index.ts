@@ -6,6 +6,7 @@ import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 import { Result } from "./types/result";
 import { submitTransaction } from "./transaction";
+import { getAddress } from "./address";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -40,8 +41,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       let chains = new Chains([]);
       let chainList = await initializeChains();
       chains = new Chains(chainList);
-      // add all the default chains into Metamask state
-      res = await ChainState.addChains(chains);
+      // Initialize with initial state
+      await snap.request({
+        method: "snap_manageState",
+        params: {
+          operation: "update",
+          newState: { chains: chains.string(), addresses: JSON.stringify([]) },
+        },
+      });
 
       await snap.request({
         method: "snap_dialog",
@@ -189,6 +196,24 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       let new_chain: Chain = JSON.parse(request.params.chain_info);
+
+      // Ensure chain id doesn't already exist
+      let get_chain = ChainState.getChain(new_chain.chain_id);
+      if (get_chain != null) {
+        await snap.request({
+          method: "snap_dialog",
+          params: {
+            type: "alert",
+            content: panel([
+              heading("Error Occured"),
+              text(
+                `Chain with Chain Id ${new_chain.chain_id} already exists.`
+              ),
+            ]),
+          },
+        });
+        throw new Error(`Chain with Chain Id ${new_chain.chain_id} already exists.`);
+      }
 
       let new_chains = await ChainState.addChain(new_chain);
 
@@ -396,6 +421,38 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       return {
         data: res,
+        success: true,
+        statusCode: 200,
+      };
+    case "getChainAddress":
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "chain_id" in request.params &&
+          typeof request.params.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid getChainAddress request");
+      }
+      
+      let address = await ChainState.getChainAddress(request.params.chain_id);
+
+      return {
+        data: {
+          "address": address,
+          "chain_id": request.params.chain_id
+        },
+        success: true,
+        statusCode: 200,
+      };
+    case "getChainAddresses":      
+      let addresses = await ChainState.getChainAddresses();
+
+      return {
+        data: {
+          "addresses": addresses,
+        },
         success: true,
         statusCode: 200,
       };
