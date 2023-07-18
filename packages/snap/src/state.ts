@@ -12,14 +12,14 @@ export class ChainState {
    * @throws If an error occurs.
    */
   public static async getChains(): Promise<Chains> {
-    const data = await snap.request({
+    let data = await snap.request({
       method: "snap_manageState",
       params: { operation: "get" },
     });
     if (data?.chains == undefined || data?.chains == null) {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
-    return JSON.parse(data?.chains?.toString()!);
+    return new Chains(JSON.parse(data?.chains?.toString()!));
   }
   /**
    * Gets a Cosmos chain based on its chain id from Metamask snap state.
@@ -27,7 +27,7 @@ export class ChainState {
    * @returns Chain object you want.
    * @throws If an error occurs.
    */
-  public static async getChain(chain_id: string) {
+  public static async getChain(chain_id: string): Promise<Chain> {
     const data = await snap.request({
       method: "snap_manageState",
       params: { operation: "get" },

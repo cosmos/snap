@@ -45,7 +45,7 @@ class PassingChainStateTests {
     //get current state of Chains
     const result = await ChainState.getChains();
 
-    t.deepEqual(result, [chainsJson[0], chainsJson[1]]);
+    t.deepEqual(result.chains, [chainsJson[0], chainsJson[1]]);
   }
 
   //getChain function should return the chain with matching chain_id
@@ -67,7 +67,7 @@ class PassingChainStateTests {
     //Get updated Chains
     const result = await ChainState.getChains();
 
-    t.deepEqual(result, chainsJson);
+    t.deepEqual(result.chains, chainsJson);
   }
 
   //removeChain function should delete the chain matching the given chain_id
@@ -76,7 +76,7 @@ class PassingChainStateTests {
 
     const result = await ChainState.getChains();
 
-    t.deepEqual(result, [chainsJson[0], chainsJson[2]]);
+    t.deepEqual(result.chains, [chainsJson[0], chainsJson[2]]);
   }
 
   //addChains function should replace the current Chains with a new one
@@ -93,7 +93,7 @@ class PassingChainStateTests {
     //Get updated Chains
     const result = await ChainState.getChains();
 
-    t.deepEqual(result, [chainsJson[2]]);
+    t.deepEqual(result.chains, [chainsJson[2]]);
   }
 }
 

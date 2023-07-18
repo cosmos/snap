@@ -237,7 +237,8 @@
         "url": "https://stakeflow.io/agoric",
         "account_page": "https://stakeflow.io/agoric/accounts/${accountAddress}"
       }
-    ]
+    ],
+    "address": ""
   },
   {
     "$schema": "../chain.schema.json",
@@ -702,7 +703,8 @@
         "url": "https://stakeflow.io/cosmos",
         "account_page": "https://stakeflow.io/cosmos/accounts/${accountAddress}"
       }
-    ]
+    ],
+    "address": ""
   },
   {
     "$schema": "../chain.schema.json",
@@ -1146,6 +1148,7 @@
         "account_page": "https://stakeflow.io/osmosis/accounts/${accountAddress}"
       }
     ],
-    "keywords": ["dex"]
+    "keywords": ["dex"],
+    "address": ""
   }
 ]

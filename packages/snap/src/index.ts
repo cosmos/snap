@@ -35,7 +35,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         },
       });
       if (!confirmation) {
-        throw new Error("Initialize Cosmos chain support was denied.")
+        throw new Error("Initialize Cosmos chain support was denied.");
       }
       let chains = new Chains([]);
       let chainList = await initializeChains();
@@ -85,19 +85,15 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Confirm Transaction"),
             divider(),
             heading("Chain"),
-            text(
-              `${request.params.chain_id}`
-            ),
+            text(`${request.params.chain_id}`),
             divider(),
-            heading("Chain"),
-            text(
-              `${request.params.msgs}`
-            ),
+            heading("Transaction"),
+            text(`${request.params.msgs}`),
           ]),
         },
       });
       if (!confirmation) {
-        throw new Error("Transaction was denied.")
+        throw new Error("Transaction was denied.");
       }
 
       let fees: Fees = {
@@ -116,25 +112,53 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         fees
       );
 
-      await snap.request({
-        method: "snap_dialog",
-        params: {
-          type: "alert",
-          content: panel([
-            heading("Transaction Successful"),
-            text(
-              `Transaction with the hash ${result.transactionHash} has been broadcasted to the chain ${request.params.chain_id}.`
-            ),
-            copyable(`${result.transactionHash}`)
-          ]),
-        },
-      });
+      if (typeof result === "undefined") {
+        return {
+          data: {},
+          success: false,
+          statusCode: 500,
+        };
+      }
 
-      return {
-        data: result,
-        success: true,
-        statusCode: 201,
-      };
+      if (result.code === 0) {
+        await snap.request({
+          method: "snap_dialog",
+          params: {
+            type: "alert",
+            content: panel([
+              heading("Transaction Successful"),
+              text(
+                `Transaction with the hash ${result.transactionHash} has been broadcasted to the chain ${request.params.chain_id}.`
+              ),
+              copyable(`${result.transactionHash}`),
+            ]),
+          },
+        });
+
+        return {
+          data: result,
+          success: true,
+          statusCode: 201,
+        };
+      } else {
+        await snap.request({
+          method: "snap_dialog",
+          params: {
+            type: "alert",
+            content: panel([
+              heading("Transaction Failed"),
+              text(result.rawLog!),
+              copyable(`${result.transactionHash}`),
+            ]),
+          },
+        });
+
+        return {
+          data: result,
+          success: false,
+          statusCode: 500,
+        };
+      }
     case "addChain":
       if (
         !(
@@ -156,14 +180,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Confirm Chain Addition"),
             divider(),
             heading("Chain Info"),
-            text(
-              `${request.params.chain_info}`
-            ),
+            text(`${request.params.chain_info}`),
           ]),
         },
       });
       if (!confirmation) {
-        throw new Error("Chain addition was denied.")
+        throw new Error("Chain addition was denied.");
       }
 
       let new_chain: Chain = JSON.parse(request.params.chain_info);
@@ -178,7 +200,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Chain Added"),
             text(
               `The chain ${new_chain.chain_id} has been added to your wallet.`
-            )
+            ),
           ]),
         },
       });
@@ -210,14 +232,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Confirm Chain Deletion"),
             divider(),
             heading("Chain To Delete"),
-            text(
-              `${request.params.chain_id}`
-            ),
+            text(`${request.params.chain_id}`),
           ]),
         },
       });
       if (!confirmation) {
-        throw new Error("Chain deletion was denied.")
+        throw new Error("Chain deletion was denied.");
       }
 
       res = await ChainState.removeChain(request.params.chain_id);
@@ -230,7 +250,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Chain Removed"),
             text(
               `The chain ${request.params.chain_id} has been removed from your wallet.`
-            )
+            ),
           ]),
         },
       });
@@ -275,17 +295,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Confirm Address Book Addition"),
             divider(),
             heading("Chain"),
-            text(
-              `${request.params.chain_id}`
-            ),
+            text(`${request.params.chain_id}`),
             heading("Name"),
-            text(
-              `${request.params.name}`
-            ),
+            text(`${request.params.name}`),
             heading("Address"),
-            text(
-              `${request.params.address}`
-            ),
+            text(`${request.params.address}`),
           ]),
         },
       });
@@ -312,7 +326,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Address Added"),
             text(
               `The address ${request.params.address} has been added to your wallet address book for chain ${request.params.chain_id} as ${request.params.name}.`
-            )
+            ),
           ]),
         },
       });
@@ -345,9 +359,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Confirm Address Book Deletion"),
             divider(),
             heading("Address"),
-            text(
-              `${request.params.address}`
-            ),
+            text(`${request.params.address}`),
           ]),
         },
       });
@@ -367,7 +379,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Address Deleted"),
             text(
               `The address ${request.params.address} has been deleted from your wallets address book.`
-            )
+            ),
           ]),
         },
       });

@@ -25,5 +25,8 @@
 		"vite": "^4.3.0",
 		"vitest": "^0.31.1"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"@metamask/detect-provider": "^2.0.0"
+	}
 }
