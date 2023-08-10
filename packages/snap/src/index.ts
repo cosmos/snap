@@ -83,6 +83,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error("Invalid transact request");
       }
 
+      //Calculate fees for transaction
+      let fees: Fees = {
+        amount: [],
+        gas: "200000",
+      };
+  
+      if (request.params.fees) {
+        if (typeof request.params.fees == "string") {
+          fees = JSON.parse(request.params.fees);
+        }
+      }
+
       // Ensure user confirms transaction
       confirmation = await snap.request({
         method: "snap_dialog",
@@ -96,21 +108,14 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             divider(),
             heading("Transaction"),
             text(`${request.params.msgs}`),
+            heading("Fees Amount"),
+            text(`${fees}`)
           ]),
         },
       });
+      
       if (!confirmation) {
         throw new Error("Transaction was denied.");
-      }
-
-      let fees: Fees = {
-        amount: [],
-        gas: "200000",
-      };
-      if (request.params.fees) {
-        if (typeof request.params.fees == "string") {
-          fees = JSON.parse(request.params.fees);
-        }
       }
 
       let result = await submitTransaction(
