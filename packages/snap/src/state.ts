@@ -15,12 +15,12 @@ export class ChainState {
   public static async getChainAddresses(): Promise<CosmosAddress[]> {
     let chains = await this.getChains();
 
-    let addressesP = chains.chains.map(async item => {
-      return this.getChainAddress(item.chain_id)
-    })
+    let addressesP = chains.chains.map(async (item) => {
+      return this.getChainAddress(item.chain_id);
+    });
     let addresses = await Promise.all(addressesP);
 
-    return addresses
+    return addresses;
   }
   /**
    * Get the chain ids bech32 address.
@@ -28,10 +28,12 @@ export class ChainState {
    * @returns The bech32 prefixed address.
    * @throws If an error occurs.
    */
-  public static async getChainAddress(chain_id: string): Promise<CosmosAddress> {
+  public static async getChainAddress(
+    chain_id: string
+  ): Promise<CosmosAddress> {
     let chain = await this.getChain(chain_id);
     if (chain == null) {
-      throw new Error(`Chain with Chain Id ${chain_id} does not exist.`)
+      throw new Error(`Chain with Chain Id ${chain_id} does not exist.`);
     }
 
     // get signer info
@@ -62,7 +64,7 @@ export class ChainState {
 
     return {
       address,
-      chain_id
+      chain_id,
     };
   }
   /**
@@ -125,7 +127,10 @@ export class ChainState {
     // update Metamask state with new chain state
     await snap.request({
       method: "snap_manageState",
-      params: { operation: "update", newState: { ...data, chains: chains.string() } },
+      params: {
+        operation: "update",
+        newState: { ...data, chains: chains.string() },
+      },
     });
 
     return chains;
@@ -173,7 +178,10 @@ export class ChainState {
     // update Metamask state with new chain state
     await snap.request({
       method: "snap_manageState",
-      params: { operation: "update", newState: { ...data, chains: chains.string() } },
+      params: {
+        operation: "update",
+        newState: { ...data, chains: chains.string() },
+      },
     });
 
     return chains;

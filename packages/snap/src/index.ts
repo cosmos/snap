@@ -88,7 +88,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         amount: [],
         gas: "200000",
       };
-  
+
       if (request.params.fees) {
         if (typeof request.params.fees == "string") {
           fees = JSON.parse(request.params.fees);
@@ -98,8 +98,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       //Get messages if any from JSON string
       let messages;
 
-      if (request.params.msgs){
-        if (typeof request.params.msgs == "string"){
+      if (request.params.msgs) {
+        if (typeof request.params.msgs == "string") {
           messages = JSON.parse(request.params.msgs);
         }
       }
@@ -118,7 +118,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Transaction"),
             text(`${messages}`),
             heading("Fees Amount"),
-            text(`${fees}`)
+            text(`${fees}`),
           ]),
         },
       });
@@ -203,9 +203,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           typeof new_chain.chain_id == "string"
         )
       ) {
-        throw new Error("Invalid Chain Info")
+        throw new Error("Invalid Chain Info");
       }
-      
 
       // Ensure user confirms addChain
       confirmation = await snap.request({
@@ -233,13 +232,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             type: "alert",
             content: panel([
               heading("Error Occured"),
-              text(
-                `Chain with Chain Id ${new_chain.chain_id} already exists.`
-              ),
+              text(`Chain with Chain Id ${new_chain.chain_id} already exists.`),
             ]),
           },
         });
-        throw new Error(`Chain with Chain Id ${new_chain.chain_id} already exists.`);
+        throw new Error(
+          `Chain with Chain Id ${new_chain.chain_id} already exists.`
+        );
       }
 
       let new_chains = await ChainState.addChain(new_chain);
@@ -462,23 +461,23 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       ) {
         throw new Error("Invalid getChainAddress request");
       }
-      
+
       let address = await ChainState.getChainAddress(request.params.chain_id);
 
       return {
         data: {
-          "address": address,
-          "chain_id": request.params.chain_id
+          address: address,
+          chain_id: request.params.chain_id,
         },
         success: true,
         statusCode: 200,
       };
-    case "getChainAddresses":      
+    case "getChainAddresses":
       let addresses = await ChainState.getChainAddresses();
 
       return {
         data: {
-          "addresses": addresses,
+          addresses: addresses,
         },
         success: true,
         statusCode: 200,
