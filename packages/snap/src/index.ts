@@ -95,6 +95,15 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         }
       }
 
+      //Get messages if any from JSON string
+      let messages;
+
+      if (request.params.msgs){
+        if (typeof request.params.msgs == "string"){
+          messages = JSON.parse(request.params.msgs);
+        }
+      }
+
       // Ensure user confirms transaction
       confirmation = await snap.request({
         method: "snap_dialog",
@@ -107,20 +116,20 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             text(`${request.params.chain_id}`),
             divider(),
             heading("Transaction"),
-            text(`${request.params.msgs}`),
+            text(`${messages}`),
             heading("Fees Amount"),
             text(`${fees}`)
           ]),
         },
       });
-      
+
       if (!confirmation) {
         throw new Error("Transaction was denied.");
       }
 
       let result = await submitTransaction(
         request.params.chain_id,
-        JSON.parse(request.params.msgs),
+        messages,
         fees
       );
 
@@ -183,6 +192,21 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error("Invalid addAddress request");
       }
 
+      //Get Chain info from JSON string
+      let new_chain: Chain = JSON.parse(request.params.chain_info);
+
+      if (
+        !(
+          "chain_name" in new_chain &&
+          "chain_id" in new_chain &&
+          typeof new_chain.chain_name == "string" &&
+          typeof new_chain.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid Chain Info")
+      }
+      
+
       // Ensure user confirms addChain
       confirmation = await snap.request({
         method: "snap_dialog",
@@ -192,15 +216,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Confirm Chain Addition"),
             divider(),
             heading("Chain Info"),
-            text(`${request.params.chain_info}`),
+            text(`${new_chain}`),
           ]),
         },
       });
       if (!confirmation) {
         throw new Error("Chain addition was denied.");
       }
-
-      let new_chain: Chain = JSON.parse(request.params.chain_info);
 
       // Ensure chain id doesn't already exist
       let get_chain = ChainState.getChain(new_chain.chain_id);
