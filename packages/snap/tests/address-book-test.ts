@@ -122,7 +122,7 @@ class PassingAddressStateTests {
     let new_address_book = new Addresses([new_address]);
 
     //Add new address to Address Book
-    await AddressState.addAddresses(new_address_book);
+    await AddressState.replaceAllAddresses(new_address_book);
 
     //Get updated Address Book
     const result = await AddressState.getAddressBook();
@@ -226,7 +226,7 @@ class FailingAddressStateTests {
 
     await t.throwsAsync(
       async () => {
-        await AddressState.addAddresses(new_address_book);
+        await AddressState.replaceAllAddresses(new_address_book);
       },
       { instanceOf: Error, message: message }
     );

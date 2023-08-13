@@ -1,8 +1,14 @@
 import { DeliverTxResponse, SigningStargateClient } from "@cosmjs/stargate";
 import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
-import { CosmosAddress, Fees } from "./types/chains";
+import { Fees } from "./types/chains";
 import { ChainState } from "./state";
 import { heading, panel, text } from "@metamask/snaps-ui";
+import {
+  WALLET_URL,
+  DEFAULT_FEES,
+  U_MULTIPLIER,
+  DEFAULT_AVG_GAS,
+} from "./constants";
 
 /**
  * submitTransaction Submits a transaction to the chain specified.
@@ -21,12 +27,22 @@ export const submitTransaction = async (
   try {
     // get the chain from state
     let chain = await ChainState.getChain(chain_id);
+    if (chain == null) {
+      throw new Error(
+        `Chain ${chain_id} not found. Please go to ${WALLET_URL} to add it!`
+      );
+    }
 
     // if fees are not specified then just use default fees + gas
-    let ugas = chain.fees.fee_tokens[0].average_gas_price * 1000000;
+    let avg_gas_price = chain.fees.fee_tokens[0].average_gas_price
+      ? chain.fees.fee_tokens[0].average_gas_price
+      : DEFAULT_AVG_GAS;
+    let ugas = avg_gas_price * U_MULTIPLIER;
     if (fees == null) {
       fees = {
-        amount: [{ denom: chain.fees.fee_tokens[0].denom, amount: "500" }],
+        amount: [
+          { denom: chain.fees.fee_tokens[0].denom, amount: DEFAULT_FEES.gas },
+        ],
         gas: ugas.toString(),
       };
     }

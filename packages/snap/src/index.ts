@@ -6,13 +6,13 @@ import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 import { Result } from "./types/result";
 import { submitTransaction } from "./transaction";
-import { getAddress } from "./address";
+import { DEFAULT_FEES } from "./constants";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
  *
  * @param args - The request handler args as object.
- * @param args.request - A validated JSON-RPC request object.
+ * @param args.request - A JSON-RPC request object that will be validated.
  * @returns A result object.
  * @throws If the request method is not valid for this snap.
  */
@@ -38,9 +38,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       if (!confirmation) {
         throw new Error("Initialize Cosmos chain support was denied.");
       }
-      let chains = new Chains([]);
       let chainList = await initializeChains();
-      chains = new Chains(chainList);
+      let chains = new Chains(chainList);
       // Initialize with initial state
       await snap.request({
         method: "snap_manageState",
@@ -84,10 +83,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       //Calculate fees for transaction
-      let fees: Fees = {
-        amount: [],
-        gas: "200000",
-      };
+      let fees: Fees = DEFAULT_FEES;
 
       if (request.params.fees) {
         if (typeof request.params.fees == "string") {
@@ -116,7 +112,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             text(`${request.params.chain_id}`),
             divider(),
             heading("Transaction"),
-            text(`${messages}`),
+            text(JSON.stringify(messages, null, 2)),
             heading("Fees Amount"),
             text(`${fees}`),
           ]),
@@ -225,7 +221,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       // Ensure chain id doesn't already exist
       let get_chain = await ChainState.getChain(new_chain.chain_id);
-      
+
       if (get_chain != null) {
         await snap.request({
           method: "snap_dialog",

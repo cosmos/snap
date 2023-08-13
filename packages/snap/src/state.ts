@@ -1,6 +1,7 @@
 import { Chains, Chain, CosmosAddress } from "./types/chains";
 import { Addresses, Address } from "./types/address";
 import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
+import { DEFAULT_SLIP44, WALLET_URL } from "./constants";
 
 /**
  * ChainState is the class to manage all Chain state within Metamask.
@@ -40,7 +41,8 @@ export class ChainState {
     let node = await snap.request({
       method: "snap_getBip44Entropy",
       params: {
-        coinType: typeof chain.slip44 == "number" ? chain.slip44 : 118,
+        coinType:
+          typeof chain.slip44 == "number" ? chain.slip44 : DEFAULT_SLIP44,
       },
     });
 
@@ -78,7 +80,7 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "get" },
     });
-    if (data?.chains == undefined || data?.chains == null) {
+    if (data?.chains == null) {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
     return new Chains(JSON.parse(data?.chains?.toString()!));
@@ -94,7 +96,7 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "get" },
     });
-    if (data?.chains == undefined || data?.chains == null) {
+    if (data?.chains == null) {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
     let chains = new Chains(JSON.parse(data?.chains?.toString()!));
@@ -144,7 +146,7 @@ export class ChainState {
    * @returns Returns the current state of Chains.
    * @throws If an error occurs.
    */
-  public static async addChains(chains: Chains): Promise<Chains> {
+  public static async replaceAllChains(chains: Chains): Promise<Chains> {
     // get current state
     const data = await snap.request({
       method: "snap_manageState",
@@ -166,7 +168,7 @@ export class ChainState {
       method: "snap_manageState",
       params: { operation: "get" },
     });
-    if (data?.chains == undefined || data?.chains == null) {
+    if (data?.chains == null) {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
     // remember we keep chain stores as a json string so convert into a Chains object
@@ -206,7 +208,7 @@ export class AddressState {
       params: { operation: "get" },
     });
 
-    if (data?.addresses == undefined || data?.addresses == null) {
+    if (data?.addresses == null) {
       throw new Error(
         "Address book was not found. Add an address to address book to initialize."
       );
@@ -235,7 +237,7 @@ export class AddressState {
       params: { operation: "get" },
     });
 
-    if (data?.addresses == undefined || data?.addresses == null) {
+    if (data?.addresses == null) {
       throw new Error(
         "Address book was not found. Add an address to address book to initialize."
       );
@@ -256,7 +258,7 @@ export class AddressState {
 
     if (addressList.length == 0) {
       throw new Error(
-        `${chain_id} is not found. Add the address to your address book at https://wallet.mysticlabs.xyz`
+        `${chain_id} is not found. Add the address to your address book at ${WALLET_URL}`
       );
     }
 
@@ -310,7 +312,9 @@ export class AddressState {
    * @returns Boolean indicating success or not.
    * @throws If an error occurs.
    */
-  public static async addAddresses(addresses: Addresses): Promise<Boolean> {
+  public static async replaceAllAddresses(
+    addresses: Addresses
+  ): Promise<Boolean> {
     // get current state
     const data = await snap.request({
       method: "snap_manageState",
@@ -342,7 +346,7 @@ export class AddressState {
       params: { operation: "get" },
     });
 
-    if (data?.addresses == undefined || data?.addresses == null) {
+    if (data?.addresses == null) {
       throw new Error("Snap has not been initialized. Please initialize snap.");
     }
 

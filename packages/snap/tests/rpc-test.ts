@@ -8,15 +8,15 @@ import chainsJson from "./public/chain-test.json";
 
 const origin = "test-origin";
 
-class ChainsPassingOnRpcRequestTests{
-    //Initialize Sample Chains
-    chain1: Chain = chainsJson[0];
-    chain2: Chain = chainsJson[1];
-  
-    //Initialize Sample Chains
-    SampleChains = new Chains([this.chain1, this.chain2]);
+class ChainsPassingOnRpcRequestTests {
+  //Initialize Sample Chains
+  chain1: Chain = chainsJson[0];
+  chain2: Chain = chainsJson[1];
 
-    // Mock the Metamask snap object and its request method
+  //Initialize Sample Chains
+  SampleChains = new Chains([this.chain1, this.chain2]);
+
+  // Mock the Metamask snap object and its request method
   snapMock = {
     request: (params: any) => {
       if (
@@ -37,7 +37,6 @@ class ChainsPassingOnRpcRequestTests{
         return true;
       }
 
-            
       if (
         params.method === "snap_dialog" &&
         params.params.type === "confirmation"
@@ -57,22 +56,18 @@ class ChainsPassingOnRpcRequestTests{
       params: [],
     };
 
-    let result  = await onRpcRequest({ origin, request });
-
+    let result = await onRpcRequest({ origin, request });
 
     // Check that the correct result is returned
     t.deepEqual(result, {
       data: new Chains([chainsJson[0], chainsJson[1]]),
       statusCode: 200,
-      success: true
+      success: true,
     });
-
   }
-
 
   //onRpcRequet function should handle the "addChain" case correctly
   async casePassAddChain(t: any) {
-
     //Initialize new chain
     const new_chain: Chain = chainsJson[2];
 
@@ -82,43 +77,41 @@ class ChainsPassingOnRpcRequestTests{
       jsonrpc: "2.0",
       id: null,
       params: {
-        chain_info : JSON.stringify(new_chain)
-      }
+        chain_info: JSON.stringify(new_chain),
+      },
     };
 
     let result = await onRpcRequest({ origin, request });
 
-    // Check that the correct result is returned  
+    // Check that the correct result is returned
     t.deepEqual(result, {
-      data: new Chains (chainsJson),
+      data: new Chains(chainsJson),
       statusCode: 201,
-      success: true
+      success: true,
     });
   }
 
   //onRpcRequet function should handle the "deleteChain" case correctly
   async casePassDeleteChain(t: any) {
-
     // Define the JSON-RPC request variable{}
     let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
       method: "deleteChain",
       jsonrpc: "2.0",
       id: null,
       params: {
-        chain_id : "cosmoshub-4"
-      }
+        chain_id: "cosmoshub-4",
+      },
     };
 
     let result = await onRpcRequest({ origin, request });
 
-    // Check that the correct result is returned  
+    // Check that the correct result is returned
     t.deepEqual(result, {
-      data: new Chains ([chainsJson[0], chainsJson[2]]),
+      data: new Chains([chainsJson[0], chainsJson[2]]),
       statusCode: 201,
-      success: true
+      success: true,
     });
   }
-
 }
 
 class ChainsFailingOnRpcRequestTests {
@@ -143,14 +136,13 @@ class ChainsFailingOnRpcRequestTests {
     },
   };
 
-  async caseFailGetChains(t: any, message: string){
-
+  async caseFailGetChains(t: any, message: string) {
     // Define the JSON-RPC request variable{}
     let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
       method: "getChains",
       jsonrpc: "2.0",
       id: null,
-      params: []
+      params: [],
     };
 
     await t.throwsAsync(
@@ -161,7 +153,7 @@ class ChainsFailingOnRpcRequestTests {
     );
   }
 
-  async caseFailAddChain(t: any, message: string){
+  async caseFailAddChain(t: any, message: string) {
     //Initialize new chain
     const new_chain: Chain = chainsJson[2];
 
@@ -174,7 +166,7 @@ class ChainsFailingOnRpcRequestTests {
         jsonrpc: "2.0",
         id: null,
         params: {
-          chain_info: JSON.stringify(new_chain)
+          chain_info: JSON.stringify(new_chain),
         },
       };
     } else {
@@ -183,22 +175,20 @@ class ChainsFailingOnRpcRequestTests {
         jsonrpc: "2.0",
         id: null,
         params: {
-          chain_info : 1
+          chain_info: 1,
         },
       };
     }
-    
+
     await t.throwsAsync(
       async () => {
         await onRpcRequest({ origin, request });
       },
       { instanceOf: Error, message: message }
     );
-
   }
 
-  async caseFailDeleteChain(t: any, message: string){
-
+  async caseFailDeleteChain(t: any, message: string) {
     let request: JsonRpcRequest<Json[] | Record<string, Json>>;
 
     // Define the JSON-RPC request variable for different snap objects
@@ -208,7 +198,7 @@ class ChainsFailingOnRpcRequestTests {
         jsonrpc: "2.0",
         id: null,
         params: {
-          chain_id: "cosmoshub-4"
+          chain_id: "cosmoshub-4",
         },
       };
     } else {
@@ -217,11 +207,10 @@ class ChainsFailingOnRpcRequestTests {
         jsonrpc: "2.0",
         id: null,
         params: {
-          chain_id : 123
+          chain_id: 123,
         },
       };
     }
-
 
     await t.throwsAsync(
       async () => {
@@ -229,9 +218,7 @@ class ChainsFailingOnRpcRequestTests {
       },
       { instanceOf: Error, message: message }
     );
-
   }
-
 }
 
 class AddressPassingOnRpcRequestTests {
@@ -323,7 +310,7 @@ class AddressPassingOnRpcRequestTests {
     });
   }
 
-  //onRpcRequet function should handle the "deleteAddress" case correctly
+  //onRpcRequest function should handle the "deleteAddress" case correctly
   async casePassDeleteAddress(t: any) {
     // Define the JSON-RPC request variable{}
     let request: JsonRpcRequest<Json[] | Record<string, Json>> = {
@@ -504,37 +491,57 @@ const address_failing_tests = new AddressFailingOnRpcRequestTests();
 const chains_passing_tests = new ChainsPassingOnRpcRequestTests();
 const chains_failing_tests = new ChainsFailingOnRpcRequestTests();
 
+test.serial(
+  "onRpcRequest Passing Tests for Address Book operations",
+  async (t) => {
+    (globalThis as any).snap = address_passing_tests.snapMock;
 
-test.serial("onRpcRequest Passing Tests for Address Book operations", async (t) => {
-  (globalThis as any).snap = address_passing_tests.snapMock;
+    await address_passing_tests.casePassGetAddresses(t);
+    await address_passing_tests.casePassAddAddress(t);
+    await address_passing_tests.casePassDeleteAddress(t);
+  }
+);
 
-  await address_passing_tests.casePassGetAddresses(t);
-  await address_passing_tests.casePassAddAddress(t);
-  await address_passing_tests.casePassDeleteAddress(t);
-});
+test.serial(
+  "onRpcRequest Failing Tests for Address Book operations",
+  async (t) => {
+    (globalThis as any).snap = address_failing_tests.snapMock1;
 
-test.serial("onRpcRequest Failing Tests for Address Book operations", async (t) => {
-  (globalThis as any).snap = address_failing_tests.snapMock1;
+    await address_failing_tests.caseFailGetAddresses(
+      t,
+      "Address book was not found. Add an address to address book to initialize."
+    );
+    await address_failing_tests.caseFailAddAddress(
+      t,
+      "Invalid addAddress request"
+    );
+    await address_failing_tests.caseFailDeleteAddress(
+      t,
+      "Invalid deleteAddress request"
+    );
 
-  await address_failing_tests.caseFailGetAddresses(
-    t,
-    "Address book was not found. Add an address to address book to initialize."
-  );
-  await address_failing_tests.caseFailAddAddress(t, "Invalid addAddress request");
-  await address_failing_tests.caseFailDeleteAddress(t, "Invalid deleteAddress request");
+    (globalThis as any).snap = address_failing_tests.snapMock2;
+    await address_failing_tests.caseFailAddAddress(
+      t,
+      "Invalid addAddress request"
+    );
+    await address_failing_tests.caseFailDeleteAddress(
+      t,
+      "Invalid deleteAddress request"
+    );
 
-  (globalThis as any).snap = address_failing_tests.snapMock2;
-  await address_failing_tests.caseFailAddAddress(t, "Invalid addAddress request");
-  await address_failing_tests.caseFailDeleteAddress(t, "Invalid deleteAddress request");
+    (globalThis as any).snap = address_failing_tests.snapMock3;
 
-  (globalThis as any).snap = address_failing_tests.snapMock3;
-
-  await address_failing_tests.caseFailAddAddress(t, "Add address action declined");
-  await address_failing_tests.caseFailDeleteAddress(
-    t,
-    "Delete address action declined"
-  );
-});
+    await address_failing_tests.caseFailAddAddress(
+      t,
+      "Add address action declined"
+    );
+    await address_failing_tests.caseFailDeleteAddress(
+      t,
+      "Delete address action declined"
+    );
+  }
+);
 
 test.serial("onRpcRequest Passing Tests for Chains operations", async (t) => {
   (globalThis as any).snap = chains_passing_tests.snapMock;
@@ -542,19 +549,25 @@ test.serial("onRpcRequest Passing Tests for Chains operations", async (t) => {
   await chains_passing_tests.casePassGetChains(t);
   await chains_passing_tests.casePassAddChain(t);
   await chains_passing_tests.casePassDeleteChain(t);
-})
+});
 
-
-test.serial("onRpcRequest Failing Tests for Chains operations", async(t) => {
+test.serial("onRpcRequest Failing Tests for Chains operations", async (t) => {
   (globalThis as any).snap = chains_failing_tests.snapMock1;
 
-  await chains_failing_tests.caseFailGetChains(t, "Snap has not been initialized. Please initialize snap.");
+  await chains_failing_tests.caseFailGetChains(
+    t,
+    "Snap has not been initialized. Please initialize snap."
+  );
   await chains_failing_tests.caseFailAddChain(t, "Invalid addChain request");
-  await chains_failing_tests.caseFailDeleteChain(t, "Invalid deleteChain request");
+  await chains_failing_tests.caseFailDeleteChain(
+    t,
+    "Invalid deleteChain request"
+  );
 
   (globalThis as any).snap = chains_failing_tests.snapMock2;
   await chains_failing_tests.caseFailAddChain(t, "Chain addition was denied.");
-  await chains_failing_tests.caseFailDeleteChain(t, "Chain deletion was denied.");
-
-
-})
+  await chains_failing_tests.caseFailDeleteChain(
+    t,
+    "Chain deletion was denied."
+  );
+});
