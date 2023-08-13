@@ -88,7 +88,7 @@ class PassingChainStateTests {
     let new_chains = new Chains([new_chain]);
 
     //Add new chain to Chains
-    await ChainState.addChains(new_chains);
+    await ChainState.replaceAllChains(new_chains);
 
     //Get updated Chains
     const result = await ChainState.getChains();
