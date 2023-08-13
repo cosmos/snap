@@ -189,7 +189,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           typeof request.params.chain_info == "string"
         )
       ) {
-        throw new Error("Invalid addAddress request");
+        throw new Error("Invalid addChain request");
       }
 
       //Get Chain info from JSON string
@@ -224,7 +224,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       // Ensure chain id doesn't already exist
-      let get_chain = ChainState.getChain(new_chain.chain_id);
+      let get_chain = await ChainState.getChain(new_chain.chain_id);
+      
       if (get_chain != null) {
         await snap.request({
           method: "snap_dialog",
