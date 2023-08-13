@@ -76,7 +76,7 @@ export class Chains {
   getChain(chain_id: string) {
     let chainList = this.chains.filter((item) => item.chain_id === chain_id);
     if (chainList.length == 0) {
-      return null
+      return null;
     }
     return chainList[0];
   }

@@ -83,6 +83,27 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error("Invalid transact request");
       }
 
+      //Calculate fees for transaction
+      let fees: Fees = {
+        amount: [],
+        gas: "200000",
+      };
+
+      if (request.params.fees) {
+        if (typeof request.params.fees == "string") {
+          fees = JSON.parse(request.params.fees);
+        }
+      }
+
+      //Get messages if any from JSON string
+      let messages;
+
+      if (request.params.msgs) {
+        if (typeof request.params.msgs == "string") {
+          messages = JSON.parse(request.params.msgs);
+        }
+      }
+
       // Ensure user confirms transaction
       confirmation = await snap.request({
         method: "snap_dialog",
@@ -95,27 +116,20 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             text(`${request.params.chain_id}`),
             divider(),
             heading("Transaction"),
-            text(`${request.params.msgs}`),
+            text(`${messages}`),
+            heading("Fees Amount"),
+            text(`${fees}`),
           ]),
         },
       });
+
       if (!confirmation) {
         throw new Error("Transaction was denied.");
       }
 
-      let fees: Fees = {
-        amount: [],
-        gas: "200000",
-      };
-      if (request.params.fees) {
-        if (typeof request.params.fees == "string") {
-          fees = JSON.parse(request.params.fees);
-        }
-      }
-
       let result = await submitTransaction(
         request.params.chain_id,
-        JSON.parse(request.params.msgs),
+        messages,
         fees
       );
 
@@ -178,6 +192,20 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error("Invalid addAddress request");
       }
 
+      //Get Chain info from JSON string
+      let new_chain: Chain = JSON.parse(request.params.chain_info);
+
+      if (
+        !(
+          "chain_name" in new_chain &&
+          "chain_id" in new_chain &&
+          typeof new_chain.chain_name == "string" &&
+          typeof new_chain.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid Chain Info");
+      }
+
       // Ensure user confirms addChain
       confirmation = await snap.request({
         method: "snap_dialog",
@@ -187,15 +215,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Confirm Chain Addition"),
             divider(),
             heading("Chain Info"),
-            text(`${request.params.chain_info}`),
+            text(`${new_chain}`),
           ]),
         },
       });
       if (!confirmation) {
         throw new Error("Chain addition was denied.");
       }
-
-      let new_chain: Chain = JSON.parse(request.params.chain_info);
 
       // Ensure chain id doesn't already exist
       let get_chain = ChainState.getChain(new_chain.chain_id);
@@ -206,13 +232,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             type: "alert",
             content: panel([
               heading("Error Occured"),
-              text(
-                `Chain with Chain Id ${new_chain.chain_id} already exists.`
-              ),
+              text(`Chain with Chain Id ${new_chain.chain_id} already exists.`),
             ]),
           },
         });
-        throw new Error(`Chain with Chain Id ${new_chain.chain_id} already exists.`);
+        throw new Error(
+          `Chain with Chain Id ${new_chain.chain_id} already exists.`
+        );
       }
 
       let new_chains = await ChainState.addChain(new_chain);
@@ -435,23 +461,23 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       ) {
         throw new Error("Invalid getChainAddress request");
       }
-      
+
       let address = await ChainState.getChainAddress(request.params.chain_id);
 
       return {
         data: {
-          "address": address,
-          "chain_id": request.params.chain_id
+          address: address,
+          chain_id: request.params.chain_id,
         },
         success: true,
         statusCode: 200,
       };
-    case "getChainAddresses":      
+    case "getChainAddresses":
       let addresses = await ChainState.getChainAddresses();
 
       return {
         data: {
-          "addresses": addresses,
+          addresses: addresses,
         },
         success: true,
         statusCode: 200,
