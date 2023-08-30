@@ -1,7 +1,6 @@
 {
   "name": "@cosmsnap/cosmsnap",
   "version": "0.1.0",
-  "private": false,
   "type": "module",
   "description": "The Cosmos extension for your Metamask wallet.",
   "homepage": "https://github.com/cosmos/snap#README.md",
