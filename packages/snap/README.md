@@ -7,20 +7,6 @@ Please note, to develop this Metamask Snap you need to use Metamask Flask, a can
 ## Contribution
 Your contributions are always welcome! Please have a look at the [contribution guidelines](CONTRIBUTING.md) first.
 
-## Running Snap
-```bash
-yarn install
-cd packages/snap
-yarn start
-```
-
-## Running Snap UI
-```bash
-yarn install
-cd packages/ui
-yarn run dev
-```
-
 ## Install & Initialize
 ```javascript
 // Check if the Snap is installed
