@@ -11,14 +11,14 @@ Your contributions are always welcome! Please have a look at the [contribution g
 ```javascript
 // Check if the Snap is installed
 await window.ethereum.request({ method: 'wallet_getSnaps' });
-const installed = Object.keys(result).includes("npm:@cosmos/snap");
+const installed = Object.keys(result).includes("npm:@cosmsnap/snap");
 
 // Install Snap
 if (!installed) {
     const result = await window.ethereum.request({
         method: 'wallet_requestSnaps',
         params: {
-            'npm:@cosmos/snap': {
+            'npm:@cosmsnap/snap': {
             version: '^0.1.0',
             },
         },
@@ -29,7 +29,7 @@ if (!installed) {
 await ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'initialize',
         },
@@ -43,7 +43,7 @@ await ethereum.request({
 const initialized = await ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'initialized',
         },
@@ -60,7 +60,7 @@ Chain info is structured like in the chain registry (i.e [Agoric](https://github
 await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'addChain',
             param: {
@@ -76,7 +76,7 @@ await window.ethereum.request({
 const chains = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'getChains'
         },
@@ -89,7 +89,7 @@ const chains = await window.ethereum.request({
 const chain = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'deleteChain',
             param: {
@@ -125,7 +125,7 @@ const fees = {
 const address = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'transact',
             param: {
@@ -144,7 +144,7 @@ const address = await window.ethereum.request({
 const address = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'addAddress',
             param: {
@@ -162,7 +162,7 @@ const address = await window.ethereum.request({
 const address = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'getAddresses'
         },
@@ -175,7 +175,7 @@ const address = await window.ethereum.request({
 const address = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'deleteAddress',
             params: {
@@ -191,7 +191,7 @@ const address = await window.ethereum.request({
 const address = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'getChainAddress',
             param: {
@@ -207,7 +207,7 @@ const address = await window.ethereum.request({
 const address = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-        snapId: 'npm:@cosmos/snap',
+        snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'getChainAddresses'
         },
