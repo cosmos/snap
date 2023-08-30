@@ -27,6 +27,12 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@metamask/detect-provider": "^2.0.0"
+		"@fullhuman/postcss-purgecss": "^5.0.0",
+		"@metamask/detect-provider": "^2.0.0",
+		"flowbite-svelte": "^0.44.4",
+		"gridjs": "^6.0.6",
+		"gridjs-svelte": "^2.1.1",
+		"postcss": "^8.4.27",
+		"tailwindcss": "^3.3.3"
 	}
 }

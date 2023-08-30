@@ -7,7 +7,7 @@
     "url": "https://github.com/cosmos/snap.git"
   },
   "source": {
-    "shasum": "9CcU3bZEtnyt9A7uJ35UCzKI2PmmvCrzKHJWCsNdxyY=",
+    "shasum": "5IAxlWrLBRk6DuGoSAZTDm1ha/5Y1Pcxc2vGiaxeedo=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -26,9 +26,6 @@
       },
       {
         "coinType": 564
-      },
-      {
-        "coinType": 60
       },
       {
         "coinType": 459

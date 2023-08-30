@@ -22,6 +22,29 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   let res: Object = {};
   let confirmation: string | boolean | null = false;
   switch (request.method) {
+    case "initialized":
+      let data = await snap.request({
+        method: "snap_manageState",
+        params: { operation: "get" },
+      });
+
+      if (data == null) {
+        return {
+          data: {
+            initialized: false
+          },
+          success: true,
+          statusCode: 200,
+        };
+      }
+
+      return {
+        data: {
+          initialized: data.initialized
+        },
+        success: true,
+        statusCode: 200,
+      };
     case "initialize":
       // Ensure user confirms initializing Cosmos snap
       confirmation = await snap.request({
@@ -45,7 +68,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         method: "snap_manageState",
         params: {
           operation: "update",
-          newState: { chains: chains.string(), addresses: JSON.stringify([]) },
+          newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true },
         },
       });
 

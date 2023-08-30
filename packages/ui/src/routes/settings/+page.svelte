@@ -321,23 +321,6 @@
 </div>  
 
 <style>
-@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
-
-@import url("https://fonts.googleapis.com/css?family=Inter:500,700");
-
-:root {
-  --white-2: #ffffff1a;
-  --licorice: #14141473;
-  --white: #ffffff;
-  --black: #000000;
-  --eerie-black: #1b1721;
-  --blueberry: #594bff;
-  --font-size-xl2: 20px;
-  --font-size-l2: 16px;
-  --font-size-s: 12px;
-  --font-family-inter: "Inter", Helvetica;
-}
-
 * {
   box-sizing: border-box;
 }
