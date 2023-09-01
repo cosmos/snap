@@ -1,12 +1,18 @@
 <script>
+  import AddAddress from "../../components/AddAddress.svelte";
+	import { state } from "../../store/state";
+
   export let search_value = "";
 </script>
 
-<div class="w-full flex flex-col justify-center items-center h-full bg-[var(--licorice)]">
+<div class="w-full flex flex-col justify-center items-center h-full bg-[transparent]">
+  <div hidden={!$state.openAddAddressPopup}>
+    <AddAddress/>
+  </div>
   <div class="rectangle-13">
     <div class="w-full flex justify-between mb-[20px]">
       <div class="chain-management">Address book</div>
-      <button class="connect-button button-text">
+      <button on:click={() => $state.openAddAddressPopup = true} class="connect-button button-text">
         Add address
       </button>
     </div>

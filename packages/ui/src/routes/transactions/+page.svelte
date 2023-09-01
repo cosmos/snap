@@ -1,5 +1,6 @@
 <script>
   import Grid from "gridjs-svelte";
+  import TxMobile from "../../components/TxMobile.svelte";
 
   let columns = [{
       id: '#',
@@ -91,10 +92,24 @@
   <div class="tx-title">Transaction history</div>
   <Grid data={data} sort={true} search={true} pagination={true} className={config} style={style} columns={columns}/>
 </div>
+<div id="main-grid-container-mobile">
+  <div class="tx-title-mobile">Transaction history</div>
+  <div class="table-div">
+    <TxMobile/>
+    <TxMobile/>
+  </div>
+</div>
 
 <style>
   #main-grid-container {
     padding: 25px;
+  }
+
+  .table-div {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
   }
 
   .tx-title {
@@ -104,5 +119,37 @@
     font-weight: 700;
     position: relative;
     top: 40px;
+  }
+
+  .tx-title-mobile {
+    color: var(--white);
+    font-family: var(--font-family-inter);
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  @media (min-width: 772px) {
+    #main-grid-container {
+      display: block;
+      padding: 25px;
+    }
+    #main-grid-container-mobile {
+      display: none;
+      padding: 25px;
+    }
+  }
+
+  @media (max-width: 772px) { /* mobile devices */
+    #main-grid-container {
+      display: none;
+      padding: 25px;
+    }
+    #main-grid-container-mobile {
+      display: block;
+      padding: 25px;
+    }
   }
 </style>
