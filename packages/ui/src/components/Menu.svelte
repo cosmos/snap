@@ -1,18 +1,20 @@
 <script>
 	import { goto } from "$app/navigation";
+  import { page } from '$app/stores';
 
     let menu_items = [
-        { title: "Dashboard", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/dashboard.svg", path: "/dashboard" },
-        { title: "History", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/dns.svg", path: "/transactions" },
-        { title: "Address Book", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/account-box.svg", path: "/address" },
-        { title: "Settings", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/settings.svg", path: "/settings" }
+        { route: "/dashboard", title: "Dashboard", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/dashboard.svg", path: "/dashboard" },
+        { route: "/transactions", title: "History", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/dns.svg", path: "/transactions" },
+        { route: "/address", title: "Address Book", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/account-box.svg", path: "/address" },
+        { route: "/settings", title: "Settings", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/settings.svg", path: "/settings" }
     ]
-    export let active = "Dashboard"
+    export let active = $page.route.id
 </script>
 
 <div class="">
     <div class="frame-47 frame-2">
         {#each menu_items as tab}
+          <div class="w-full flex justify-between h-[20px]">
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div class="frame" on:click={() => goto(tab.path)}>
                 <img
@@ -21,8 +23,9 @@
                 alt={tab.title.toLowerCase()}
                 />
                 <div class="item-1 inter-medium-white-16px">{tab.title}</div>
-                <div hidden={active != tab.title} class="rectangle-12"></div>
             </div>
+            <div hidden={active != tab.route} class="rectangle-12"></div>
+          </div>
         {/each}
     </div>
 </div>
@@ -44,9 +47,10 @@
 }
 
 .frame-2 {
-  display: grid;
+  display: flex;
   justify-content: center;
   width: auto;
+  padding: 20px;
 }
 
 .frame {

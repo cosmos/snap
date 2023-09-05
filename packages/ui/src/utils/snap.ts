@@ -1,3 +1,5 @@
+import type { Chain, CosmosAddress } from '../../../snap/src/types/chains';
+
 export const snapId = import.meta.env.VITE_SNAP_ID ?? `local:http://localhost:8080`;
 const snapVersion = import.meta.env.VITE_SNAP_VERSION;
 const initialJsonString = "{}";
@@ -30,7 +32,7 @@ export const isSnapInitialized = async (): Promise<boolean | undefined> => {
   return result.data.initialized;
 };
 
-export const getChains = async () => {
+export const getChains = async (): Promise<Chain[]> => {
   const result = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
@@ -41,6 +43,19 @@ export const getChains = async () => {
     },
   });
   return result.data.chains;
+};
+
+export const getChainAddresses = async (): Promise<CosmosAddress[]> => {
+  const result = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+      snapId,
+      request: {
+        method: 'getChainAddresses',
+      },
+    },
+  });
+  return result.data.addresses;
 };
 
 export const installSnap = async () => {

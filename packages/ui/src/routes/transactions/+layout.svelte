@@ -26,10 +26,10 @@
       --black: #000000;
       --white-2: #ffffff1a;
       --white: #ffffff;
-      --licorice: #141414;
+      --licorice: #14141473;
       --blueberry: #594bff;
       --eerie-black: #1b1721;
-      --font-size-xl: 20px;
+      --font-size-xl: 18px;
       --font-size-m: 14px;
       --font-size-l: 16px;
       --font-size-s: 12px;

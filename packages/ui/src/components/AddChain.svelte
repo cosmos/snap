@@ -1,22 +1,12 @@
 <script>
-    import { JSONEditor } from 'svelte-jsoneditor';
-    import { state } from '../store/state';
-  
-    let content = {
-      text: undefined,
-      json: {
-        array: [1, 2, 3],
-        boolean: true,
-        color: '#82b92c',
-        null: null,
-        number: 123,
-        object: { a: 'b', c: 'd' },
-        string: 'Hello World'
-      }
-    }
-  
-    $: console.log('contents changed:', content)
-    </script>
+  import defaultChains from '../../../snap/tests/public/chain-test.json';
+  import { JSONEditor, Mode } from 'svelte-jsoneditor';
+  import { state } from '../store/state';
+
+  let content = {
+    json: JSON.parse(JSON.stringify(defaultChains[0]))
+  }
+</script>
   
   <div class="rectangle-66">
       <div class="group-4449">
@@ -33,8 +23,8 @@
                   </div>
                   <div class="group-4447">
                       <div class="group-4445">
-                          <div class="overlap-group">
-                            <JSONEditor bind:content mainMenuBar={false} navigationBar={false} statusBar={false} mode="text"/>
+                          <div class="overlap-group jse-theme-dark">
+                            <JSONEditor content={content} mainMenuBar={false} navigationBar={false} statusBar={false} mode={Mode.text}/>
                           </div>
                       </div>
                   <button class="frame-1-2 create-new-chain inter-medium-white-12px">
@@ -46,6 +36,8 @@
   </div>
   
   <style>
+  @import 'svelte-jsoneditor/themes/jse-theme-dark.css';
+
   .rectangle-66 {
       z-index: 100;
       backdrop-filter: blur(15px) brightness(100%);
@@ -153,6 +145,11 @@
     min-height: 330px;
     font-family: var(--font-family-inter);
     color: var(--white);
+    overflow-y: scroll;
+    max-height: 375px;
+    /* Variables Editor */
+    --jse-theme-color: transparent;
+    --jse-theme-color-highlight: transparent;
   }
   
   .overlap-group:focus {
@@ -169,6 +166,8 @@
     min-height: 330px;
     font-family: var(--font-family-inter);
     color: var(--white);
+    overflow-y: scroll;
+    max-height: 375px;
   }
   
   .overlap-group:focus-visible {
@@ -185,6 +184,8 @@
     min-height: 330px;
     font-family: var(--font-family-inter);
     color: var(--white);
+    overflow-y: scroll;
+    max-height: 375px;
   }
   
   .frame-1-2 {

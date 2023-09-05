@@ -32,20 +32,12 @@ export let registry = [
     url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/crescent/chain.json",
   },
   {
-    chain_id: "evmos",
-    url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/evmos/chain.json",
-  },
-  {
     chain_id: "gitopia",
     url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/gitopia/chain.json",
   },
   {
     chain_id: "gravitybridge",
     url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/gravitybridge/chain.json",
-  },
-  {
-    chain_id: "injective",
-    url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/injective/chain.json",
   },
   {
     chain_id: "juno",

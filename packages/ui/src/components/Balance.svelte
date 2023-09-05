@@ -1,10 +1,20 @@
 <script>
+	import { state } from "../store/state";
+	import { copyToClipboard } from "../utils/general";
+
   export let name = "Osmosis";
   export let dollarAmount = 16.75;
   export let tokenAmount = 48.77;
   export let tokenDenom = "osmo";
   export let chainAddress = "osmo1m9l358xunhdhqp0568dj37mzhvuxx9uxtz4vt7";
   export let logo = "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/mask-group-18@2x.png";
+
+  const copyAddress = async () => {
+    await copyToClipboard(chainAddress);
+    $state.showAlert = true;
+    $state.alertText = "Address Copied to Clipboard"
+    console.log($state);
+  }
 </script>
 
 <div class="group-55">
@@ -29,10 +39,11 @@
       </div>
   </div>
 </div>
-<div class="frame-33 frame-2">
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div on:click={copyAddress} class="frame-33 frame-2">
   <div class="cosmos1vhw82tqftrg-1 inter-medium-white-14px">
       {chainAddress}
-  </div> 
+  </div>
   <img class="content_copy-1" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/content-copy-1.svg" alt="content_copy">
 </div>
 </div>
@@ -188,5 +199,16 @@
   height: 18px;
   min-width: 18px;
   margin-left: 15px;
+}
+
+.frame-33:hover {
+  width: max-content;
+  z-index: 100;
+}
+
+@media (max-width: 1024px) {
+  .frame-33:hover {
+    width: 100%;
+  }
 }
 </style>
