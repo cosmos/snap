@@ -1,7 +1,10 @@
 <script>
-    let source = "osmosis";
-    let destination = "osmosis";
-    let denom = "osmo"
+  import { chains } from "../store/chains";
+	import Info from "./Info.svelte";
+
+  let source = "cosmoshub-4";
+  let destination = "cosmoshub-4";
+  let denom = "atom"
 </script>
 
 <div class="overlap-group1">
@@ -12,8 +15,9 @@
         Source Chain
     </div>
     <select bind:value={source} id="source_chain" name="source_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-        <option class="source-chain-osmosis inter-medium-white-14px" value="osmosis">Osmosis</option>
-        <option class="source-chain-osmosis inter-medium-white-14px" value="gaia">Cosmos Hub</option>
+      {#each $chains as chain}
+        <option class="source-chain-osmosis inter-medium-white-14px" value={chain.chain_id}>{chain.pretty_name}</option>
+      {/each}
     </select>
     <div style="width: 100%;">
         <div class="percent inter-medium-white-14px">
@@ -27,10 +31,12 @@
     <input type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
     <div class="percent inter-medium-white-14px">
         Destination Chain
+        <Info />
     </div>
     <select bind:value={destination} id="dest_chain" name="dest_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-        <option class="source-chain-osmosis inter-medium-white-14px" value="osmosis">Osmosis</option>
-        <option class="source-chain-osmosis inter-medium-white-14px" value="gaia">Cosmos Hub</option>
+      {#each $chains as chain}
+        <option class="source-chain-osmosis inter-medium-white-14px" value={chain.chain_id}>{chain.pretty_name}</option>
+      {/each}
     </select>
     <input type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
     <div class="available-balance-1454789 inter-medium-blueberry-14px">

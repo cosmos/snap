@@ -1,13 +1,35 @@
-<script>
-  import defaultChains from '../../../../snap/tests/public/chain-test.json';
+<script lang="ts">
+  import { chains } from '../../store/chains';
   import AddChain from '../../components/AddChain.svelte';
 	import { state } from "../../store/state";
+	import { deleteChain } from '../../utils/snap';
 
-  let chains = defaultChains;
+  let editCurrentChain = false;
+  let currentEditChain: string = "";
+  let currentChain: any = {};
+  let filteredChains = [];
+
+  $: {
+    filteredChains = $chains.filter(item => item.chain_id === currentEditChain);
+    if (filteredChains.length > 0) {
+      currentChain = filteredChains[0];
+    }
+  }
+
+  const editChain = async (chain_id: string) => {
+    editCurrentChain = true;
+    chain_id = currentEditChain;
+    $state.openAddChainPopup = true;
+    currentChain = $chains.filter(item => item.chain_id === currentEditChain)[0]
+  }
+
+  const deleteChainFromSnap = async (chain_id: string) => {
+    deleteChain(chain_id);
+  }
 </script>
 
 <div hidden={!$state.openAddChainPopup}>
-  <AddChain/>
+  <AddChain edit={editCurrentChain} chainInfo={currentChain}/>
 </div>
 <div style="padding: 25px;">
   <div class="top-box">
@@ -16,24 +38,31 @@
     </div>
     <div style="display: flex; height: 40px;">
       <input placeholder="Search chain" class="search-chain"/>
-      <button on:click={() => $state.openAddChainPopup = true} class="add-chain-button button-text">Add chain</button>
+      <button on:click={() => { $state.openAddChainPopup = true; editCurrentChain = false;}} class="add-chain-button button-text">Add chain</button>
     </div>
   </div>
   <div class="mt-[20px] grid grid-cols-2 gap-[20px]">
-    {#each chains as chain}
+    {#each $chains as chain}
       <div class="col-span-2 lg:col-span-1">
         <div class="group-85">
           <div class="group-84">
             <div class="group-28">
               <!-- svelte-ignore a11y-missing-attribute -->
-              <img class="group-46" src={chain.logo_URIs.svg}/>
+              {#if chain.logo_URIs}
+                <img class="group-46" src={chain.logo_URIs.svg}/>
+              {:else}
+                <img class="group-46" src="https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.svg"/>
+              {/if}
             </div>
             <div class="osmosis inter-bold-white-20px">
               {chain.pretty_name}
             </div>
           </div>
           <div class="group-4450">
-            <img class="create" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a710c1420c7281d1d60ffb/img/create.svg" alt="create"><img class="delete_outline s-lf-SQIIAcKox" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a710c1420c7281d1d60ffb/img/delete-outline.svg" alt="delete_outline">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <img on:click={() => editChain(chain.chain_id)} class="create cursor-pointer" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a710c1420c7281d1d60ffb/img/create.svg" alt="create">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <img on:click={() => deleteChainFromSnap(chain.chain_id)} class="delete_outline cursor-pointer" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a710c1420c7281d1d60ffb/img/delete-outline.svg" alt="delete_outline">
           </div>
         </div>
       </div>

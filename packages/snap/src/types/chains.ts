@@ -1,3 +1,5 @@
+import { HttpEndpoint } from "@cosmjs/stargate";
+
 export interface Chain {
   chain_name: string;
   chain_id: string;
@@ -15,6 +17,7 @@ export interface Chain {
     grpc: Api[];
   };
   explorers: Explorer[];
+  address: string | undefined;
 }
 
 export interface Explorer {
@@ -25,7 +28,7 @@ export interface Explorer {
 }
 
 export interface Api {
-  address: string;
+  address: string | HttpEndpoint;
   provider?: string;
 }
 

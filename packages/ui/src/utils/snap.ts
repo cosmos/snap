@@ -1,3 +1,4 @@
+import type { Address } from '../../../snap/src/types/address';
 import type { Chain, CosmosAddress } from '../../../snap/src/types/chains';
 
 export const snapId = import.meta.env.VITE_SNAP_ID ?? `local:http://localhost:8080`;
@@ -56,6 +57,52 @@ export const getChainAddresses = async (): Promise<CosmosAddress[]> => {
     },
   });
   return result.data.addresses;
+};
+
+export const getAddresses = async (): Promise<Address[]> => {
+  const result = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+      snapId,
+      request: {
+        method: 'getAddresses',
+      },
+    },
+  });
+  console.log(result);
+  return result.data;
+};
+
+export const addAddressToBook = async (chain_id: string, address: string, name: string) => {
+  await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+        snapId,
+        request: {
+            method: 'addAddress',
+            params: {
+                chain_id,
+                address,
+                name
+            }
+        },
+    },
+  });
+};
+
+export const deleteChain = async (chain_id: string) => {
+  await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+      snapId,
+      request: {
+          method: 'deleteChain',
+          params: {
+              chain_id,
+          }
+      },
+    }
+  })
 };
 
 export const installSnap = async () => {

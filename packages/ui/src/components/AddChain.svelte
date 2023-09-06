@@ -1,10 +1,11 @@
 <script>
-  import defaultChains from '../../../snap/tests/public/chain-test.json';
   import { JSONEditor, Mode } from 'svelte-jsoneditor';
   import { state } from '../store/state';
 
+  export let edit = false;
+  export let chainInfo = {};
   let content = {
-    json: JSON.parse(JSON.stringify(defaultChains[0]))
+    json: JSON.parse(JSON.stringify(chainInfo))
   }
 </script>
   
@@ -14,7 +15,7 @@
               <div class="group-4446">
                   <div class="group-4444">
                       <div class="add-new-chain-1 inter-bold-white-20px">
-                              Add new chain
+                        {edit ? "Edit chain" : "Add new chain"}
                       </div>
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <img on:click={() => $state.openAddChainPopup = false} class="clear" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/clear@2x.png" alt="clear">
@@ -28,7 +29,7 @@
                           </div>
                       </div>
                   <button class="frame-1-2 create-new-chain inter-medium-white-12px">
-                      Create new chain
+                      {edit ? "Save chain edits" : "Create new chain"}
                   </button>
               </div>
           </div>
@@ -43,7 +44,7 @@
       backdrop-filter: blur(15px) brightness(100%);
       background-color: #05000bbf;
       left: 0;
-      position: absolute;
+      position: fixed;
       top: 0;
       width: 100vw;
       min-height: 100vh;

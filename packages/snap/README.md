@@ -63,7 +63,7 @@ await window.ethereum.request({
         snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'addChain',
-            param: {
+            params: {
                 chain_info: JSON.stringify(chainInfo),
             }
         },
@@ -92,7 +92,7 @@ const chain = await window.ethereum.request({
         snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'deleteChain',
-            param: {
+            params: {
                 chain_id: 'cosmoshub-4',
             }
         },
@@ -101,6 +101,7 @@ const chain = await window.ethereum.request({
 ```
 
 ## Send Transaction
+This will sign and broadcast the transaction.
 ```javascript
 const msgs = [
     {
@@ -128,7 +129,48 @@ const address = await window.ethereum.request({
         snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'transact',
-            param: {
+            params: {
+                chain_id: 'cosmoshub-4',
+                msgs: JSON.stringify(msgs),
+                // Optional: Uses default fees for chain if not specified
+                fees: JSON.stringify(fees)
+            }
+        },
+    },
+});
+```
+
+## Sign Transaction
+This will sign the transaction and return the transaction bytes.
+NOTE: This does not broadcast the transaction.
+```javascript
+const msgs = [
+    {
+        typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+        value: {
+            fromAddress: senderAddress,
+            toAddress: recipientAddress,
+            amount: [{
+                denom: "uatom",
+                amount: "500000"
+            }],
+        },
+    }
+];
+const fees = {
+    amount: [{
+        denom: "uatom",
+        amount: "500"
+    }],
+    gas: "200000"
+};
+const address = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+        snapId: 'npm:@cosmsnap/snap',
+        request: {
+            method: 'signTx',
+            params: {
                 chain_id: 'cosmoshub-4',
                 msgs: JSON.stringify(msgs),
                 // Optional: Uses default fees for chain if not specified
@@ -147,7 +189,7 @@ const address = await window.ethereum.request({
         snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'addAddress',
-            param: {
+            params: {
                 chain_id: 'cosmoshub-4',
                 address: 'cosmos123456789',
                 name: 'John Cosmos'
@@ -194,7 +236,7 @@ const address = await window.ethereum.request({
         snapId: 'npm:@cosmsnap/snap',
         request: {
             method: 'getChainAddress',
-            param: {
+            params: {
                 chain_id: 'cosmoshub-4',
             }
         },

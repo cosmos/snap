@@ -1,7 +1,18 @@
 <script>
+	import { getAddressBook } from "../store/addressbook";
+	import { chains } from "../store/chains";
   import { state } from "../store/state";
+	import { addAddressToBook } from "../utils/snap";
 
-  let chain = "osmosis";
+  let chain_id = $chains.length > 0 ? $chains[0].chain_id : "cosmoshub-4";
+  let address = "cosmos163gulek3trdckcktcv820dpxntnm7qkkgfkcga";
+  let name = "John Doe";
+
+  const addAddress = async () => {
+    await addAddressToBook(chain_id, address, name);
+    $state.openAddAddressPopup = false;
+    await getAddressBook();
+  }
 </script>
 
 <div class="rectangle-66">
@@ -23,21 +34,22 @@
                           <div class="percent inter-medium-white-14px">
                             Name
                           </div>
-                          <input type="text" placeholder="Enter address name" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+                          <input bind:value={name} type="text" placeholder="Enter address name" class="enter-amount inter-medium-white-14px overlap-group-7"/>
                           <div class="percent inter-medium-white-14px">
                             Address
                           </div>
-                          <input type="text" placeholder="Enter address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+                          <input bind:value={address} type="text" placeholder="Enter address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
                           <div class="percent inter-medium-white-14px">
                             Chain
                           </div>
-                          <select bind:value={chain} id="source_chain" name="source_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-                              <option class="source-chain-osmosis inter-medium-white-14px" value="osmosis">Osmosis</option>
-                              <option class="source-chain-osmosis inter-medium-white-14px" value="gaia">Cosmos Hub</option>
+                          <select bind:value={chain_id} id="source_chain" name="source_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
+                            {#each $chains as chain}
+                              <option class="source-chain-osmosis inter-medium-white-14px" value={chain.chain_id}>{chain.pretty_name}</option>
+                            {/each}
                           </select>
                         </div>
                     </div>
-                <button class="frame-1-2 create-new-chain inter-medium-white-12px">
+                <button on:click={addAddress} class="frame-1-2 create-new-chain inter-medium-white-12px">
                     Add address
                 </button>
             </div>

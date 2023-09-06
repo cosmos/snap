@@ -13,7 +13,6 @@
     await copyToClipboard(chainAddress);
     $state.showAlert = true;
     $state.alertText = "Address Copied to Clipboard"
-    console.log($state);
   }
 </script>
 

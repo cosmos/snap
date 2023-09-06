@@ -1,13 +1,13 @@
 {
-  "version": "0.1.6",
-  "description": "Cosmos Metamask Snap that adds Cosmos support to Metamask.",
-  "proposedName": "Cosmos Metamask Snap",
+  "version": "0.1.7",
+  "description": "Cosmos Extension that adds Cosmos support to Metamask.",
+  "proposedName": "Cosmos Extension",
   "repository": {
     "type": "git",
     "url": "https://github.com/cosmos/snap.git"
   },
   "source": {
-    "shasum": "z5MiND1FM0FftB3U1mnaXtDh2sOwXOWQAH57NrUZ7i4=",
+    "shasum": "vTr7wXctqn/NZmTVkjwj2nJYkPM9GEYvrnRAswshDxY=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",

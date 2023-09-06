@@ -3,7 +3,6 @@ import type { Chain } from "../../../snap/src/types/chains";
 import { getChainAddresses, getChains } from "./snap";
 
 export interface ChainClient extends Chain {
-    address: string | null;
     client: StargateClient | null;
 }
 

@@ -1,8 +1,21 @@
-<script>
+<script lang="ts">
+	import { onMount } from "svelte";
   import AddAddress from "../../components/AddAddress.svelte";
+	import { getAddressBook, addressbook } from "../../store/addressbook";
 	import { state } from "../../store/state";
+	import { copyToClipboard } from "../../utils/general";
 
   export let search_value = "";
+
+  const copyAddress = async (address: string) => {
+    await copyToClipboard(address);
+    $state.showAlert = true;
+    $state.alertText = "Address Copied to Clipboard"
+  }
+
+  onMount(() => {
+    getAddressBook();
+  })
 </script>
 
 <div class="w-full flex flex-col justify-center items-center h-full bg-[transparent]">
@@ -17,33 +30,39 @@
       </button>
     </div>
     <input placeholder="Type a keyword" bind:value={search_value} class="search-input"/>    
-    <div class="group-4407">
-      <div class="group-45">
-        <div class="group-45-1">
-          <img
-            class="mask-group"
-            src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64e665d9e1c2a81b98b3cc49/img/mask-group@2x.png"
-            alt="Mask group"
-          />
-          <div class="group-4405">
-            <div class="name-2 name-3 inter-bold-white-16px">
-              Johnny Bravo
-            </div>
-            <div class="group-4400">
-              <div class="group-4537">
-                <div class="cosmos1vhw82tqftrg inter-medium-white-12px">
-                  cosmos1vhw8...2tqftrg
+    <div id="items-div" class="w-full overflow-scroll">
+      {#each $addressbook as address}
+        <div class="group-4407">
+          <div class="group-45">
+            <div class="group-45-1">
+              <img
+                class="mask-group"
+                src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64e665d9e1c2a81b98b3cc49/img/mask-group@2x.png"
+                alt="Mask group"
+              />
+              <div class="group-4405">
+                <div class="name-2 name-3 inter-bold-white-16px">
+                  {address.name}
                 </div>
-                <img
-                  class="content_copy"
-                  src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64e66782179fd75deb1bab46/img/content-copy-12@2x.png"
-                  alt="content_copy"
-                />
+                <div class="group-4400">
+                  <div class="group-4537">
+                    <div class="cosmos1vhw82tqftrg inter-medium-white-12px">
+                      {address.address}
+                    </div>
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <img
+                      on:click={() => copyAddress(address.address)}
+                      class="content_copy cursor-pointer"
+                      src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64e66782179fd75deb1bab46/img/content-copy-12@2x.png"
+                      alt="content_copy"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      {/each}
     </div>
   </div>
 </div>
@@ -51,6 +70,10 @@
 <style>
 * {
   box-sizing: border-box;
+}
+
+#items-div::-webkit-scrollbar {
+  display: none;
 }
 
 .inter-medium-white-12px {
@@ -103,18 +126,18 @@
 .group-4405 {
   display: flex;
   flex-direction: column;
-  width: 153px;
+  width: 100%;
 }
 
 .group-4400 {
   display: flex;
-  width: 151px;
+  width: 100%;
 }
 
 .group-4537 {
   display: flex;
   gap: 10px;
-  width: 153px;
+  width: 100%;
   align-items: center;
 }
 
@@ -126,6 +149,9 @@
 
 .cosmos1vhw82tqftrg {
   line-height: normal;
+  text-overflow: ellipsis; /* enables ellipsis */
+  white-space: nowrap; /* keeps the text in a single line */
+  overflow: hidden; /* keeps the element from overflowing its parent */
 }
 
 .name-2 {
@@ -140,12 +166,13 @@
   border-color: var(--white-2);
   border-radius: 12px;
   width: 100%;
-  max-width: 450px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   padding: 20px;
+  max-height: 480px;
 }
 
 .chain-management {

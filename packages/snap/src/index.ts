@@ -5,8 +5,8 @@ import { Chain, Chains, Fees } from "./types/chains";
 import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 import { Result } from "./types/result";
-import { submitTransaction } from "./transaction";
-import { DEFAULT_FEES } from "./constants";
+import { signTx, submitTransaction } from "./transaction";
+import { COIN_TYPES, DEFAULT_FEES } from "./constants";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -61,6 +61,27 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       if (!confirmation) {
         throw new Error("Initialize Cosmos chain support was denied.");
       }
+      // Make sure not initialized already
+      let checkInit = await snap.request({
+        method: "snap_manageState",
+        params: { operation: "get" },
+      });
+      if (checkInit != null && checkInit.initialized) {
+        await snap.request({
+          method: "snap_dialog",
+          params: {
+            type: "alert",
+            content: panel([
+              heading("Already Initialized"),
+              text(
+                "The Cosmos Snap has already been initialized."
+              ),
+            ]),
+          },
+        });
+        throw new Error("The Cosmos Snap has already been initialized.");
+      };
+
       let chainList = await initializeChains();
       let chains = new Chains(chainList);
       // Initialize with initial state
@@ -136,8 +157,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             divider(),
             heading("Transaction"),
             text(JSON.stringify(messages, null, 2)),
-            heading("Fees Amount"),
-            text(`${fees}`),
+            heading("Gas & Fees"),
+            text(`${JSON.stringify(fees)}`),
           ]),
         },
       });
@@ -199,6 +220,81 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           statusCode: 500,
         };
       }
+    case "signTx":
+      // Sign a transaction with the wallet
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "msgs" in request.params &&
+          "chain_id" in request.params &&
+          typeof request.params.msgs == "string" &&
+          typeof request.params.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid transact request");
+      }
+
+      //Calculate fees for transaction
+      let feesTx: Fees = DEFAULT_FEES;
+
+      if (request.params.fees) {
+        if (typeof request.params.fees == "string") {
+          feesTx = JSON.parse(request.params.fees);
+        }
+      }
+
+      //Get messages if any from JSON string
+      let messagesTx;
+
+      if (request.params.msgs) {
+        if (typeof request.params.msgs == "string") {
+          messagesTx = JSON.parse(request.params.msgs);
+        }
+      }
+
+      // Ensure user confirms transaction
+      confirmation = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading("Confirm Transaction"),
+            divider(),
+            heading("Chain"),
+            text(`${request.params.chain_id}`),
+            divider(),
+            heading("Transaction"),
+            text(JSON.stringify(messagesTx, null, 2)),
+            heading("Gas & Fees"),
+            text(`${JSON.stringify(feesTx)}`),
+          ]),
+        },
+      });
+
+      if (!confirmation) {
+        throw new Error("Transaction was denied.");
+      }
+
+      let resultTx = await signTx(
+        request.params.chain_id,
+        messagesTx,
+        feesTx
+      );
+
+      if (typeof resultTx === "undefined") {
+        return {
+          data: {},
+          success: false,
+          statusCode: 500,
+        };
+      }
+
+      return {
+        data: resultTx,
+        success: true,
+        statusCode: 201,
+      };
     case "addChain":
       if (
         !(
@@ -244,7 +340,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       // Ensure chain id doesn't already exist
       let get_chain = await ChainState.getChain(new_chain.chain_id);
-
       if (get_chain != null) {
         await snap.request({
           method: "snap_dialog",
@@ -258,6 +353,23 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         });
         throw new Error(
           `Chain with Chain Id ${new_chain.chain_id} already exists.`
+        );
+      }
+
+      // Ensure the coin type is supported (NOTE: 60 is blocked by Metamask)
+      if (!COIN_TYPES.includes(new_chain.slip44)) {
+        await snap.request({
+          method: "snap_dialog",
+          params: {
+            type: "alert",
+            content: panel([
+              heading("Error Occured"),
+              text(`Coin type ${new_chain.slip44} is not supported.`),
+            ]),
+          },
+        });
+        throw new Error(
+          `Coin type ${new_chain.slip44} is not supported.`
         );
       }
 

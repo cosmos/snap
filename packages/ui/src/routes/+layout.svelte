@@ -4,8 +4,14 @@
   import { page } from '$app/stores';
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
+  import { fetchChains } from "../store/chains";
+  import Alert from "../components/Alert.svelte";
+  import "../app.css";
+	import { getAddressBook } from "../store/addressbook";
 
-  onMount(() => {
+  onMount(async () => {
+    fetchChains();
+    getAddressBook();
     if (!$state.connected) {
       goto("/");
     } else {
@@ -19,6 +25,7 @@
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
+<Alert />
 <div class="container">
   <Header
     connected={$state.connected}
