@@ -1,16 +1,39 @@
-<script>
+<script lang="ts">
 	import Header from "../components/Header.svelte";
   import { state } from "../store/state";
   import { page } from '$app/stores';
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import { fetchChains } from "../store/chains";
+  import { chains, fetchChains } from "../store/chains";
   import Alert from "../components/Alert.svelte";
-  import "../app.css";
 	import { getAddressBook } from "../store/addressbook";
+	import { balances } from "../store/balances";
+
+  const onLoadCall = async () => {
+    await fetchChains();
+    try {
+      if ($balances.length === 0 && $chains.length > 0) {
+        const res = await fetch('https://balancefunction.joeschnetzler.repl.co/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chains: $chains })
+        });
+
+        if (!res.ok) {
+          throw new Error("HTTP error " + res.status);
+        }
+
+        const data = await res.json();
+        console.log(data);
+        $balances = data.balances;
+      }
+    } catch (error) {
+      console.error("There was a problem with the fetch operation:", error);
+    }
+  };
 
   onMount(async () => {
-    fetchChains();
+    onLoadCall();
     getAddressBook();
     if (!$state.connected) {
       goto("/");

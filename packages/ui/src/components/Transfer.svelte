@@ -9,7 +9,7 @@
 
 <div class="overlap-group1">
     <div class="ibc-transfer inter-medium-white-16px">
-        Transfer
+        {source == destination ? "Transfer" : "IBC Transfer"}
     </div>
     <div class="percent inter-medium-white-14px">
         Source Chain

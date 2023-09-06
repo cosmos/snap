@@ -1,5 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
+	import { state } from "../store/state";
 
     export let connected: boolean = true;
     export let logoSrc: string;
@@ -13,6 +14,11 @@
         <div class="logo-container" on:click={() => goto("/dashboard")}>
             <img class="logo-image" src={logoSrc} alt={logoText} />
             <div class="logo-text">{logoText}</div>
+        </div>
+        <div>
+            <!-- svelte-ignore a11y-missing-attribute -->
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <img on:click={() => $state.showMenu = !$state.showMenu} class="burger cursor-pointer" src="/mobile-menu-burger.png"/>
         </div>
     </div>
 {:else}
@@ -30,10 +36,13 @@
 {/if}
 
 <style>
+    .burger {
+        height: 16.67px;
+        width: 25px;
+    }
     .navbar {
         position: fixed;
         backdrop-filter: blur(15px) brightness(100%);
-        background-color: var(--licorice);
         border: 1px solid;
         border-color: var(--white-2);
         display: flex;

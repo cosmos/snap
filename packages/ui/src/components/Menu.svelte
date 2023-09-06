@@ -11,12 +11,12 @@
     export let active = $page.route.id
 </script>
 
-<div class="">
+<div class="menu-div">
     <div class="frame-47 frame-2">
         {#each menu_items as tab}
-          <div class="w-full flex justify-between h-[20px]">
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <div class="frame" on:click={() => goto(tab.path)}>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div on:click={() => goto(tab.path)} class="w-full flex justify-between h-[40px] items-center cursor-pointer">
+            <div class="frame">
                 <img
                 class="item"
                 src={tab.icon}
@@ -42,7 +42,6 @@
 .frame-47 {
   align-items: flex-start;
   flex-direction: column;
-  gap: 40px;
   margin-top: 40px;
 }
 
@@ -51,6 +50,7 @@
   justify-content: center;
   width: auto;
   padding: 20px;
+  gap: 10px;
 }
 
 .frame {
@@ -58,7 +58,6 @@
   display: flex;
   gap: 10px;
   width: fit-content;
-  cursor: pointer;
 }
 
 .item {
@@ -81,5 +80,11 @@
   font-size: var(--font-size-l);
   font-style: normal;
   font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .menu-div {
+    width: 100%;
+  }
 }
 </style>

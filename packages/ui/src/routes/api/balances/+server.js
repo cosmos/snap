@@ -3,6 +3,7 @@ import { json } from '@sveltejs/kit';
 export async function POST({ request }) {
     
   let { chains } = await request.json();
+  console.log(chains);
 
   /**
    * Fetches the balance for a given chain.

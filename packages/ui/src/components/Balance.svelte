@@ -20,8 +20,13 @@
   <div class="group-51">
       <div class="group-28">
           <div class="group-46">
-            <!-- svelte-ignore a11y-missing-attribute -->
-            <img src={logo}/>
+            {#if logo}
+              <!-- svelte-ignore a11y-missing-attribute -->
+              <img class="rounded-[100px]" src={logo}/>
+            {:else}
+              <!-- svelte-ignore a11y-missing-attribute -->
+              <img class="rounded-[100px]" src="https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.svg"/>
+            {/if}
           </div>
       </div>
       <div class="group-49">
@@ -99,6 +104,9 @@
   border-radius: 19.9px;
   height: 40px;
   width: 40px;
+  display: flex;
+  justify-content: center;
+  justify-items: center;
 }
 
 .chain {

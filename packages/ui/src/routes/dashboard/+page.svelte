@@ -1,15 +1,14 @@
 <script lang="ts">
   import Balance from "../../components/Balance.svelte";
   import Transfer from "../../components/Transfer.svelte";
-  import { state } from "../../store/state";
   import { balances } from "../../store/balances";
   import { onMount } from 'svelte';
 	import { chains } from "../../store/chains";
 
   onMount(async () => {
     try {
-      if ($balances.length === 0) {
-        const res = await fetch('/api/balances', {
+      if ($balances.length === 0 && $chains.length > 0) {
+        const res = await fetch('https://balancefunction.joeschnetzler.repl.co/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ chains: $chains })
@@ -21,7 +20,7 @@
 
         const data = await res.json();
         console.log(data);
-        $balances = data.body.balances;
+        $balances = data.balances;
       }
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
@@ -45,7 +44,7 @@
                 tokenAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
                 tokenDenom={amount.denom.split("u")[1]}
                 chainAddress={b?.address}
-                logo={b?.logo_URIs.svg}
+                logo={b.logo_URIs ? b.logo_URIs.svg : undefined}
               />
             </div>
           {/each}
