@@ -207,15 +207,4 @@
   min-width: 18px;
   margin-left: 15px;
 }
-
-.frame-33:hover {
-  width: max-content;
-  z-index: 100;
-}
-
-@media (max-width: 1024px) {
-  .frame-33:hover {
-    width: 100%;
-  }
-}
 </style>

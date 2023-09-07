@@ -10,7 +10,7 @@ Your contributions are always welcome! Please have a look at the [contribution g
 ## Install & Initialize
 ```javascript
 // Check if the Snap is installed
-await window.ethereum.request({ method: 'wallet_getSnaps' });
+let result = await window.ethereum.request({ method: 'wallet_getSnaps' });
 const installed = Object.keys(result).includes("npm:@cosmsnap/snap");
 
 // Install Snap
