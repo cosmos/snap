@@ -1,6 +1,6 @@
 {
   "name": "@cosmsnap/snapper",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A helper package with utilities to interact with the Cosmos Extension Metamask Snap.",
   "repository": {
     "type": "git",
@@ -14,6 +14,14 @@
     "images/",
     "snap.manifest.json",
     "README.md"
+  ],
+  "keywords": [
+    "cosmos",
+    "metamask",
+    "snap",
+    "crypto",
+    "ibc",
+    "wallets"
   ],
   "scripts": {
     "build": "npx tsc",
