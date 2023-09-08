@@ -1,6 +1,6 @@
 {
   "name": "@cosmsnap/snapper",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A helper package with utilities to interact with the Cosmos Extension Metamask Snap.",
   "repository": {
     "type": "git",
@@ -9,7 +9,7 @@
   "type": "module",
   "license": "MIT",
   "author": "Mystic Labs, Inc",
-  "main": "packages/index.js",
+  "main": "dist/index.js",
   "files": [
     "dist/",
     "images/",
