@@ -9,7 +9,7 @@
   "type": "module",
   "license": "MIT",
   "author": "Mystic Labs, Inc",
-  "main": "dist/index.js",
+  "main": "packages/index.js",
   "files": [
     "dist/",
     "images/",

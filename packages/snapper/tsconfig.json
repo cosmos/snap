@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./dist",
+    "outDir": "./package",
     "module": "commonjs",
     "target": "es2016",
     "sourceMap": true,
