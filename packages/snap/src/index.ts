@@ -107,7 +107,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       });
 
       return {
-        data: res,
+        data: chains.chains,
         success: true,
         statusCode: 201,
       };
@@ -610,6 +610,17 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       return {
         data: {
           addresses: addresses,
+        },
+        success: true,
+        statusCode: 200,
+      };
+
+    case "getPublicKey":  
+      let key = await ChainState.getPublicKey();
+
+      return {
+        data: {
+          public_key: key
         },
         success: true,
         statusCode: 200,

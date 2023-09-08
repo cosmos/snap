@@ -70,6 +70,27 @@ export class ChainState {
     };
   }
   /**
+   * Gets the public key for this wallet.
+   *
+   * @returns The public key in hex string.
+   * @throws If an error occurs.
+   */
+  public static async getPublicKey(): Promise<string> {
+    // get signer info
+    let node = await snap.request({
+      method: "snap_getBip44Entropy",
+      params: {
+        coinType: DEFAULT_SLIP44,
+      },
+    });
+
+    if (typeof node.publicKey === "undefined") {
+      throw Error("Public key from node is undefined");
+    }
+
+    return node.publicKey;
+  }
+  /**
    * Gets all Cosmos chains from Metamask snap state.
    *
    * @returns All chains in Metamask snap state.

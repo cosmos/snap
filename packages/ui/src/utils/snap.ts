@@ -1,5 +1,6 @@
 import type { Address } from '../../../snap/src/types/address';
 import type { Chain, CosmosAddress } from '../../../snap/src/types/chains';
+import { LOCAL_STORAGE_INIT } from './general';
 
 export const snapId = import.meta.env.VITE_SNAP_ID ?? `local:http://localhost:8080`;
 const snapVersion = import.meta.env.VITE_SNAP_VERSION;
@@ -57,6 +58,19 @@ export const getChainAddresses = async (): Promise<CosmosAddress[]> => {
     },
   });
   return result.data.addresses;
+};
+
+export const getPublicKey = async (): Promise<string> => {
+  const result = await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: {
+      snapId,
+      request: {
+        method: 'getPublicKey',
+      },
+    },
+  });
+  return result.data.public_key;
 };
 
 export const getAddresses = async (): Promise<Address[]> => {
@@ -118,9 +132,11 @@ export const installSnap = async () => {
   }
 };
 
-export const initSnap = async () => {
+export const initSnap = async (): Promise<Chain[]> => {
   try {
-    await window.ethereum.request({
+    // save in local storage for cache
+    localStorage.setItem(LOCAL_STORAGE_INIT, "true");
+    let res = await window.ethereum.request({
       method: 'wallet_invokeSnap',
       params: {
         snapId,
@@ -129,6 +145,8 @@ export const initSnap = async () => {
         },
       },
     });
+
+    return res.data
 
   } catch (err) {
     console.error(err);

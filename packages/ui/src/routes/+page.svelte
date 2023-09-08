@@ -5,11 +5,22 @@
 	import { isMetaMaskInstalled, isSnapInitialized, isSnapInstalled, installSnap, initSnap } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
+	import { LOCAL_STORAGE_CHAINS, LOCAL_STORAGE_INIT } from '../utils/general';
 
   let loading = true;
   let isMetaMaskInstalledValue: boolean = false;
   let isSnapInstalledValue: boolean = false;
   let isSnapInitValue: boolean = false;
+
+  const initializeSnap = async () => {
+    let chains = await initSnap();
+    if (chains) {
+      localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chains))
+    }
+    isSnapInitValue = true; 
+    $state.connected = true; 
+    goto("/balances");
+  }
 
   onMount(async () => {
     let isMetaMaskInstalledRaw = isMetaMaskInstalled()
@@ -26,6 +37,12 @@
       isSnapInstalledValue = isSnapInstalledRaw;
     }
 
+    if (localStorage.getItem(LOCAL_STORAGE_INIT) == "true") {
+      goto("/balances");
+      $state.connected = true;
+      loading = false;
+    }
+
     let isSnapInitValueRaw = await isSnapInitialized()
     if (isSnapInitValueRaw === undefined) {
       isSnapInitValue = false;
@@ -34,7 +51,7 @@
     }
 
     if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
-      goto("/dashboard");
+      goto("/balances");
       $state.connected = true;
     }
 
@@ -77,7 +94,7 @@
 
                   <Step 
                       disabled={!isMetaMaskInstalledValue || !isSnapInstalledValue || isSnapInitValue}
-                      action={async () => { await initSnap(); isSnapInitValue = true; $state.connected = true; goto("/dashboard"); }}
+                      action={async () => { await initializeSnap(); }}
                       complete={isSnapInitValue}
                       stepNumber="3"
                       stepTitle="Initiate Cosmos Snap"

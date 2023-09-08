@@ -11,7 +11,7 @@
 {#if connected}
     <div class="navbar">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="logo-container" on:click={() => goto("/dashboard")}>
+        <div class="logo-container" on:click={() => goto("/balances")}>
             <img class="logo-image" src={logoSrc} alt={logoText} />
             <div class="logo-text">{logoText}</div>
         </div>

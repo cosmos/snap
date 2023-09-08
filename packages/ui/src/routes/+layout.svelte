@@ -4,59 +4,45 @@
   import { page } from '$app/stores';
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import { chains, fetchChains } from "../store/chains";
   import Alert from "../components/Alert.svelte";
-	import { getAddressBook } from "../store/addressbook";
-	import { balances } from "../store/balances";
+	import Menu from "../components/Menu.svelte";
+	import { updateDirectory } from "../store/directory";
 
-  const onLoadCall = async () => {
-    await fetchChains();
-    try {
-      if ($balances.length === 0 && $chains.length > 0) {
-        const res = await fetch('https://balancefunction.joeschnetzler.repl.co/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chains: $chains })
-        });
-
-        if (!res.ok) {
-          throw new Error("HTTP error " + res.status);
-        }
-
-        const data = await res.json();
-        console.log(data);
-        $balances = data.balances;
-      }
-    } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
-    }
-  };
+  export const balanceURL = import.meta.env.VITE_BALANCE_FUNCTION_URL ?? "/api/balances";
 
   onMount(async () => {
-    onLoadCall();
-    getAddressBook();
+    updateDirectory();
     if (!$state.connected) {
       goto("/");
     } else {
       if ($page.url.pathname == "/") {
-        goto("/dashboard")
+        goto("/balances")
       }
     }
-  })
+  });
 </script>
 
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<Alert />
 <div class="container">
-  <Header
-    connected={$state.connected}
-    logoSrc="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/g10@2x.png" 
-    logoText="MYSTIC LABS" 
-    connectWalletTxt="Connect wallet"
-  />
-  <slot/>
+<Header
+  connected={$state.connected}
+  logoSrc="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/g10@2x.png" 
+  logoText="MYSTIC LABS" 
+  connectWalletTxt="Connect wallet"
+/>
+  {#if $state.connected}
+      <div hidden={!$state.showMenu} class="left-content">
+        <Menu />
+      </div>
+      <div class="right-content">
+        <slot/>
+      </div>
+  {:else} 
+    <Alert />
+    <slot/>
+  {/if}
 </div>
 
 <style>
@@ -70,7 +56,7 @@
       --black: #000000;
       --white-2: #ffffff1a;
       --white: #ffffff;
-      --licorice: #141414;
+      --licorice: #14141473;
       --blueberry: #594bff;
       --eerie-black: #1b1721;
       --font-size-xl: 20px;
@@ -90,6 +76,27 @@
       min-width: 100vw;
     }
 
+    .left-content {
+      backdrop-filter: blur(15px) brightness(100%);
+      background-color: var(--black);
+      border: 1px solid;
+      border-color: var(--white-2);
+      border-top: 0px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 200px;
+      margin-top: 75px;
+    }
+
+    .right-content {
+      margin-left: 200px; 
+      flex-grow: 1;
+      overflow: clip;
+      margin-top: 75px;
+    }
+
     @media (max-width: 1024px) { /* tablets, smaller laptops */
     }
 
@@ -97,6 +104,19 @@
       .container {
         flex-direction: column;
         min-height: 100vh;
+      }
+
+      .left-content {
+        display: flex;
+        position: fixed;
+        z-index: 1000;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .right-content {
+        margin-left: 0px;
+        height: auto;
       }
     }
 </style>

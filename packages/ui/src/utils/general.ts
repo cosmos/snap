@@ -1,3 +1,6 @@
+export const LOCAL_STORAGE_CHAINS = "cosmsnap:chains";
+export const LOCAL_STORAGE_INIT = "cosmsnap:initialized";
+
 export const copyToClipboard = async (text: string): Promise<void> => {
     if (text === null || text === undefined) {
         return;

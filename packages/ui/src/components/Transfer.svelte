@@ -1,10 +1,27 @@
-<script>
+<script lang="ts">
   import { chains } from "../store/chains";
 	import Info from "./Info.svelte";
+	import { balances } from "../store/balances";
+	import type { Coin } from "@cosmjs/stargate";
 
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
-  let denom = "atom"
+  let denom = "uatom";
+  let available: Coin = {amount: "0", denom};
+
+  $: {
+      let filtBal = $balances.filter(item => item.chain_id == source);
+      if (filtBal.length > 0) {
+        let filtTokens = filtBal[0].balances.filter(item => item.denom == denom);
+        if (filtTokens.length > 0) {
+          available = filtTokens[0]
+        } else {
+          available = { amount: "0", denom };
+        }
+      } else {
+        available = { amount: "0", denom };
+      }
+  }
 </script>
 
 <div class="overlap-group1">
@@ -24,8 +41,8 @@
             Asset
         </div>
         <select bind:value={denom} id="denom" name="denom" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-            <option class="source-chain-osmosis inter-medium-white-14px" value="osmo">OSMO</option>
-            <option class="source-chain-osmosis inter-medium-white-14px" value="atom">ATOM</option>
+            <option class="source-chain-osmosis inter-medium-white-14px" value="uosmo">OSMO</option>
+            <option class="source-chain-osmosis inter-medium-white-14px" value="uatom">ATOM</option>
         </select>
     </div>
     <input type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
@@ -40,7 +57,7 @@
     </select>
     <input type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
     <div class="available-balance-1454789 inter-medium-blueberry-14px">
-        Available balance: 14.54789
+        Available: {available.amount} {available.denom.substring(1).toUpperCase()}
     </div>
     <button class="frame-1-2 frame-1-4 button-send">
         <div class="send-amount-1 inter-medium-white-12px">
@@ -220,31 +237,31 @@
 }
 
 .button-send {
-    letter-spacing: -0.36px;
-    line-height: normal;
-    margin-top: 15px;
-    position: relative;
-    width: fit-content;
-    height: 40px;
-    min-width: 100px;
-    width: 100%;
-  }
+  letter-spacing: -0.36px;
+  line-height: normal;
+  margin-top: 15px;
+  position: relative;
+  width: fit-content;
+  height: 40px;
+  min-width: 100px;
+  width: 100%;
+}
 
 .button-send:hover {
-    background-color: var(--blueberry);
-    filter: brightness(1.1);
+  background-color: var(--blueberry);
+  filter: brightness(1.1);
 }
 
 select {
-    border-radius: 5px;
-    padding: 10px;
+  border-radius: 5px;
+  padding: 10px;
 }
 
 option {
-    font-size: 16px;
-    padding: 10px;
-    background-color: #141414;
-    border-radius: 5px;
-    border: 1px;
+  font-size: 16px;
+  padding: 10px;
+  background-color: #141414;
+  border-radius: 5px;
+  border: 1px;
 }
 </style>

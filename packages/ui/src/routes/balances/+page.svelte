@@ -1,30 +1,12 @@
 <script lang="ts">
+	import { onMount } from "svelte";
   import Balance from "../../components/Balance.svelte";
   import Transfer from "../../components/Transfer.svelte";
   import { balances } from "../../store/balances";
-  import { onMount } from 'svelte';
-	import { chains } from "../../store/chains";
+	import { fetchChains } from "../../store/chains";
 
-  onMount(async () => {
-    try {
-      if ($balances.length === 0 && $chains.length > 0) {
-        const res = await fetch('https://balancefunction.joeschnetzler.repl.co/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chains: $chains })
-        });
-
-        if (!res.ok) {
-          throw new Error("HTTP error " + res.status);
-        }
-
-        const data = await res.json();
-        console.log(data);
-        $balances = data.balances;
-      }
-    } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
-    }
+  onMount(() => {
+    fetchChains();
   });
 </script>
 
@@ -32,17 +14,17 @@
   <div class="grid grid-cols-8 gap-[20px]">
     <div class="lg:col-span-5 col-span-8">
       <div class="chain-holding-distribution">
-        Chains
+        Balances
       </div>
       <div class="mt-[20px] grid grid-cols-2 gap-[20px]">
         {#each $balances as b}
-          {#each b['balances'] as amount}
+          {#each b.balances as amount}
             <div class="balance col-span-2 lg:col-span-1">
               <Balance
                 name={b?.pretty_name}
                 dollarAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
                 tokenAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
-                tokenDenom={amount.denom.split("u")[1]}
+                tokenDenom={amount.denom}
                 chainAddress={b?.address}
                 logo={b.logo_URIs ? b.logo_URIs.svg : undefined}
               />
