@@ -1,11 +1,12 @@
 {
   "name": "@cosmsnap/snapper",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "A helper package with utilities to interact with the Cosmos Extension Metamask Snap.",
   "repository": {
     "type": "git",
     "url": "https://github.com/cosmos/snap.git"
   },
+  "type": "module",
   "license": "MIT",
   "author": "Mystic Labs, Inc",
   "main": "dist/index.js",
@@ -24,9 +25,7 @@
     "wallets"
   ],
   "scripts": {
-    "build": "npx tsc",
-    "test": "npx ava tests/*",
-    "watch": "npx ava -w"
+    "build": "npx tsc"
   },
   "ava": {
     "extensions": [
