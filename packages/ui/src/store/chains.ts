@@ -7,7 +7,6 @@ export const chains = writable<Chain[]>([]);
 
 export async function fetchChains() {
   let cacheChains = localStorage.getItem(LOCAL_STORAGE_CHAINS);
-  console.log("cacheChains: ", cacheChains);
   if (cacheChains) {
     chains.set(JSON.parse(cacheChains));
   }

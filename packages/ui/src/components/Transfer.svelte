@@ -3,11 +3,38 @@
 	import Info from "./Info.svelte";
 	import { balances } from "../store/balances";
 	import type { Coin } from "@cosmjs/stargate";
+  import { getSkipRecommendation, getRoute, type Route } from '../utils/ibc';
+	import { state } from "../store/state";
 
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
   let denom = "uatom";
   let available: Coin = {amount: "0", denom};
+  let amount = 0;
+  let noRoute = false;
+
+  const computeIBCRoute = async () => {
+    if (source != destination) {
+      try {
+        let skipRec = await getSkipRecommendation(denom, source, destination);
+        if (skipRec.recommendations.length == 0) {
+          noRoute = true;
+          throw new Error("No recommended asset found.");
+        }
+        let routeSkip = await getRoute(amount.toString(), denom, source, skipRec.recommendations[0].asset.denom, destination);
+        if (!routeSkip) {
+          noRoute = true;
+          throw new Error("No route found.");
+        }
+        console.log(routeSkip);
+      } catch (error: any) {
+        noRoute = true;
+        $state.alertType = "danger";
+        $state.showAlert = true;
+        $state.alertText = `Error Occured Finding Route: ${error.message}`
+      }
+    }
+  }
 
   $: {
       let filtBal = $balances.filter(item => item.chain_id == source);
@@ -28,8 +55,10 @@
     <div class="ibc-transfer inter-medium-white-16px">
         {source == destination ? "Transfer" : "IBC Transfer"}
     </div>
-    <div class="percent inter-medium-white-14px">
-        Source Chain
+    <div class="flex w-full items-start">
+      <div class="percent inter-medium-white-14px">
+          Source Chain
+      </div>
     </div>
     <select bind:value={source} id="source_chain" name="source_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
       {#each $chains as chain}
@@ -46,20 +75,27 @@
         </select>
     </div>
     <input type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
-    <div class="percent inter-medium-white-14px">
-        Destination Chain
-        <Info />
+    <div class="flex w-full items-end">
+      <div class="percent inter-medium-white-14px">
+          Destination Chain
+      </div>
+      <div class="z-index-[1000]">
+          <Info/>
+      </div>
     </div>
     <select bind:value={destination} id="dest_chain" name="dest_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
       {#each $chains as chain}
         <option class="source-chain-osmosis inter-medium-white-14px" value={chain.chain_id}>{chain.pretty_name}</option>
       {/each}
     </select>
-    <input type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
-    <div class="available-balance-1454789 inter-medium-blueberry-14px">
-        Available: {available.amount} {available.denom.substring(1).toUpperCase()}
+    <div hidden={!noRoute} class="text-align-left w-full mt-4 inter-medium-red-14px">
+        Route Not Found
     </div>
-    <button class="frame-1-2 frame-1-4 button-send">
+    <input bind:value={amount} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+    <div class="available-balance-1454789 inter-medium-blueberry-14px">
+        Available: {Math.round((Number(available.amount) / 1000000) * 100) / 100} {available.denom.substring(1).toUpperCase()}
+    </div>
+    <button on:click={computeIBCRoute} class="frame-1-2 frame-1-4 button-send">
         <div class="send-amount-1 inter-medium-white-12px">
             Send amount
         </div>
@@ -172,6 +208,14 @@
   font-weight: 500;
 }
 
+.inter-medium-red-14px {
+  color: red;
+  font-family: var(--font-family-inter);
+  font-size: var(--font-size-m);
+  font-style: normal;
+  font-weight: 500;
+}
+
 .available-balance-1454789 {
   align-self: flex-end;
   letter-spacing: -0.28px;
@@ -232,8 +276,9 @@
   min-width: 46px;
   opacity: 0.45;
   text-align: left;
-  width: 100%;
+  width: fit-content;
   margin-top: 20px;
+  display: flex;
 }
 
 .button-send {

@@ -14,7 +14,6 @@ export const isLoading: Writable<boolean> = writable(false);
 export const balances: Readable<ChainBalances[]> = derived(
     chains,
     ($chains, set: (value: ChainBalances[]) => void) => {
-        console.log($chains);
         updateBalances($chains, set);
     },
     [] as ChainBalances[]
@@ -35,7 +34,6 @@ const updateBalances = async ($chains: Chain[], set: (value: ChainBalances[]) =>
         }
 
         const data = await res.json();
-        console.log(data);
         // Update the derived store
         set(data.balances);
     } catch (error) {

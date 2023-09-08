@@ -1,13 +1,19 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { beforeUpdate, onMount } from "svelte";
   import Balance from "../../components/Balance.svelte";
   import Transfer from "../../components/Transfer.svelte";
   import { balances } from "../../store/balances";
 	import { fetchChains } from "../../store/chains";
+	import { updateDirectory } from "../../store/directory";
+	import BalanceLoader from "../../components/BalanceLoader.svelte";
 
   onMount(() => {
     fetchChains();
   });
+
+  beforeUpdate(() => {
+    updateDirectory();
+  })
 </script>
 
 <div style="padding: 25px;">
@@ -17,20 +23,26 @@
         Balances
       </div>
       <div class="mt-[20px] grid grid-cols-2 gap-[20px]">
-        {#each $balances as b}
-          {#each b.balances as amount}
-            <div class="balance col-span-2 lg:col-span-1">
-              <Balance
-                name={b?.pretty_name}
-                dollarAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
-                tokenAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
-                tokenDenom={amount.denom}
-                chainAddress={b?.address}
-                logo={b.logo_URIs ? b.logo_URIs.svg : undefined}
-              />
-            </div>
+        {#if $balances.length > 0}
+          {#each $balances as b}
+            {#each b.balances as amount}
+              <div class="balance col-span-2 lg:col-span-1">
+                <Balance
+                  name={b?.pretty_name}
+                  dollarAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
+                  tokenAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
+                  tokenDenom={amount.denom}
+                  chainAddress={b?.address}
+                  logo={b.logo_URIs ? b.logo_URIs.svg : undefined}
+                />
+              </div>
+            {/each}
           {/each}
-        {/each}
+        {:else}
+          {#each [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as i}
+            <BalanceLoader/>
+          {/each}
+        {/if}
       </div>
     </div>
     <div class="mt-[20px] lg:col-span-3 col-span-8">
@@ -45,9 +57,5 @@
   font-family: var(--font-family-inter);
   font-size: 20px;
   font-weight: 700;
-}
-
-.balance:hover {
-  z-index: 100;
 }
 </style>

@@ -1,7 +1,6 @@
 import { DeliverTxResponse, SigningStargateClient } from "@cosmjs/stargate";
 import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
 import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import { HttpEndpoint } from "@cosmjs/stargate";
 import { Fees } from "./types/chains";
 import { ChainState } from "./state";
 import { heading, panel, text } from "@metamask/snaps-ui";

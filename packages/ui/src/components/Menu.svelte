@@ -82,9 +82,12 @@
   font-weight: 500;
 }
 
+@media (min-width: 768px) {
+}
+
 @media (max-width: 768px) {
   .menu-div {
-    width: 100%;
+    display: none;
   }
 }
 </style>
