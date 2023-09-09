@@ -9,14 +9,14 @@ export interface Chain {
   // Address prefix
   bech32_prefix: string;
   fees: ChainFees;
-  staking: Staking;
-  logo_URIs: Logos;
+  staking?: Staking;
+  logo_URIs?: Logos;
   apis: {
     rpc: Api[];
     rest: Api[];
-    grpc: Api[];
+    grpc?: Api[];
   };
-  explorers: Explorer[];
+  explorers?: Explorer[];
   address: string | undefined;
 }
 

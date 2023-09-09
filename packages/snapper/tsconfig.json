@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "module": "commonjs",
+    "module": "ESNext",
+    "moduleResolution": "node", 
     "target": "es2016",
     "sourceMap": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "declaration": true,
+    "allowSyntheticDefaultImports": true 
   }
 }

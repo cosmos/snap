@@ -1,12 +1,16 @@
 import { OnRpcRequestHandler } from "@metamask/snaps-types";
+import { AccountData } from '@cosmjs/amino';
 import { panel, text, heading, divider, copyable } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
 import { Chain, Chains, Fees } from "./types/chains";
 import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 import { Result } from "./types/result";
-import { signTx, submitTransaction } from "./transaction";
+import { sendTx, signAmino, signDirect, submitTransaction } from "./transaction";
 import { COIN_TYPES, DEFAULT_FEES } from "./constants";
+import { SignDoc, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { StdSignDoc } from "@cosmjs/amino";
+import { decodeProtoMessage } from "./parser";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -20,7 +24,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
 }): Promise<Result> => {
   let res: Object = {};
-  let confirmation: string | boolean | null = false;
   switch (request.method) {
     case "initialized":
       let data = await snap.request({
@@ -47,7 +50,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       };
     case "initialize":
       // Ensure user confirms initializing Cosmos snap
-      confirmation = await snap.request({
+      let confirmationInit = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
@@ -58,7 +61,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           ]),
         },
       });
-      if (!confirmation) {
+      if (!confirmationInit) {
         throw new Error("Initialize Cosmos chain support was denied.");
       }
       // Make sure not initialized already
@@ -144,26 +147,29 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         }
       }
 
+      // create all msg prompts
+      let uiTransact = [
+        heading("Confirm Transaction"),
+        heading("Chain"),
+        text(`${request.params.chain_id}`),
+        heading("Transaction"),
+      ]
+
+      messages.txMsgs.map((item: { typeUrl: string, value: Object}) => {
+        uiTransact.push(heading(item.typeUrl)),
+        uiTransact.push(text(JSON.stringify(item.value, null, 2)))
+      });
+
       // Ensure user confirms transaction
-      confirmation = await snap.request({
+      let confirmationTransact = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
-          content: panel([
-            heading("Confirm Transaction"),
-            divider(),
-            heading("Chain"),
-            text(`${request.params.chain_id}`),
-            divider(),
-            heading("Transaction"),
-            text(JSON.stringify(messages, null, 2)),
-            heading("Gas & Fees"),
-            text(`${JSON.stringify(fees)}`),
-          ]),
+          content: panel(uiTransact),
         },
       });
 
-      if (!confirmation) {
+      if (!confirmationTransact) {
         throw new Error("Transaction was denied.");
       }
 
@@ -220,66 +226,139 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           statusCode: 500,
         };
       }
-    case "signTx":
-      // Sign a transaction with the wallet
+    case "sendTx":
+      // Send a transaction to the wallet
       if (
         !(
           request.params != null &&
           typeof request.params == "object" &&
-          "msgs" in request.params &&
+          "tx" in request.params &&
           "chain_id" in request.params &&
-          typeof request.params.msgs == "string" &&
+          typeof request.params.tx == "string" &&
           typeof request.params.chain_id == "string"
         )
       ) {
         throw new Error("Invalid transact request");
       }
 
-      //Calculate fees for transaction
-      let feesTx: Fees = DEFAULT_FEES;
+      let txBytes: Uint8Array = JSON.parse(request.params.tx)
 
-      if (request.params.fees) {
-        if (typeof request.params.fees == "string") {
-          feesTx = JSON.parse(request.params.fees);
+      let txResponse = await sendTx(request.params.chain_id, txBytes);
+
+      if (typeof txResponse === "undefined") {
+        return {
+          data: {},
+          success: false,
+          statusCode: 500,
+        };
+      }
+
+      if (txResponse.code === 0) {
+        await snap.request({
+          method: "snap_dialog",
+          params: {
+            type: "alert",
+            content: panel([
+              heading("Transaction Successful"),
+              text(
+                `Transaction with the hash ${txResponse.transactionHash} has been broadcasted to the chain ${request.params.chain_id}.`
+              ),
+              copyable(`${txResponse.transactionHash}`),
+            ]),
+          },
+        });
+
+        return {
+          data: txResponse,
+          success: true,
+          statusCode: 201,
+        };
+      } else {
+        await snap.request({
+          method: "snap_dialog",
+          params: {
+            type: "alert",
+            content: panel([
+              heading("Transaction Failed"),
+              text(txResponse.rawLog!),
+              copyable(`${txResponse.transactionHash}`),
+            ]),
+          },
+        });
+
+        return {
+          data: txResponse,
+          success: false,
+          statusCode: 500,
+        };
+      }
+    case "signDirect":
+      // Sign a transaction with the wallet
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "sign_doc" in request.params &&
+          "chain_id" in request.params &&
+          typeof request.params.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid transact request");
+      }
+
+      let signer: string | null = null;
+      if (request.params.signer) {
+        if (typeof request.params.signer == "string") {
+          signer = request.params.signer
         }
       }
 
-      //Get messages if any from JSON string
-      let messagesTx;
-
-      if (request.params.msgs) {
-        if (typeof request.params.msgs == "string") {
-          messagesTx = JSON.parse(request.params.msgs);
-        }
+      let signDoc: SignDoc = request.params.sign_doc as unknown as SignDoc;
+      let signDocNew: SignDoc = {
+        accountNumber: signDoc.accountNumber,
+        bodyBytes: new Uint8Array(Object.values(signDoc.bodyBytes)),
+        authInfoBytes: new Uint8Array(Object.values(signDoc.authInfoBytes)),
+        chainId: signDoc.chainId
       }
+      let txBody = TxBody.decode(signDocNew.bodyBytes);
+      const msgs = [];
+      for (const msg of txBody.messages) {
+        let decMsg = await decodeProtoMessage(msg.typeUrl, msg.value);
+        msgs.push(decMsg);
+      }
+
+      // create all msg prompts
+      let ui = [
+        heading("Confirm Transaction"),
+        heading("Chain"),
+        text(`${request.params.chain_id}`),
+        heading("Transactions"),
+        divider(),
+      ]
+
+      msgs.map(item => {
+        ui.push(heading(item.typeUrl)),
+        ui.push(text(JSON.stringify(item.value, null, 2))),
+        ui.push(divider())
+      });
 
       // Ensure user confirms transaction
-      confirmation = await snap.request({
+      let confirmationDirect = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
-          content: panel([
-            heading("Confirm Transaction"),
-            divider(),
-            heading("Chain"),
-            text(`${request.params.chain_id}`),
-            divider(),
-            heading("Transaction"),
-            text(JSON.stringify(messagesTx, null, 2)),
-            heading("Gas & Fees"),
-            text(`${JSON.stringify(feesTx)}`),
-          ]),
+          content: panel(ui),
         },
       });
 
-      if (!confirmation) {
+      if (!confirmationDirect) {
         throw new Error("Transaction was denied.");
       }
 
-      let resultTx = await signTx(
+      let resultTx = await signDirect(
         request.params.chain_id,
-        messagesTx,
-        feesTx
+        signer,
+        signDoc
       );
 
       if (typeof resultTx === "undefined") {
@@ -292,6 +371,68 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       return {
         data: resultTx,
+        success: true,
+        statusCode: 201,
+      };
+    case "signAmino":
+      // Sign a transaction with the wallet
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "sign_doc" in request.params &&
+          "chain_id" in request.params &&
+          typeof request.params.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid transact request");
+      }
+
+      let signerAmino: string | null = null;
+      if (request.params.signer) {
+        if (typeof request.params.signer == "string") {
+          signerAmino = request.params.signer
+        }
+      }
+
+      let signDocAmino: StdSignDoc = request.params.sign_doc as unknown as StdSignDoc;
+
+      // Ensure user confirms transaction
+      let confirmationSignAmino = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading("Confirm Transaction"),
+            heading("Chain"),
+            text(`${request.params.chain_id}`),
+            heading("Transactions"),
+            divider(),
+            text(JSON.stringify(signDocAmino.msgs, null, 2))
+          ]),
+        },
+      });
+
+      if (!confirmationSignAmino) {
+        throw new Error("Transaction was denied.");
+      }
+
+      let resultTxAmino = await signAmino(
+        request.params.chain_id,
+        signerAmino,
+        signDocAmino
+      );
+
+      if (typeof resultTxAmino === "undefined") {
+        return {
+          data: {},
+          success: false,
+          statusCode: 500,
+        };
+      }
+
+      return {
+        data: resultTxAmino,
         success: true,
         statusCode: 201,
       };
@@ -322,7 +463,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       // Ensure user confirms addChain
-      confirmation = await snap.request({
+      let confirmAddChain = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
@@ -334,7 +475,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           ]),
         },
       });
-      if (!confirmation) {
+      if (!confirmAddChain) {
         throw new Error("Chain addition was denied.");
       }
 
@@ -407,7 +548,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       // Ensure user confirms deleteChain
-      confirmation = await snap.request({
+      let confirmDeleteChain = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
@@ -419,7 +560,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           ]),
         },
       });
-      if (!confirmation) {
+      if (!confirmDeleteChain) {
         throw new Error("Chain deletion was denied.");
       }
 
@@ -470,7 +611,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       // Ensure user confirms the new address
-      confirmation = await snap.request({
+      let confirmAddAddress = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
@@ -488,7 +629,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       });
 
       //If user declined confirmation, throw error
-      if (!confirmation) {
+      if (!confirmAddAddress) {
         throw new Error("Add address action declined");
       }
 
@@ -519,7 +660,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         success: true,
         statusCode: 201,
       };
-
     case "deleteAddress":
       // Ensure deleteAddress request is valid
       if (
@@ -534,7 +674,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       // Ensure user confirms the chain_id of the address to be deleted
-      confirmation = await snap.request({
+      let confirmDeleteAddress = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
@@ -548,7 +688,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       });
 
       //If user declined confirmation, throw error
-      if (!confirmation) {
+      if (!confirmDeleteAddress) {
         throw new Error("Delete address action declined");
       }
 
@@ -572,7 +712,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         success: true,
         statusCode: 201,
       };
-
     case "getAddresses":
       // Get all addresses from the address book in wallet state
       res = await AddressState.getAddressBook();
@@ -614,13 +753,25 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         success: true,
         statusCode: 200,
       };
+    case "getAccountInfo":  
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "chain_id" in request.params &&
+          typeof request.params.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid getChainAddress request");
+      }
 
-    case "getPublicKey":  
-      let key = await ChainState.getPublicKey();
+      let account: AccountData = await ChainState.GetAccount(request.params.chain_id);
 
       return {
         data: {
-          public_key: key
+          algo: account.algo.toString(),
+          address: account.address,
+          pubkey: new Uint8Array(Object.values(account.pubkey))
         },
         success: true,
         statusCode: 200,

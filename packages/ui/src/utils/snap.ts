@@ -8,12 +8,6 @@ const initialJsonString = "{}";
 const installParams = JSON.parse(initialJsonString);
 installParams[snapId] = { version: snapVersion };
 
-declare global {
-    interface Window {
-        ethereum: any;
-    }
-}
-
 export const isMetaMaskInstalled = (): boolean | undefined => !!window.ethereum && window.ethereum.isMetaMask;
 
 export const isSnapInstalled = async (): Promise<boolean | undefined> => {

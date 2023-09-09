@@ -2,9 +2,10 @@
   import { chains } from "../store/chains";
 	import Info from "./Info.svelte";
 	import { balances } from "../store/balances";
-	import type { Coin } from "@cosmjs/stargate";
+	import { SigningStargateClient, type Coin } from "@cosmjs/stargate";
   import { getSkipRecommendation, getRoute, type Route } from '../utils/ibc';
 	import { state } from "../store/state";
+  import { CosmosSnap } from "@cosmsnap/snapper";
 
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
@@ -12,6 +13,49 @@
   let available: Coin = {amount: "0", denom};
   let amount = 0;
   let noRoute = false;
+
+  const test = async () => {
+    window.cosmos.changeSnapId("local:http://localhost:8080")
+
+    // Message info
+    const memo = "My CosmJS Protobuf Message";
+    const chainId = "cosmoshub-4";
+
+    let offlineSigner = await window.cosmos.getOfflineSigner("cosmoshub-4");
+
+    let wallet = await window.cosmos.getAccount("cosmoshub-4");
+    console.log(wallet);
+
+    // Create a send tokens message
+    const msg = {
+      typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+      value: {
+        fromAddress: wallet.address,
+        toAddress: "cosmos123456789",
+        amount: [
+          {
+            denom: "uatom",
+            amount: "10000",
+          },
+        ],
+      },
+    };
+
+    // Create fee and sign doc
+    const fee = {
+      amount: [],
+      gas: "200000",
+    };
+
+    const signingClient = await SigningStargateClient.connectWithSigner(
+      "https://rpc-cosmoshub.whispernode.com:443",
+      offlineSigner
+    );
+
+    const result = await signingClient.sign(wallet.address, [msg], fee, memo);
+
+    console.log(result);
+  }
 
   const computeIBCRoute = async () => {
     if (source != destination) {
@@ -95,7 +139,7 @@
     <div class="available-balance-1454789 inter-medium-blueberry-14px">
         Available: {Math.round((Number(available.amount) / 1000000) * 100) / 100} {available.denom.substring(1).toUpperCase()}
     </div>
-    <button on:click={computeIBCRoute} class="frame-1-2 frame-1-4 button-send">
+    <button on:click={test} class="frame-1-2 frame-1-4 button-send">
         <div class="send-amount-1 inter-medium-white-12px">
             Send amount
         </div>

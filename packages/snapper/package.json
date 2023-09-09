@@ -1,7 +1,7 @@
 {
   "name": "@cosmsnap/snapper",
-  "version": "0.1.4",
-  "description": "A helper package with utilities to interact with the Cosmos Extension Metamask Snap.",
+  "version": "0.1.13",
+  "description": "A helper package with utilities to interact with the Cosmos Extension for MetaMask.",
   "repository": {
     "type": "git",
     "url": "https://github.com/cosmos/snap.git"
@@ -9,7 +9,9 @@
   "type": "module",
   "license": "MIT",
   "author": "Mystic Labs, Inc",
-  "main": "dist/index.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/",
     "images/",
@@ -25,7 +27,7 @@
     "wallets"
   ],
   "scripts": {
-    "build": "npx tsc"
+    "build": "tsc && esbuild ./dist --bundle --outfile=./dist/index.cjs"
   },
   "ava": {
     "extensions": [
@@ -36,6 +38,8 @@
     ]
   },
   "dependencies": {
+    "@keplr-wallet/proto-types": "0.12.12",
+    "@keplr-wallet/types": "0.12.12",
     "ses": "^0.18.4"
   },
   "devDependencies": {
@@ -43,6 +47,7 @@
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
     "ava": "^5.3.0",
+    "esbuild": "^0.19.2",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-import": "^2.26.0",

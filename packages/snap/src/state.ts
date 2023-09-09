@@ -1,6 +1,6 @@
 import { Chains, Chain, CosmosAddress } from "./types/chains";
 import { Addresses, Address } from "./types/address";
-import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
+import { AccountData, DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
 import { DEFAULT_SLIP44, WALLET_URL } from "./constants";
 
 /**
@@ -75,7 +75,14 @@ export class ChainState {
    * @returns The public key in hex string.
    * @throws If an error occurs.
    */
-  public static async getPublicKey(): Promise<string> {
+  public static async GetAccount(
+    chain_id: string
+  ): Promise<AccountData> {
+    let chain = await this.getChain(chain_id);
+    if (chain == null) {
+      throw new Error(`Chain with Chain Id ${chain_id} does not exist.`);
+    }
+
     // get signer info
     let node = await snap.request({
       method: "snap_getBip44Entropy",
@@ -84,11 +91,25 @@ export class ChainState {
       },
     });
 
-    if (typeof node.publicKey === "undefined") {
-      throw Error("Public key from node is undefined");
+    if (typeof node.privateKey === "undefined") {
+      throw Error("Private key from node is undefined");
     }
 
-    return node.publicKey;
+    // Create bytes key
+    let pk = node.privateKey;
+    if (pk.startsWith("0x")) {
+      pk = pk.substring(2);
+    }
+
+    // create the wallet
+    let wallet = await DirectSecp256k1Wallet.fromKey(
+      Uint8Array.from(Buffer.from(pk, "hex")),
+      chain.bech32_prefix
+    );
+
+    let account = (await wallet.getAccounts())[0];
+
+    return account;
   }
   /**
    * Gets all Cosmos chains from Metamask snap state.

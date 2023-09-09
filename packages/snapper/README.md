@@ -1,7 +1,97 @@
-# Cosmos Extension Metamask Snap Utility Library
+# Provider Library for Cosmos Extension for Metamask
 Snapper is a utility library for interacting with the official Cosmos Extension for Metamask.
 
-## Functions
+## Global Provider (Drop In Replacement for window.keplr)
+Add the provider as a global object within your dApp.
+```typescript
+import { CosmosSnap } from "@cosmsnap/snapper";
+window.cosmos = new CosmosSnap();
+// then use it anywhere!
+window.cosmos.changeSnapId("local:http://localhost:8080")
+
+const memo = "Hello from Metamask!";
+
+let offlineSigner = await window.cosmos.getOfflineSigner("cosmoshub-4");
+
+let wallet = await window.cosmos.getAccount("cosmoshub-4");
+
+// Create a send token message
+const msg = {
+    typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+    value: {
+    fromAddress: wallet.address,
+    toAddress: "cosmos123456789",
+    amount: [
+        {
+        denom: "uatom",
+        amount: "10000",
+        },
+    ],
+    },
+};
+
+// Create fee
+const fee = {
+    amount: [],
+    gas: "200000",
+};
+
+const signingClient = await SigningStargateClient.connectWithSigner(
+    "https://rpc-cosmoshub.whispernode.com:443",
+    offlineSigner
+);
+
+const result = await signingClient.sign(wallet.address, [msg], fee, memo);
+```
+
+Structure of the provider.
+```typescript
+export interface SnapProvider {
+  experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
+  signAmino(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc,
+  ): Promise<AminoSignResponse>;
+  signDirect(
+    chainId: string,
+    signer: string,
+    signDoc: {
+      /** SignDoc bodyBytes */
+      bodyBytes?: Uint8Array | null;
+
+      /** SignDoc authInfoBytes */
+      authInfoBytes?: Uint8Array | null;
+
+      /** SignDoc chainId */
+      chainId?: string | null;
+
+      /** SignDoc accountNumber */
+      accountNumber?: Long | null;
+    },
+  ): Promise<DirectSignResponse>;
+  sendTx(
+    chainId: string,
+    tx: Uint8Array,
+  ): Promise<DeliverTxResponse>;
+  getOfflineSigner(chainId: string): Promise<OfflineAminoSigner & OfflineDirectSigner>;
+  enabled(): Promise<boolean>;
+  install(): Promise<void>;
+  getChains(): Promise<Chain[]>;
+  deleteChain(chain_id: string): Promise<void>;
+  signAndBroadcast(chain_id: string, msgs: Msg[], fees: Fees): Promise<DeliverTxResponse>;
+  sign(chain_id: string, msgs: Msg[], fees: Fees): Promise<Int8Array>;
+  addAddressToBook(chain_id: string, address: string, name: string): Promise<void>;
+  getAddressBook(): Promise<Address[]>;
+  deleteAddressFromBook(address: string): Promise<void>;
+  getBech32Addresses(): Promise<CosmosAddress[]>;
+  getBech32Address(chain_id: string): Promise<CosmosAddress>;
+  getAccount(chain_id: string): Promise<AccountData>;
+  changeSnapId(snap_id: string): void;
+}
+```
+## Direct Interaction Functions
+You can interact with the snap directly to with these functions although we highly suggest using the provider through the window as it is a drop in replacement for other Cosmos wallets.
 
 ### Check If Installed
 ```typescript

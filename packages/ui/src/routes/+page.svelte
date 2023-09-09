@@ -2,10 +2,10 @@
 	import { onMount } from 'svelte';
   import MainTitle from '../components/MainTitle.svelte';
 	import Step from '../components/Step.svelte';
-	import { isMetaMaskInstalled, isSnapInitialized, isSnapInstalled, installSnap, initSnap } from '../utils/snap';
+  import { isMetaMaskInstalled, initSnap, isSnapInitialized, isSnapInstalled, installSnap } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
-	import { LOCAL_STORAGE_CHAINS, LOCAL_STORAGE_INIT } from '../utils/general';
+	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
 
   let loading = true;
   let isMetaMaskInstalledValue: boolean = false;
@@ -35,12 +35,6 @@
       isSnapInstalledValue = false;
     } else {
       isSnapInstalledValue = isSnapInstalledRaw;
-    }
-
-    if (localStorage.getItem(LOCAL_STORAGE_INIT) == "true") {
-      goto("/balances");
-      $state.connected = true;
-      loading = false;
     }
 
     let isSnapInitValueRaw = await isSnapInitialized()
