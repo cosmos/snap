@@ -2059,7 +2059,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@cosmsnap/snapper@0.1.12, @cosmsnap/snapper@workspace:packages/snapper":
+"@cosmsnap/snapper@npm:0.1.12":
+  version: 0.1.12
+  resolution: "@cosmsnap/snapper@npm:0.1.12"
+  dependencies:
+    "@keplr-wallet/proto-types": 0.12.12
+    "@keplr-wallet/types": 0.12.12
+    ses: ^0.18.4
+  checksum: 4cdcced12796fcd686233b3f66d4e45d7af245dae07e7ee728e1b9a306cdd8e03b875d6b774406e7d4b2595c0d797abc65117c93bd918684ed91251c88b8cb55
+  languageName: node
+  linkType: hard
+
+"@cosmsnap/snapper@workspace:packages/snapper":
   version: 0.0.0-use.local
   resolution: "@cosmsnap/snapper@workspace:packages/snapper"
   dependencies:
