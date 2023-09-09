@@ -3,7 +3,7 @@
     import { QuestionCircleSolid, ChevronRightOutline } from 'flowbite-svelte-icons';
 </script>
 
-<div class="flex items-center text-sm font-light text-gray-500 dark:text-gray-400">
+<div class="position-absolute flex items-center text-sm font-light text-gray-500 dark:text-gray-400">
 <button id="b3">
     <QuestionCircleSolid class="w-4 h-4 ml-1.5" />
     <span class="sr-only">Show information</span>
