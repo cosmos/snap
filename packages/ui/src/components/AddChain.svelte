@@ -4,8 +4,11 @@
 
   export let edit = false;
   export let chainInfo = {};
-  let content = {
-    json: JSON.parse(JSON.stringify(chainInfo))
+  let content = { json: {} };
+  $: {
+    content = {
+      json: chainInfo
+    }
   }
 </script>
   

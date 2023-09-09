@@ -1,6 +1,13 @@
 import type { Address } from '../../../snap/src/types/address';
 import type { Chain, CosmosAddress } from '../../../snap/src/types/chains';
 import { LOCAL_STORAGE_INIT } from './general';
+import type { ChainInfo } from '@keplr-wallet/types';
+
+declare global {
+  interface Window {
+    ethereum?: any
+  }
+}
 
 export const snapId = import.meta.env.VITE_SNAP_ID ?? `local:http://localhost:8080`;
 const snapVersion = import.meta.env.VITE_SNAP_VERSION;
@@ -77,7 +84,6 @@ export const getAddresses = async (): Promise<Address[]> => {
       },
     },
   });
-  console.log(result);
   return result.data;
 };
 
@@ -157,4 +163,94 @@ export const initialize = async () => {
     } catch (error) {
       console.log(error);
     }
+}
+
+// Convert ChainInfo to Chain
+export const chainInfoToChain = (chainInfo: ChainInfo): Chain => {
+
+  return {
+    chain_name: chainInfo.chainName, 
+    chain_id: chainInfo.chainId,
+    pretty_name: chainInfo.chainName,
+    slip44: chainInfo.bip44.coinType,
+    bech32_prefix: chainInfo.bech32Config.bech32PrefixAccAddr,
+    fees: {
+      fee_tokens: chainInfo.feeCurrencies.map(currency => {
+        return {
+          denom: currency.coinDenom,
+          low_gas_price: currency.gasPriceStep!.low,
+          average_gas_price: currency.gasPriceStep!.average,
+          high_gas_price: currency.gasPriceStep!.high
+        }
+      })
+    },
+    staking: {
+      staking_tokens: [
+        { denom: chainInfo.stakeCurrency.coinDenom }  
+      ]
+    },
+    logo_URIs: chainInfo.chainSymbolImageUrl ? {
+      png: chainInfo.chainSymbolImageUrl,
+      svg: chainInfo.chainSymbolImageUrl
+    } : undefined,
+    apis: {
+      rpc: [{
+        address: chainInfo.rpc,
+        provider: chainInfo.nodeProvider?.name
+      }],
+      rest: [{
+        address: chainInfo.rest,
+        provider: chainInfo.nodeProvider?.name  
+      }]
+    },
+    address: undefined
+  }
+}
+
+// Convert Chain to ChainInfo
+export const chainToChainInfo = (chain: Chain): ChainInfo => {
+
+  return {
+    rpc: typeof chain.apis.rpc[0].address == "string" ? chain.apis.rpc[0].address: chain.apis.rpc[0].address.url,
+    rest: typeof chain.apis.rpc[0].address == "string" ? chain.apis.rpc[0].address: chain.apis.rpc[0].address.url,
+    nodeProvider: {
+      name: chain.apis.rpc[0].provider ? chain.apis.rpc[0].provider: "",
+      email: ""
+    },
+    chainId: chain.chain_id,
+    chainName: chain.pretty_name,
+    stakeCurrency: {
+      coinDenom: chain.staking!.staking_tokens[0].denom.substring(1),
+      coinMinimalDenom: chain.fees.fee_tokens[0].denom,
+      coinDecimals: 8
+    },
+    bip44: {
+      coinType: chain.slip44
+    },
+    bech32Config: {
+      bech32PrefixAccAddr: chain.bech32_prefix,
+      bech32PrefixAccPub: chain.bech32_prefix,
+      bech32PrefixValAddr: chain.bech32_prefix,
+      bech32PrefixValPub: chain.bech32_prefix,
+      bech32PrefixConsAddr: chain.bech32_prefix,
+      bech32PrefixConsPub: chain.bech32_prefix
+    },
+    feeCurrencies: chain.fees.fee_tokens.map(feeToken => {
+      return {
+        coinDenom: feeToken.denom.substring(1),
+        gasPriceStep: {
+          low: feeToken.low_gas_price,
+          average: feeToken.average_gas_price,
+          high: feeToken.high_gas_price
+        },
+        paths: [],
+        originChainId: "",
+        originCurrency: "",
+        coinMinimalDenom: feeToken.denom,
+        coinDecimals: 8
+      }
+    }),
+    currencies: [],
+    chainSymbolImageUrl: chain.logo_URIs?.svg
+  }
 }

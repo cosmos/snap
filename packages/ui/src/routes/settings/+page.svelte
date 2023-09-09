@@ -9,18 +9,21 @@
   let currentChain: any = {};
   let filteredChains = [];
 
-  $: {
-    filteredChains = $chains.filter(item => item.chain_id === currentEditChain);
+  const updateFiltered = async () => {
+    let allChains = $chains;
+    filteredChains = allChains.filter(item => item.chain_id === currentEditChain);
     if (filteredChains.length > 0) {
       currentChain = filteredChains[0];
     }
   }
 
   const editChain = async (chain_id: string) => {
+    await updateFiltered();
     editCurrentChain = true;
-    chain_id = currentEditChain;
+    currentEditChain = chain_id;
     $state.openAddChainPopup = true;
-    currentChain = $chains.filter(item => item.chain_id === currentEditChain)[0]
+    let allChains = $chains;
+    currentChain = allChains.filter(item => item.chain_id === currentEditChain)[0];
   }
 
   const deleteChainFromSnap = async (chain_id: string) => {

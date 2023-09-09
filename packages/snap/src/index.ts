@@ -397,19 +397,27 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       let signDocAmino: StdSignDoc = request.params.sign_doc as unknown as StdSignDoc;
 
+      // create all msg prompts
+      let uiAmino = [
+        heading("Confirm Transaction"),
+        heading("Chain"),
+        text(`${request.params.chain_id}`),
+        heading("Transactions"),
+        divider(),
+      ]
+
+      signDocAmino.msgs.map(item => {
+        ui.push(heading(item.type)),
+        ui.push(text(JSON.stringify(item.value, null, 2))),
+        ui.push(divider())
+      });
+
       // Ensure user confirms transaction
       let confirmationSignAmino = await snap.request({
         method: "snap_dialog",
         params: {
           type: "confirmation",
-          content: panel([
-            heading("Confirm Transaction"),
-            heading("Chain"),
-            text(`${request.params.chain_id}`),
-            heading("Transactions"),
-            divider(),
-            text(JSON.stringify(signDocAmino.msgs, null, 2))
-          ]),
+          content: panel(uiAmino),
         },
       });
 

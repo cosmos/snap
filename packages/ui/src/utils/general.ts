@@ -13,3 +13,10 @@ export const copyToClipboard = async (text: string): Promise<void> => {
         throw err
     }
 };
+
+export interface Transaction {
+    address: string;
+    chain: string;
+    tx_hash: string;
+    when: Date;
+}

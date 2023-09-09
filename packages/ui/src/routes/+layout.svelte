@@ -73,7 +73,7 @@
       background-color: #05000b;
       border: 1px none;
       min-height: 100vh;
-      min-width: 100vw;
+      min-width: 100%;
     }
 
     .left-content {
