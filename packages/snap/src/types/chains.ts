@@ -1,5 +1,10 @@
 import { HttpEndpoint } from "@cosmjs/stargate";
 
+export interface Msg {
+  typeUrl: string;
+  value: any;
+}
+
 export interface Chain {
   chain_name: string;
   chain_id: string;

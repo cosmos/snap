@@ -7,6 +7,6 @@ export const state = writable({
     openAddChainPopup: false,
     confirmDeleteChainPopup: false,
     alertText: "",
-    showAlert: true,
+    showAlert: false,
     alertType: "success"
 });

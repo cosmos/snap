@@ -1,10 +1,10 @@
 import { writable, derived, type Writable, type Readable } from 'svelte/store';
 import type { Chain } from '../../../snap/src/types/chains';
-import type { Coin } from '@cosmjs/stargate';
 import { chains } from './chains'; 
+import type { CoinIBC } from '../utils/ibc';
 
-interface ChainBalances extends Chain {
-    balances: Coin[];
+export interface ChainBalances extends Chain {
+    balances: CoinIBC[];
 }
 
 // Store to hold a loading state
@@ -34,7 +34,6 @@ const updateBalances = async ($chains: Chain[], set: (value: ChainBalances[]) =>
         }
 
         const data = await res.json();
-        // Update the derived store
         set(data.balances);
     } catch (error) {
         console.error("There was a problem with the fetch operation:", error);

@@ -7,10 +7,14 @@
   import Alert from "../components/Alert.svelte";
 	import Menu from "../components/Menu.svelte";
 	import { updateDirectory } from "../store/directory";
+	import { CosmosSnap } from "@cosmsnap/snapper";
+	import { snapId } from "../utils/snap";
 
   export const balanceURL = import.meta.env.VITE_BALANCE_FUNCTION_URL ?? "/api/balances";
 
   onMount(async () => {
+    window.cosmos = new CosmosSnap();
+    window.cosmos.changeSnapId(snapId);
     updateDirectory();
     if (!$state.connected) {
       goto("/");

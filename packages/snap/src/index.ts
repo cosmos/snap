@@ -2,7 +2,7 @@ import { OnRpcRequestHandler } from "@metamask/snaps-types";
 import { AccountData } from '@cosmjs/amino';
 import { panel, text, heading, divider, copyable } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
-import { Chain, Chains, Fees } from "./types/chains";
+import { Chain, Chains, Fees, Msg } from "./types/chains";
 import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 import { Result } from "./types/result";
@@ -139,7 +139,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       //Get messages if any from JSON string
-      let messages;
+      let messages: Msg[] = [];
 
       if (request.params.msgs) {
         if (typeof request.params.msgs == "string") {
@@ -150,14 +150,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       // create all msg prompts
       let uiTransact = [
         heading("Confirm Transaction"),
+        divider(),
         heading("Chain"),
         text(`${request.params.chain_id}`),
+        divider(),
         heading("Transaction"),
       ]
 
-      messages.txMsgs.map((item: { typeUrl: string, value: Object}) => {
+      messages.map((item) => {
         uiTransact.push(heading(item.typeUrl)),
-        uiTransact.push(text(JSON.stringify(item.value, null, 2)))
+        uiTransact.push(text(JSON.stringify(item.value, null, 2))),
+        uiTransact.push(divider()),
+        uiTransact.push(text(""))
       });
 
       // Ensure user confirms transaction
@@ -332,6 +336,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         heading("Confirm Transaction"),
         heading("Chain"),
         text(`${request.params.chain_id}`),
+        divider(),
         heading("Transactions"),
         divider(),
       ]
@@ -402,6 +407,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         heading("Confirm Transaction"),
         heading("Chain"),
         text(`${request.params.chain_id}`),
+        divider(),
         heading("Transactions"),
         divider(),
       ]

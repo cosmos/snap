@@ -229,11 +229,11 @@ export const chainToChainInfo = (chain: Chain): ChainInfo => {
     },
     bech32Config: {
       bech32PrefixAccAddr: chain.bech32_prefix,
-      bech32PrefixAccPub: chain.bech32_prefix,
-      bech32PrefixValAddr: chain.bech32_prefix,
-      bech32PrefixValPub: chain.bech32_prefix,
-      bech32PrefixConsAddr: chain.bech32_prefix,
-      bech32PrefixConsPub: chain.bech32_prefix
+      bech32PrefixAccPub: chain.bech32_prefix+"pub",
+      bech32PrefixValAddr: chain.bech32_prefix+"valoper",
+      bech32PrefixValPub: chain.bech32_prefix+"valoperpub",
+      bech32PrefixConsAddr: chain.bech32_prefix+"valcons",
+      bech32PrefixConsPub: chain.bech32_prefix+"valconspub"
     },
     feeCurrencies: chain.fees.fee_tokens.map(feeToken => {
       return {

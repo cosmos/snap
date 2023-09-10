@@ -7,6 +7,10 @@
 	import { updateDirectory } from "../../store/directory";
 	import BalanceLoader from "../../components/BalanceLoader.svelte";
 
+  $: {
+    console.log($balances);
+  }
+
   onMount(() => {
     fetchChains();
   });

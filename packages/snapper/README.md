@@ -6,8 +6,6 @@ Add the provider as a global object within your dApp.
 ```typescript
 import { CosmosSnap } from "@cosmsnap/snapper";
 window.cosmos = new CosmosSnap();
-// then use it anywhere!
-window.cosmos.changeSnapId("local:http://localhost:8080")
 
 const memo = "Hello from Metamask!";
 
@@ -42,6 +40,12 @@ const signingClient = await SigningStargateClient.connectWithSigner(
 );
 
 const result = await signingClient.sign(wallet.address, [msg], fee, memo);
+```
+
+Use in development mode.
+`Note:` You must run the snap locally for this to run properly.
+```typescript
+window.cosmos.changeSnapId("local:http://localhost:8080");
 ```
 
 Structure of the provider.

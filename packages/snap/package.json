@@ -1,6 +1,6 @@
 {
   "name": "@cosmsnap/snap",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "The Cosmos extension for your Metamask wallet.",
   "repository": {
     "type": "git",

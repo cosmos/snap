@@ -6,11 +6,12 @@
 	import { copyToClipboard } from "../../utils/general";
 
   export let search_value = "";
+  let copied = false; 
 
   const copyAddress = async (address: string) => {
+    copied = true;
     await copyToClipboard(address);
-    $state.showAlert = true;
-    $state.alertText = "Address Copied to Clipboard"
+    setTimeout(() => { copied = false; }, 1000);
   }
 
   onMount(() => {
@@ -49,13 +50,18 @@
                     <div class="cosmos1vhw82tqftrg inter-medium-white-12px">
                       {address.address}
                     </div>
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <img
-                      on:click={() => copyAddress(address.address)}
-                      class="content_copy cursor-pointer"
-                      src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64e66782179fd75deb1bab46/img/content-copy-12@2x.png"
-                      alt="content_copy"
-                    />
+                      <!-- svelte-ignore a11y-click-events-have-key-events -->
+                      <div class="cursor-pointer" on:click={() => copyAddress(address.address)}>
+                        {#if copied}
+                          <svg class="text-[#594bff] w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 1v4a1 1 0 0 1-1 1H1m4 6 2 2 4-4m4-8v16a.97.97 0 0 1-.933 1H1.933A.97.97 0 0 1 1 18V5.828a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 1 5.828 1h8.239A.97.97 0 0 1 15 2Z"/>
+                          </svg>
+                        {:else}
+                          <svg class="text-[#594bff] w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 5a1 1 0 0 0-1 1v12a.969.969 0 0 0 .933 1h8.1a1 1 0 0 0 1-1.033M10 1v4a1 1 0 0 1-1 1H5m10-4v12a.97.97 0 0 1-.933 1H5.933A.97.97 0 0 1 5 14V5.828a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 1 9.828 1h4.239A.97.97 0 0 1 15 2Z"/>
+                          </svg>
+                        {/if}
+                      </div>
                   </div>
                 </div>
               </div>
@@ -113,7 +119,7 @@
 .group-45-1 {
   display: flex;
   gap: 15px;
-  width: 204px;
+  width: 100%;
   align-items: center;
 }
 
@@ -141,17 +147,12 @@
   align-items: center;
 }
 
-.content_copy {
-  height: 14px;
-  margin-top: 1px;
-  width: 14px;
-}
-
 .cosmos1vhw82tqftrg {
   line-height: normal;
-  text-overflow: ellipsis; /* enables ellipsis */
-  white-space: nowrap; /* keeps the text in a single line */
-  overflow: hidden; /* keeps the element from overflowing its parent */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden; 
+  max-width: 300px;
 }
 
 .name-2 {

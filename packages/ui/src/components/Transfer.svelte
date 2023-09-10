@@ -2,9 +2,12 @@
   import { chains } from "../store/chains";
 	import Info from "./Info.svelte";
 	import { balances } from "../store/balances";
-  import { getSkipRecommendation, getRoute, type Route } from '../utils/ibc';
+  import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/ibc';
 	import { state } from "../store/state";
 	import type { Coin } from "@cosmjs/stargate";
+	import type { Msg } from "@cosmsnap/snapper";
+  import _ from 'lodash';
+	import { makeCoinPresentable } from "../utils/general";
 
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
@@ -12,8 +15,23 @@
   let available: Coin = {amount: "0", denom};
   let amount = 0;
   let noRoute = false;
+  let recipient = "";
+  let slippage = "1";
+  let sourceBalances: CoinIBC[] = [];
+  let defaultSourceAsset: string = "";
+
+  $: {
+    if ($balances) {
+      let source_chain = $balances.filter(item => item.chain_id == source)[0];
+      if (source_chain) {
+        sourceBalances = source_chain.balances;
+        defaultSourceAsset = source_chain.balances[0].ibc ? source_chain.balances[0].ibc_denom! : source_chain.balances[0].denom;
+      }
+    }
+  }
 
   const computeIBCRoute = async () => {
+    noRoute = false;
     if (source != destination) {
       try {
         let skipRec = await getSkipRecommendation(denom, source, destination);
@@ -21,13 +39,26 @@
           noRoute = true;
           throw new Error("No recommended asset found.");
         }
-        let routeSkip = await getRoute(amount.toString(), denom, source, skipRec.recommendations[0].asset.denom, destination);
-        if (!routeSkip) {
-          noRoute = true;
-          throw new Error("No route found.");
+        let msg = await getMsgs(source, denom, destination, skipRec.recommendations[0].asset.denom, (amount*1000000).toString(), slippage, $chains);
+        let fees = {
+          amount: [
+            {
+              amount: "100000",
+              denom: "uosmo"
+            }
+          ],
+          gas: "300000",
         }
-        console.log(routeSkip);
+        let messages: Msg[] = msg.msgs.map(item => {
+          let msgCamel: any = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
+          return {
+            value: msgCamel,
+            typeUrl: item.msg_type_url
+          }
+        });
+        await window.cosmos.signAndBroadcast(source, messages, fees);
       } catch (error: any) {
+        console.log(error);
         noRoute = true;
         $state.alertType = "danger";
         $state.showAlert = true;
@@ -41,12 +72,12 @@
       if (filtBal.length > 0) {
         let filtTokens = filtBal[0].balances.filter(item => item.denom == denom);
         if (filtTokens.length > 0) {
-          available = filtTokens[0]
+          available = makeCoinPresentable(filtTokens[0])
         } else {
-          available = { amount: "0", denom };
+          available = makeCoinPresentable({ amount: "0", denom, ibc: false });
         }
       } else {
-        available = { amount: "0", denom };
+        available = makeCoinPresentable({ amount: "0", denom, ibc: false });
       }
   }
 </script>
@@ -69,17 +100,18 @@
         <div class="percent inter-medium-white-14px">
             Asset
         </div>
-        <select bind:value={denom} id="denom" name="denom" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-            <option class="source-chain-osmosis inter-medium-white-14px" value="uosmo">OSMO</option>
-            <option class="source-chain-osmosis inter-medium-white-14px" value="uatom">ATOM</option>
+        <select bind:value={defaultSourceAsset} id="denom" name="denom" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
+            {#each sourceBalances as balance}
+              <option class="source-chain-osmosis inter-medium-white-14px" value={balance.ibc ? balance.ibc_denom : balance.denom}>{makeCoinPresentable(balance).denom}</option>
+            {/each}
         </select>
     </div>
-    <input type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+    <input bind:value={amount} type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
     <div class="flex w-full items-end">
       <div class="percent inter-medium-white-14px">
           Destination Chain
       </div>
-      <div class="z-index-[1000]">
+      <div class="z-[1000]">
           <Info/>
       </div>
     </div>
@@ -91,9 +123,10 @@
     <div hidden={!noRoute} class="text-align-left w-full mt-4 inter-medium-red-14px">
         Route Not Found
     </div>
-    <input bind:value={amount} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
-    <div class="available-balance-1454789 inter-medium-blueberry-14px">
-        Available: {Math.round((Number(available.amount) / 1000000) * 100) / 100} {available.denom.substring(1).toUpperCase()}
+    <input bind:value={recipient} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div on:click={() => { amount = _.round((Number(available.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
+        Available: {_.round((Number(available.amount) / 1000000))} {available.denom.substring(1).toUpperCase()}
     </div>
     <button on:click={computeIBCRoute} class="frame-1-2 frame-1-4 button-send">
         <div class="send-amount-1 inter-medium-white-12px">

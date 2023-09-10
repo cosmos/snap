@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { getDenomFromIBC } from '../../../utils/ibc.js';
 
 export async function POST({ request }) {
     
@@ -16,6 +17,14 @@ export async function POST({ request }) {
       const url = `${chain.apis.rest[0].address}/cosmos/bank/v1beta1/balances/${chain.address}`;
       const response = await fetch(url);
       const data = await response.json();
+      if (data.balances.length == 0) {
+        data.balances.push({
+          amount: "0",
+          denom: chain.staking?.staking_tokens[0].denom
+        })
+      }
+      let cleansedBalances = data.balances.map((/** @type {import('@cosmjs/stargate').Coin} */ item) => getDenomFromIBC(chain.apis.rest[0].address, item));
+      data.balances = await Promise.all(cleansedBalances);
       return { ...chain, balances: data.balances };
     } catch (err) {
       console.error(err);
@@ -28,13 +37,15 @@ export async function POST({ request }) {
     const balances = await Promise.all(chains.map(fetchBalance));
     return json({
       status: 200,
-      body: { balances }
+      balances,
+      error: null
     });
   } catch (error) {
     console.error(error);
     return json({
       status: 500,
-      body: { error }
+      balances: null,
+      error
     });
   }
 }

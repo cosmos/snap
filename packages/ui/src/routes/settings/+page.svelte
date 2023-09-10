@@ -4,35 +4,13 @@
 	import { state } from "../../store/state";
 	import { deleteChain } from '../../utils/snap';
 
-  let editCurrentChain = false;
-  let currentEditChain: string = "";
-  let currentChain: any = {};
-  let filteredChains = [];
-
-  const updateFiltered = async () => {
-    let allChains = $chains;
-    filteredChains = allChains.filter(item => item.chain_id === currentEditChain);
-    if (filteredChains.length > 0) {
-      currentChain = filteredChains[0];
-    }
-  }
-
-  const editChain = async (chain_id: string) => {
-    await updateFiltered();
-    editCurrentChain = true;
-    currentEditChain = chain_id;
-    $state.openAddChainPopup = true;
-    let allChains = $chains;
-    currentChain = allChains.filter(item => item.chain_id === currentEditChain)[0];
-  }
-
   const deleteChainFromSnap = async (chain_id: string) => {
     deleteChain(chain_id);
   }
 </script>
 
 <div hidden={!$state.openAddChainPopup}>
-  <AddChain edit={editCurrentChain} chainInfo={currentChain}/>
+  <AddChain/>
 </div>
 <div style="padding: 25px;">
   <div class="top-box">
@@ -41,7 +19,7 @@
     </div>
     <div style="display: flex; height: 40px;">
       <input placeholder="Search chain" class="search-chain"/>
-      <button on:click={() => { $state.openAddChainPopup = true; editCurrentChain = false;}} class="add-chain-button button-text">Add chain</button>
+      <button on:click={() => { $state.openAddChainPopup = true; }} class="add-chain-button button-text">Add chain</button>
     </div>
   </div>
   <div class="mt-[20px] grid grid-cols-2 gap-[20px]">
@@ -62,8 +40,6 @@
             </div>
           </div>
           <div class="group-4450">
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <img on:click={() => editChain(chain.chain_id)} class="create cursor-pointer" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a710c1420c7281d1d60ffb/img/create.svg" alt="create">
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <img on:click={() => deleteChainFromSnap(chain.chain_id)} class="delete_outline cursor-pointer" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a710c1420c7281d1d60ffb/img/delete-outline.svg" alt="delete_outline">
           </div>
@@ -216,10 +192,5 @@
   margin-bottom: 3px;
   width: 100%;
   justify-content: flex-end;
-}
-
-.create {
-  height: 24px;
-  width: 24px;
 }
 </style>

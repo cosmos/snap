@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { copyToClipboard } from "../utils/general";
   import { directory } from "../store/directory";
+  import _ from "lodash";
 
   export let chain_id = "osmosis-1";
   export let name = "Osmosis";
@@ -45,12 +46,12 @@
               {name}
           </div>
       <div class="group-53">
-          <div class="price inter-medium-white-12px">
-            ${dollarAmount}
-          </div>
-          <div class="percent inter-medium-white-14px">
-            {tokenAmount} {tokenDenom.substring(1).toUpperCase()}
-          </div>
+          <p class="price inter-medium-white-12px">
+            ${_.round(dollarAmount, 2)}
+          </p>
+          <p class="percent inter-medium-white-14px w-[150px]">
+            {_.round(tokenAmount, 2) + " " + tokenDenom.substring(1).toUpperCase()}
+          </p>
       </div>
   </div>
 </div>
@@ -140,14 +141,17 @@
   font-size: 22px;
   font-style: normal;
   font-weight: 700;
+  width: fit-content;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .group-53 {
-  display: grid;
+  display: flex;
   height: 17px;
   width: 100%;
-  grid-auto-flow: column;
   margin-top: 5px;
+  justify-content: space-between;
 }
 
 .price {
@@ -164,6 +168,9 @@
   font-style: normal;
   font-weight: 500;
   opacity: 0.45;
+  width: fit-content;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .percent {
@@ -173,6 +180,9 @@
   min-width: 46px;
   opacity: 0.45;
   text-align: right;
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .inter-medium-white-14px {
@@ -181,6 +191,7 @@
   font-size: var(--font-size-m);
   font-style: normal;
   font-weight: 500;
+  text-overflow: ellipsis;
 }
 
 .group-49 {
