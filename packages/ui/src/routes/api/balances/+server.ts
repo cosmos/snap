@@ -1,10 +1,24 @@
+import type { Coin, HttpEndpoint } from '@cosmjs/stargate';
+import type { Chain } from '@cosmsnap/snapper';
 import { json } from '@sveltejs/kit';
 
-const getDenomFromIBC = async (/** @type {string | import("@cosmjs/stargate").HttpEndpoint} */ url, /** @type {import("@cosmjs/stargate").Coin} */ ibc_coin) => {
+const getDenomFromIBC = async (url: HttpEndpoint | string, ibc_coin: Coin) => {
+  let endpoint: string;
+  let headers: HeadersInit = {};
+
+  if (typeof url === 'string') {
+    endpoint = url;
+  } else {
+    endpoint = url.url;
+    headers = url.headers; 
+  }
+  
   let splits = ibc_coin.denom.toUpperCase().split("IBC/");
   if (splits.length > 1) {
     let hash = splits[1];
-    let res = await fetch(`${url}/ibc/apps/transfer/v1/denom_traces/${hash}`);
+    let res = await fetch(`${endpoint}/ibc/apps/transfer/v1/denom_traces/${hash}`, {
+      headers 
+    });
     let data = await res.json();
     return {
       denom: data.denom_trace.base_denom,
@@ -25,7 +39,7 @@ export async function POST({ request }) {
    * @param {import('../../../../../snap/src/types/chains').Chain} chain - The chain for which to fetch the balance.
    * @returns {Promise<Object>} - A promise resolving to an object containing the chain and its balance.
    */
-  const fetchBalance = async (chain) => {
+  const fetchBalance = async (chain: Chain) => {
     try {
       const url = `${chain.apis.rest[0].address}/cosmos/bank/v1beta1/balances/${chain.address}`;
       const response = await fetch(url);
@@ -36,7 +50,7 @@ export async function POST({ request }) {
           denom: chain.staking?.staking_tokens[0].denom
         })
       }
-      let cleansedBalances = data.balances.map((/** @type {import('@cosmjs/stargate').Coin} */ item) => getDenomFromIBC(chain.apis.rest[0].address, item));
+      let cleansedBalances = data.balances.map((item: Coin) => getDenomFromIBC(chain.apis.rest[0].address, item));
       data.balances = await Promise.all(cleansedBalances);
       return { ...chain, balances: data.balances };
     } catch (err) {

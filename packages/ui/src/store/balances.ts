@@ -3,6 +3,11 @@ import type { Chain } from '../../../snap/src/types/chains';
 import { chains } from './chains'; 
 import type { CoinIBC } from '../utils/ibc';
 
+if (!import.meta.env.VITE_BALANCE_FUNCTION_URL) {
+    throw new Error("VITE_BALANCE_FUNCTION_URL not set...");
+}
+export const denoUrl = import.meta.env.VITE_DENO_SERVERLESS_URL;
+
 export interface ChainBalances extends Chain {
     balances: CoinIBC[];
 }
@@ -23,7 +28,7 @@ const updateBalances = async ($chains: Chain[], set: (value: ChainBalances[]) =>
     // Set loading state to true
     isLoading.set(true);
     try {
-        const res = await fetch('https://balancefunction.joeschnetzler.repl.co/', {
+        const res = await fetch(`${denoUrl}/balances`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
             body: JSON.stringify({ chains: $chains })
@@ -34,7 +39,6 @@ const updateBalances = async ($chains: Chain[], set: (value: ChainBalances[]) =>
         }
 
         const data = await res.json();
-        console.log(data);
         set(data.balances);
     } catch (error) {
         console.error("There was a problem with the fetch operation:", error);

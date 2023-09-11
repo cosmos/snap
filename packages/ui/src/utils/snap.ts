@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-export const snapId = import.meta.env.VITE_SNAP_ID ?? `local:http://localhost:8080`;
+export const snapId = import.meta.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
 const snapVersion = import.meta.env.VITE_SNAP_VERSION;
 const initialJsonString = "{}";
 const installParams = JSON.parse(initialJsonString);

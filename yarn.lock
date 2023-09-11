@@ -2059,18 +2059,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@cosmsnap/snapper@npm:0.1.12":
-  version: 0.1.12
-  resolution: "@cosmsnap/snapper@npm:0.1.12"
-  dependencies:
-    "@keplr-wallet/proto-types": 0.12.12
-    "@keplr-wallet/types": 0.12.12
-    ses: ^0.18.4
-  checksum: 4cdcced12796fcd686233b3f66d4e45d7af245dae07e7ee728e1b9a306cdd8e03b875d6b774406e7d4b2595c0d797abc65117c93bd918684ed91251c88b8cb55
-  languageName: node
-  linkType: hard
-
-"@cosmsnap/snapper@workspace:packages/snapper":
+"@cosmsnap/snapper@^0.1.14, @cosmsnap/snapper@workspace:packages/snapper":
   version: 0.0.0-use.local
   resolution: "@cosmsnap/snapper@workspace:packages/snapper"
   dependencies:
@@ -3714,6 +3703,13 @@ __metadata:
   version: 4.0.2
   resolution: "@types/long@npm:4.0.2"
   checksum: d16cde7240d834cf44ba1eaec49e78ae3180e724cd667052b194a372f350d024cba8dd3f37b0864931683dab09ca935d52f0c4c1687178af5ada9fc85b0635f4
+  languageName: node
+  linkType: hard
+
+"@types/lunr@npm:^2.3.5":
+  version: 2.3.5
+  resolution: "@types/lunr@npm:2.3.5"
+  checksum: c68c2bdb0af765e05ebb67ac773e98423080bbe5f7c7456ade9259dbb6bd808bd50d2c91e61ca216c4f36dc799d3058e97d514b76cdeb221b3fb20799fe266fa
   languageName: node
   linkType: hard
 
@@ -5495,7 +5491,7 @@ __metadata:
   dependencies:
     "@cosmjs/crypto": ^0.31.1
     "@cosmjs/stargate": ^0.31.1
-    "@cosmsnap/snapper": 0.1.12
+    "@cosmsnap/snapper": ^0.1.14
     "@fullhuman/postcss-purgecss": ^5.0.0
     "@keplr-wallet/types": 0.12.12
     "@metamask/detect-provider": ^2.0.0
@@ -5503,12 +5499,14 @@ __metadata:
     "@sveltejs/adapter-node": ^1.3.1
     "@sveltejs/kit": ^1.5.0
     "@types/lodash": ^4.14.198
+    "@types/lunr": ^2.3.5
     autoprefixer: latest
     flowbite-svelte: ^0.44.4
     flowbite-svelte-icons: ^0.4.3
     gridjs: ^6.0.6
     gridjs-svelte: ^2.1.1
     lodash: ^4.17.21
+    lunr: ^2.3.9
     mongodb: ^6.0.0
     postcss: latest
     postcss-load-config: ^4.0.1
@@ -8488,6 +8486,13 @@ __metadata:
   version: 10.0.1
   resolution: "lru-cache@npm:10.0.1"
   checksum: 06f8d0e1ceabd76bb6f644a26dbb0b4c471b79c7b514c13c6856113879b3bf369eb7b497dad4ff2b7e2636db202412394865b33c332100876d838ad1372f0181
+  languageName: node
+  linkType: hard
+
+"lunr@npm:^2.3.9":
+  version: 2.3.9
+  resolution: "lunr@npm:2.3.9"
+  checksum: 176719e24fcce7d3cf1baccce9dd5633cd8bdc1f41ebe6a180112e5ee99d80373fe2454f5d4624d437e5a8319698ca6837b9950566e15d2cae5f2a543a3db4b8
   languageName: node
   linkType: hard
 

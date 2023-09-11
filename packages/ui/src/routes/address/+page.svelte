@@ -4,9 +4,41 @@
 	import { getAddressBook, addressbook } from "../../store/addressbook";
 	import { state } from "../../store/state";
 	import { copyToClipboard } from "../../utils/general";
+	import lunr from "lunr";
+	import type { Address } from "@cosmsnap/snapper";
 
-  export let search_value = "";
+  let search_value = "";
+  let searchResults: lunr.Index.Result[] = [];
+  let currentAddresses: Address[] = $addressbook;
   let copied = false; 
+
+  const idx = lunr(function () {
+    // Use this ref function to get the id that will refer to each document
+    this.ref('address');
+
+    // Define fields to search in
+    this.field('address');
+    this.field('chain_id');
+    this.field('name');
+
+    $addressbook.forEach((doc) => {
+      this.add({
+        address: doc.address,
+        chain_id: doc.chain_id,
+        name: doc.name,
+      });
+    });
+  });
+
+  $: {
+    searchResults = idx.search(search_value);
+    currentAddresses = searchResults.map((result) => {
+      return $addressbook.find((address: Address) => address.address === result.ref);
+    }).filter(Boolean) as Address[];
+    if (currentAddresses.length === 0) {
+      currentAddresses = $addressbook
+    }
+  }
 
   const copyAddress = async (address: string) => {
     copied = true;
@@ -30,9 +62,9 @@
         Add address
       </button>
     </div>
-    <input placeholder="Type a keyword" bind:value={search_value} class="search-input"/>    
+    <input bind:value={search_value} placeholder="Type a keyword" class="search-input"/>    
     <div id="items-div" class="w-full overflow-scroll">
-      {#each $addressbook as address}
+      {#each currentAddresses as address}
         <div class="group-4407">
           <div class="group-45">
             <div class="group-45-1">

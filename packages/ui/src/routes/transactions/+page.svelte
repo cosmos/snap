@@ -1,11 +1,19 @@
-<script>
+<script lang="ts">
   import Grid from "gridjs-svelte";
   import TxMobile from "../../components/TxMobile.svelte";
+  import { transactions, type Transaction } from "../../store/transactions";
 
-  let columns = [{
-      id: '#',
-      name: '#'
-    }, 
+  let data: Transaction[] = [];
+
+  const setTransactions = async () => {
+    data = await $transactions
+  }
+
+  $: {
+    setTransactions();
+  }
+
+  let columns = [
     {
       id: 'address',
       name: 'Address'
@@ -22,11 +30,6 @@
       id: 'when',
       name: 'When'
     }
-  ]
-
-  const data = [
-    { '#': 1, address: "osmo1vhw8...2tqftrg", chain: "Osmosis", tx_hash: 8746613, when: "21 Apr 07:15:58" },
-    { '#': 2, address: "cosmos1vhw8...2tqftrg", chain: "Cosmos Hub", tx_hash: 7466, when: "05 May 18:36:14" },
   ]
 
   let config = {

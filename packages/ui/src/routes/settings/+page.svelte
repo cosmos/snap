@@ -3,6 +3,40 @@
   import AddChain from '../../components/AddChain.svelte';
 	import { state } from "../../store/state";
 	import { deleteChain } from '../../utils/snap';
+  import lunr from 'lunr';
+	import type { Chain } from '@cosmsnap/snapper';
+
+  let searchResults: lunr.Index.Result[] = [];
+  let currentChains: Chain[] = $chains;
+  let term = "";
+
+  const idx = lunr(function () {
+    // Use this ref function to get the id that will refer to each document
+    this.ref('chain_id');
+
+    // Define fields to search in
+    this.field('chain_name');
+    this.field('chain_id');
+    this.field('pretty_name');
+
+    $chains.forEach((doc) => {
+      this.add({
+        chain_name: doc.chain_name,
+        chain_id: doc.chain_id,
+        pretty_name: doc.pretty_name,
+      });
+    });
+  });
+
+  $: {
+    searchResults = idx.search(term);
+    currentChains = searchResults.map((result) => {
+      return $chains.find((chain: Chain) => chain.chain_id === result.ref);
+    }).filter(Boolean) as Chain[];
+    if (currentChains.length === 0) {
+      currentChains = $chains
+    }
+  }
 
   const deleteChainFromSnap = async (chain_id: string) => {
     deleteChain(chain_id);
@@ -18,12 +52,12 @@
       Settings
     </div>
     <div style="display: flex; height: 40px;">
-      <input placeholder="Search chain" class="search-chain"/>
+      <input bind:value={term} placeholder="Search chain" class="search-chain"/>
       <button on:click={() => { $state.openAddChainPopup = true; }} class="add-chain-button button-text">Add chain</button>
     </div>
   </div>
   <div class="mt-[20px] grid grid-cols-2 gap-[20px]">
-    {#each $chains as chain}
+    {#each currentChains as chain}
       <div class="col-span-2 lg:col-span-1">
         <div class="group-85">
           <div class="group-84">

@@ -14,7 +14,7 @@
 
   $: {
     let chainDir = $directory.filter(chain => chain.chain_id == chain_id);
-    const tokenKey = tokenDenom.substring(1).toLowerCase();
+    const tokenKey = tokenDenom.toLowerCase();
     const price = chainDir[0]?.prices?.coingecko?.[tokenKey];
     dollarAmount = price ? tokenAmount * price.usd : dollarAmount;
   };
