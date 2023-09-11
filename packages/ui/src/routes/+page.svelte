@@ -6,16 +6,24 @@
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
 	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
+	import { chains } from '../store/chains';
 
   let loading = true;
   let isMetaMaskInstalledValue: boolean = false;
   let isSnapInstalledValue: boolean = false;
   let isSnapInitValue: boolean = false;
 
+  const runInstallSnap = async () => { 
+    await installSnap(); 
+    isSnapInstalledValue = true; 
+    await initializeSnap();
+  }
+
   const initializeSnap = async () => {
-    let chains = await initSnap();
-    if (chains) {
-      localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chains))
+    let chainsFromInit = await initSnap();
+    if (chainsFromInit) {
+      localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit))
+      chains.set(chainsFromInit);
     }
     isSnapInitValue = true; 
     $state.connected = true; 
@@ -75,7 +83,7 @@
 
                   <Step
                       disabled={!isMetaMaskInstalledValue || isSnapInstalledValue}
-                      action={async () => { await installSnap(); isSnapInstalledValue = true; }}
+                      action={runInstallSnap}
                       complete={isSnapInstalledValue}
                       stepNumber="2"
                       stepTitle="Install Cosmos Snap"

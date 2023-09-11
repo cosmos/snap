@@ -1,5 +1,18 @@
 import { json } from '@sveltejs/kit';
-import { getDenomFromIBC } from '../../../utils/ibc.js';
+
+const getDenomFromIBC = async (/** @type {string | import("@cosmjs/stargate").HttpEndpoint} */ url, /** @type {import("@cosmjs/stargate").Coin} */ ibc_coin) => {
+  let splits = ibc_coin.denom.toUpperCase().split("IBC/");
+  if (splits.length > 1) {
+    let hash = splits[1];
+    let res = await fetch(`${url}/ibc/apps/transfer/v1/denom_traces/${hash}`);
+    let data = await res.json();
+    return {
+      denom: data.denom_trace.base_denom,
+      amount: ibc_coin.amount
+    }
+  }
+  return ibc_coin
+}
 
 export async function POST({ request }) {
     

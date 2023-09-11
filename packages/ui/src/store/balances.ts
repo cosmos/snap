@@ -25,7 +25,7 @@ const updateBalances = async ($chains: Chain[], set: (value: ChainBalances[]) =>
     try {
         const res = await fetch('https://balancefunction.joeschnetzler.repl.co/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
             body: JSON.stringify({ chains: $chains })
         });
 
@@ -34,6 +34,7 @@ const updateBalances = async ($chains: Chain[], set: (value: ChainBalances[]) =>
         }
 
         const data = await res.json();
+        console.log(data);
         set(data.balances);
     } catch (error) {
         console.error("There was a problem with the fetch operation:", error);

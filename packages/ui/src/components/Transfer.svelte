@@ -4,82 +4,101 @@
 	import { balances } from "../store/balances";
   import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/ibc';
 	import { state } from "../store/state";
-	import type { Coin } from "@cosmjs/stargate";
 	import type { Msg } from "@cosmsnap/snapper";
   import _ from 'lodash';
-	import { makeCoinPresentable } from "../utils/general";
 
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
-  let denom = "uatom";
-  let available: Coin = {amount: "0", denom};
+  let selected: CoinIBC = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()};
   let amount = 0;
   let noRoute = false;
   let recipient = "";
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
-  let defaultSourceAsset: string = "";
+  let setInitial = false;
 
   $: {
     if ($balances) {
       let source_chain = $balances.filter(item => item.chain_id == source)[0];
       if (source_chain) {
         sourceBalances = source_chain.balances;
-        defaultSourceAsset = source_chain.balances[0].ibc ? source_chain.balances[0].ibc_denom! : source_chain.balances[0].denom;
+        if (!setInitial) {
+          selected = sourceBalances[0];
+          setInitial = true;
+        }
+      }
+    }
+  }
+
+  const setSelected = async (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    if (sourceBalances) {
+      let find = sourceBalances.find(item => item.denom.toUpperCase() == target.value.toUpperCase());
+      if (find) {
+        selected = find
       }
     }
   }
 
   const computeIBCRoute = async () => {
-    noRoute = false;
-    if (source != destination) {
-      try {
-        let skipRec = await getSkipRecommendation(denom, source, destination);
-        if (skipRec.recommendations.length == 0) {
-          noRoute = true;
-          throw new Error("No recommended asset found.");
-        }
-        let msg = await getMsgs(source, denom, destination, skipRec.recommendations[0].asset.denom, (amount*1000000).toString(), slippage, $chains);
-        let fees = {
-          amount: [
-            {
-              amount: "100000",
-              denom: "uosmo"
-            }
-          ],
-          gas: "300000",
-        }
-        let messages: Msg[] = msg.msgs.map(item => {
-          let msgCamel: any = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
-          return {
-            value: msgCamel,
-            typeUrl: item.msg_type_url
-          }
-        });
-        await window.cosmos.signAndBroadcast(source, messages, fees);
-      } catch (error: any) {
-        console.log(error);
-        noRoute = true;
-        $state.alertType = "danger";
-        $state.showAlert = true;
-        $state.alertText = `Error Occured Finding Route: ${error.message}`
-      }
-    }
-  }
+      noRoute = false;
 
-  $: {
-      let filtBal = $balances.filter(item => item.chain_id == source);
-      if (filtBal.length > 0) {
-        let filtTokens = filtBal[0].balances.filter(item => item.denom == denom);
-        if (filtTokens.length > 0) {
-          available = makeCoinPresentable(filtTokens[0])
-        } else {
-          available = makeCoinPresentable({ amount: "0", denom, ibc: false });
-        }
-      } else {
-        available = makeCoinPresentable({ amount: "0", denom, ibc: false });
+      if (source === destination) {
+          return;
       }
-  }
+
+      try {
+          const skipRec = await getSkipRecommendation(selected.denom, source, destination);
+
+          if (!Array.isArray(skipRec.recommendations) || skipRec.recommendations.length === 0) {
+              throw new Error("No recommended asset found.");
+          }
+
+          const firstRec = skipRec.recommendations[0].asset;
+          if (!firstRec || !firstRec.denom) {
+              throw new Error("Invalid recommendation data.");
+          }
+
+          const adjustedAmount = (amount * 1000000).toString();
+
+          const msg = await getMsgs(source, selected.denom, destination, firstRec.denom, adjustedAmount, slippage, $chains);
+
+          if (!Array.isArray(msg.msgs)) {
+              throw new Error("Invalid message data.");
+          }
+
+          const fees = {
+              amount: [
+                  {
+                      amount: "100000",
+                      denom: "uosmo"
+                  }
+              ],
+              gas: "300000",
+          };
+
+          const messages: Msg[] = msg.msgs.map(item => {
+              if (!item.msg || !item.msg_type_url) {
+                  throw new Error("Invalid message format.");
+              }
+
+              const msgCamel = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
+
+              return {
+                  value: msgCamel,
+                  typeUrl: item.msg_type_url
+              };
+          });
+
+          await window.cosmos.signAndBroadcast(source, messages, fees);
+
+      } catch (error: any) {
+          console.error(error);
+          $state.alertType = "danger";
+          $state.showAlert = true;
+          $state.alertText = `Error Occurred Finding Route: ${error.message}`;
+      }
+  };
 </script>
 
 <div class="overlap-group1">
@@ -100,9 +119,9 @@
         <div class="percent inter-medium-white-14px">
             Asset
         </div>
-        <select bind:value={defaultSourceAsset} id="denom" name="denom" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
+        <select on:change={async e => { await setSelected(e) }} id="denom" name="denom" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
             {#each sourceBalances as balance}
-              <option class="source-chain-osmosis inter-medium-white-14px" value={balance.ibc ? balance.ibc_denom : balance.denom}>{makeCoinPresentable(balance).denom}</option>
+              <option class="source-chain-osmosis inter-medium-white-14px" value={balance.ibc ? balance.ibc_denom : balance.denom}>{balance.display}</option>
             {/each}
         </select>
     </div>
@@ -125,8 +144,8 @@
     </div>
     <input bind:value={recipient} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div on:click={() => { amount = _.round((Number(available.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
-        Available: {_.round((Number(available.amount) / 1000000))} {available.denom.substring(1).toUpperCase()}
+    <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
+        Available: {_.round((Number(selected.amount) / 1000000))} {selected.display}
     </div>
     <button on:click={computeIBCRoute} class="frame-1-2 frame-1-4 button-send">
         <div class="send-amount-1 inter-medium-white-12px">

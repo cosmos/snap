@@ -76,6 +76,7 @@ export interface SkipMsgs {
 export interface CoinIBC extends Coin {
   ibc: boolean;
   ibc_denom?: string;
+  display: string;
 }
 
 export interface IbcAsset {

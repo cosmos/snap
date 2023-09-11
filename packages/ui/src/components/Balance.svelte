@@ -50,7 +50,7 @@
             ${_.round(dollarAmount, 2)}
           </p>
           <p class="percent inter-medium-white-14px w-[150px]">
-            {_.round(tokenAmount, 2) + " " + tokenDenom.substring(1).toUpperCase()}
+            {_.round(tokenAmount, 2) + " " + tokenDenom}
           </p>
       </div>
   </div>

@@ -485,7 +485,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
             heading("Confirm Chain Addition"),
             divider(),
             heading("Chain Info"),
-            text(`${new_chain}`),
+            text(`${JSON.stringify(new_chain, null, 4)}`),
           ]),
         },
       });

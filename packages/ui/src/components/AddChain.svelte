@@ -1,14 +1,27 @@
-<script>
+<script lang="ts">
   import { JSONEditor, Mode } from 'svelte-jsoneditor';
   import { state } from '../store/state';
+  import { ADD_CHAIN_EXAMPLE } from '../utils/constants';
+	import type { ChainInfo } from '@keplr-wallet/types';
+	import { validateChainInfo } from '../utils/general';
 
-  export let edit = false;
-  export let chainInfo = {};
-  let content = { json: {} };
-  $: {
-    content = {
-      json: chainInfo
+  export let chainInfo: ChainInfo = ADD_CHAIN_EXAMPLE;
+  let content = { text: undefined, json: chainInfo as any };
+
+  const addChain = async () => {
+    let good = validateChainInfo(chainInfo);
+    if (!good) {
+      $state.alertType = "danger";
+      $state.alertText = "Chain info is not supplied properly.";
+      $state.showAlert = true;
+      throw new Error("Chain info is not supplied properly.")
     }
+    await window.cosmos.experimentalSuggestChain(chainInfo);
+  }
+
+  function handleChange(updatedContent: any, previousContent: any, { contentErrors, patchResult }: any) {
+    content = updatedContent;
+    chainInfo = updatedContent.json;
   }
 </script>
   
@@ -18,7 +31,7 @@
               <div class="group-4446">
                   <div class="group-4444">
                       <div class="add-new-chain-1 inter-bold-white-20px">
-                        {edit ? "Edit chain" : "Add new chain"}
+                        Add new chain
                       </div>
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <img on:click={() => $state.openAddChainPopup = false} class="clear" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/clear@2x.png" alt="clear">
@@ -28,11 +41,11 @@
                   <div class="group-4447">
                       <div class="group-4445">
                           <div class="overlap-group jse-theme-dark">
-                            <JSONEditor content={content} mainMenuBar={false} navigationBar={false} statusBar={false} mode={Mode.text}/>
+                            <JSONEditor onChange="{handleChange}" content={content} mainMenuBar={false} navigationBar={false} statusBar={false} mode={Mode.tree}/>
                           </div>
                       </div>
-                  <button class="frame-1-2 create-new-chain inter-medium-white-12px">
-                      {edit ? "Save chain edits" : "Create new chain"}
+                  <button on:click={addChain} class="frame-1-2 create-new-chain inter-medium-white-12px">
+                      Add Chain
                   </button>
               </div>
           </div>

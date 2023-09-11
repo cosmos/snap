@@ -1,23 +1,14 @@
 <script lang="ts">
-	import { beforeUpdate, onMount } from "svelte";
+  import { beforeUpdate, onMount } from "svelte";
   import Balance from "../../components/Balance.svelte";
   import Transfer from "../../components/Transfer.svelte";
   import { balances } from "../../store/balances";
-	import { fetchChains } from "../../store/chains";
-	import { updateDirectory } from "../../store/directory";
-	import BalanceLoader from "../../components/BalanceLoader.svelte";
+  import { fetchChains } from "../../store/chains";
+  import { updateDirectory } from "../../store/directory";
+  import BalanceLoader from "../../components/BalanceLoader.svelte";
 
-  $: {
-    console.log($balances);
-  }
-
-  onMount(() => {
-    fetchChains();
-  });
-
-  beforeUpdate(() => {
-    updateDirectory();
-  })
+  onMount(fetchChains);
+  beforeUpdate(updateDirectory);
 </script>
 
 <div style="padding: 25px;">
@@ -33,9 +24,9 @@
               <div class="balance col-span-2 lg:col-span-1">
                 <Balance
                   name={b?.pretty_name}
-                  dollarAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
-                  tokenAmount={Math.round((Number(amount.amount) / 1000000) * 100) / 100}
-                  tokenDenom={amount.denom}
+                  dollarAmount={Math.round((Number(amount.amount) / 1_000_000) * 100) / 100}
+                  tokenAmount={Math.round((Number(amount.amount) / 1_000_000) * 100) / 100}
+                  tokenDenom={amount.display}
                   chainAddress={b?.address}
                   logo={b.logo_URIs ? b.logo_URIs.svg : undefined}
                 />
@@ -44,7 +35,7 @@
           {/each}
         {:else}
           {#each [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as i}
-            <BalanceLoader/>
+            <BalanceLoader />
           {/each}
         {/if}
       </div>
@@ -56,10 +47,10 @@
 </div>
 
 <style>
-.chain-holding-distribution {
-  color: var(--white);
-  font-family: var(--font-family-inter);
-  font-size: 20px;
-  font-weight: 700;
-}
+  .chain-holding-distribution {
+    color: var(--white);
+    font-family: var(--font-family-inter);
+    font-size: 20px;
+    font-weight: 700;
+  }
 </style>

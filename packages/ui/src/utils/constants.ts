@@ -1,8 +1,15 @@
-export let ADD_CHAIN_EXAMPLE = {
+import type { ChainInfo } from "@keplr-wallet/types";
+
+export let ADD_CHAIN_EXAMPLE: ChainInfo = {
     chainId: "new-chain-1",
     chainName: "Cosmos Chain",
     rpc: "http://123.456.789.012:26657",
     rest: "http://123.456.789.012:1317",
+    nodeProvider: {
+        name: "provider",
+        email: "provider@email.com",
+        website: "provider.com"
+    },
     bip44: {
         coinType: 118,
     },
