@@ -1,5 +1,4 @@
 {
-  "rootDirectory": "./packages/ui",
   "build": {
     "env": {
       "YARN_WORKSPACES": "true"
