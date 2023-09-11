@@ -1,6 +1,6 @@
 {
   "name": "@cosmsnap/snapper",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "A helper package with utilities to interact with the Cosmos Extension for MetaMask.",
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
     "wallets"
   ],
   "scripts": {
-    "build": "tsc && esbuild ./dist --bundle --outfile=./dist/index.cjs"
+    "build": "tsc && esbuild ./dist --bundle --outfile=./dist/index.cjs && esbuild ./src/provider.ts --outfile=./dist/provider.cjs && esbuild ./src/signer.ts --outfile=./dist/signer.cjs && esbuild ./src/snap.ts --outfile=./dist/snap.cjs"
   },
   "ava": {
     "extensions": [
