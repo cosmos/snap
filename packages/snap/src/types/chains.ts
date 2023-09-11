@@ -1,4 +1,4 @@
-import { HttpEndpoint } from "@cosmjs/stargate";
+import type { HttpEndpoint } from "@cosmjs/stargate";
 
 export interface Msg {
   typeUrl: string;
