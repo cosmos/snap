@@ -1,7 +1,10 @@
 import { SigningStargateClient } from '@cosmjs/stargate';
 import type { Chain } from '@cosmsnap/snapper';
 import _ from 'lodash';
-import rpcs from '../rpcs.json';
+import rpcs from '../apis.json';
+
+let keyNumia = import.meta.env.VITE_NUMIA_API_KEY;
+let _keyRhino = import.meta.env.VITE_RHINO_API_KEY;
 
 export interface Transaction {
   address: string;
@@ -20,7 +23,7 @@ export interface ChainConfig {
 export const getClient = async (chain: Chain) => {
   let chainRpc = rpcs.apis.find(item => item.chain_id == chain.chain_id);
   // if we dont have a production rpc bank on public registry
-  if (!chainRpc) {
+  if (!chainRpc || !keyNumia) {
     let signer = await window.cosmos.getOfflineSigner(chain.chain_id);
     const signingClient = await SigningStargateClient.connectWithSigner(
         chain.apis.rpc[0].address,
@@ -30,7 +33,7 @@ export const getClient = async (chain: Chain) => {
   }
   let signer = await window.cosmos.getOfflineSigner(chain.chain_id);
   const signingClient = await SigningStargateClient.connectWithSigner(
-      { url: chainRpc.rpc, headers: { "Authorization": `Bearer ${chainRpc.api_key}` } },
+      { url: chainRpc.rpc, headers: { "Authorization": `Bearer ${keyNumia}` } },
       signer
   );
   return signingClient

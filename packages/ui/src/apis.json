@@ -1,0 +1,359 @@
+{
+    "apis": [
+        {
+            "chain_id": "cosmoshub-4",
+            "rest": "https://cosmos-lcd.numia.xyz",
+            "rpc": "https://cosmos-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "juno-1",
+            "rest": "https://juno-lcd.numia.xyz",
+            "rpc": "https://juno-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "osmosis-1",
+            "rest": "https://osmosis-lcd.numia.xyz",
+            "rpc": "https://osmosis-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "evmos_9001-2",
+            "rest": "https://evmos-lcd.numia.xyz",
+            "rpc": "https://evmos-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "injective-1",
+            "rest": "https://injective-lcd.numia.xyz",
+            "rpc": "https://injective-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "stargaze-1",
+            "rest": "https://stargaze-lcd.numia.xyz",
+            "rpc": "https://stargaze-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "umee-1",
+            "rest": "https://umee-lcd.numia.xyz",
+            "rpc": "https://umee-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "phoenix-1",
+            "rest": "https://terra2-lcd.numia.xyz",
+            "rpc": "https://terra2-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "stride-1",
+            "rest": "https://stride-lcd.numia.xyz",
+            "rpc": "https://stride-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "kava_2222-10",
+            "rest": "https://kava-lcd.numia.xyz",
+            "rpc": "https://kava-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "quasar-1",
+            "rest": "https://quasar-lcd.numia.xyz",
+            "rpc": "https://quasar-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "crescent-1",
+            "rest": "https://crescent-lcd.numia.xyz",
+            "rpc": "https://crescent-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "kaiyo-1",
+            "rest": "https://kujira-lcd.numia.xyz",
+            "rpc": "https://kujira-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "neutron-1",
+            "rest": "https://neutron-lcd.numia.xyz",
+            "rpc": "https://neutron-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "mars-1",
+            "rest": "https://mars-lcd.numia.xyz",
+            "rpc": "https://mars-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "comdex-1",
+            "rest": "https://comdex-lcd.numia.xyz",
+            "rpc": "https://comdex-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "nois-1",
+            "rest": "https://nois-lcd.numia.xyz",
+            "rpc": "https://nois-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "canto_7700-1",
+            "rest": "https://canto-lcd.numia.xyz",
+            "rpc": "https://canto-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "perun-1",
+            "rest": "https://chain4energy-lcd.numia.xyz",
+            "rpc": "https://chain4energy-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "reb_1111-1",
+            "rest": "https://rebus-lcd.numia.xyz",
+            "rpc": "https://rebus-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "gitopia",
+            "rest": "https://gitopia-lcd.numia.xyz",
+            "rpc": "https://gitopia-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "bitcanna-1",
+            "rest": "https://bitcanna-lcd.numia.xyz",
+            "rpc": "https://bitcanna-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "quicksilver-2",
+            "rest": "https://quicksilver-lcd.numia.xyz",
+            "rpc": "https://quicksilver-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "axelar-dojo-1",
+            "rest": "https://axelar-lcd.numia.xyz",
+            "rpc": "https://axelar-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "secret-4",
+            "rest": "https://secretnetwork-lcd.numia.xyz",
+            "rpc": "https://secretnetwork-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "uptick_117-1",
+            "rest": "https://uptick-lcd.numia.xyz",
+            "rpc": "https://uptick-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "teritori-1",
+            "rest": "https://teritori-lcd.numia.xyz",
+            "rpc": "https://teritori-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "Oraichain",
+            "rest": "https://oraichain-lcd.numia.xyz",
+            "rpc": "https://oraichain-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "xstaxy-1",
+            "rest": "https://aura-lcd.numia.xyz",
+            "rpc": "https://aura-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "shentu-2.2",
+            "rest": "https://shentu-lcd.numia.xyz",
+            "rpc": "https://shentu-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "agoric-3",
+            "rest": "https://agoric-lcd.numia.xyz",
+            "rpc": "https://agoric-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "core-1",
+            "rest": "https://persistence-lcd.numia.xyz",
+            "rpc": "https://persistence-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "omniflixhub-1",
+            "rest": "https://omniflixhub-lcd.numia.xyz",
+            "rpc": "https://omniflixhub-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "mantle-1",
+            "rest": "https://assetmantle-lcd.numia.xyz",
+            "rpc": "https://assetmantle-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "pirin-1",
+            "rest": "https://nolus-lcd.numia.xyz",
+            "rpc": "https://nolus-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "chihuahua-1",
+            "rest": "https://chihuahua-lcd.numia.xyz",
+            "rpc": "https://chihuahua-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "mainnet-3",
+            "rest": "https://decentr-lcd.numia.xyz",
+            "rpc": "https://decentr-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "tgrade-mainnet-1",
+            "rest": "https://tgrade-lcd.numia.xyz",
+            "rpc": "https://tgrade-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "akashnet-2",
+            "rest": "https://akash-lcd.numia.xyz",
+            "rpc": "https://akash-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "planq_7070-2",
+            "rest": "https://planq-lcd.numia.xyz",
+            "rpc": "https://planq-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "bitsong-2b",
+            "rest": "https://bitsong-lcd.numia.xyz",
+            "rpc": "https://bitsong-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "ShareRing-VoyagerNet",
+            "rest": "https://shareledger-lcd.numia.xyz",
+            "rpc": "https://shareledger-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "cudos-1",
+            "rest": "https://cudos-lcd.numia.xyz",
+            "rpc": "https://cudos-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "odin-mainnet-freya",
+            "rest": "https://odin-lcd.numia.xyz",
+            "rpc": "https://odin-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "meme-1",
+            "rest": "https://meme-lcd.numia.xyz",
+            "rpc": "https://meme-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "mars-1",
+            "rest": "https://mars-lcd.numia.xyz",
+            "rpc": "https://mars-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "fetchhub-4",
+            "rest": "https://fetchhub-lcd.numia.xyz",
+            "rpc": "https://fetchhub-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "dyson-mainnet-01",
+            "rest": "https://dyson-lcd.numia.xyz",
+            "rpc": "https://dyson-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "acre_9052-1",
+            "rest": "https://acrechain-lcd.numia.xyz",
+            "rpc": "https://acrechain-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "regen-1",
+            "rest": "https://regen-lcd.numia.xyz",
+            "rpc": "https://regen-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "jackal-1",
+            "rest": "https://jackal-lcd.numia.xyz",
+            "rpc": "https://jackal-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "pio-mainnet-1",
+            "rest": "https://provenance-lcd.numia.xyz",
+            "rpc": "https://provenance-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "laozi-mainnet",
+            "rest": "https://bandchain-lcd.numia.xyz",
+            "rpc": "https://bandchain-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "nyx",
+            "rest": "https://nyx-lcd.numia.xyz",
+            "rpc": "https://nyx-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "dimension_37-1",
+            "rest": "https://xpla-lcd.numia.xyz",
+            "rpc": "https://xpla-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "panacea-3",
+            "rest": "https://panacea-lcd.numia.xyz",
+            "rpc": "https://panacea-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "kichain-2",
+            "rest": "https://kichain-lcd.numia.xyz",
+            "rpc": "https://kichain-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "cheqd-mainnet-1",
+            "rest": "https://cheqd-lcd.numia.xyz",
+            "rpc": "https://cheqd-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "likecoin-mainnet-2",
+            "rest": "https://likecoin-lcd.numia.xyz",
+            "rpc": "https://likecoin-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "colosseum-1",
+            "rest": "https://firmachain-lcd.numia.xyz",
+            "rpc": "https://firmachain-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "tenet_1559-1",
+            "rest": "https://tenet-lcd.numia.xyz",
+            "rpc": "https://tenet-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "lambda_92000-1",
+            "rest": "https://lambda-lcd.numia.xyz",
+            "rpc": "https://lambda-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "irishub-1",
+            "rest": "https://irisnet-lcd.numia.xyz",
+            "rpc": "https://irisnet-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "migaloo-1",
+            "rest": "https://migaloo-lcd.numia.xyz",
+            "rpc": "https://migaloo-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "realionetwork_3301-1",
+            "rest": "https://realio-lcd.numia.xyz",
+            "rpc": "https://realio-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "dig-1",
+            "rest": "https://dig-lcd.numia.xyz",
+            "rpc": "https://dig-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "coreum-mainnet-1",
+            "rest": "https://coreum-lcd.numia.xyz",
+            "rpc": "https://coreum-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "carbon-1",
+            "rest": "https://carbon-lcd.numia.xyz",
+            "rpc": "https://carbon-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "imversed_5555555-1",
+            "rest": "https://imversed-lcd.numia.xyz",
+            "rpc": "https://imversed-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "crypto-org-chain-mainnet-1",
+            "rest": "https://cryptoorgchain-lcd.numia.xyz",
+            "rpc": "https://cryptoorgchain-rpc.numia.xyz"
+        },
+        {
+            "chain_id": "archway-1",
+            "rest": "https://archway-lcd.numia.xyz",
+            "rpc": "https://archway-rpc.numia.xyz"
+        }
+    ]
+}

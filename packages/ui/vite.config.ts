@@ -8,5 +8,12 @@ export default defineConfig({
 	},
 	resolve: {
 		dedupe: ['@cosmsnap/snapper'] 
+	},
+	optimizeDeps: {
+		esbuildOptions: {
+			define: {
+				global: 'globalThis'  
+			}
+		}
 	}
 });
