@@ -4,8 +4,10 @@
 	import { balances } from "../store/balances";
   import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/ibc';
 	import { state } from "../store/state";
-	import type { Msg } from "@cosmsnap/snapper";
+	import type { Chain, Msg } from "@cosmsnap/snapper";
   import _ from 'lodash';
+	import { getClient } from "../utils/tx";
+	import { addTransaction } from "../store/transactions";
 
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
@@ -16,8 +18,55 @@
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
   let setInitial = false;
+  let fromAddress = "";
+  let fees = {
+      amount: [
+          {
+              amount: "100000",
+              denom: ""
+          }
+      ],
+      gas: "5000",
+  };
+  let fromChain: Chain = {
+	  chain_name: "",
+	  chain_id: "",
+	  pretty_name: "",
+	  slip44: 0,
+	  bech32_prefix: "",
+	  fees: {fee_tokens: []},
+	  apis: {
+		  rpc: [],
+		  rest: [],
+		  grpc: undefined
+	  },
+	  address: undefined
+  };
 
   $: {
+    if (typeof amount != "number") {
+      amount = 0
+    }
+    if (!fees || !fees.amount) {
+      fees = {
+          amount: [
+              {
+                  amount: "100000",
+                  denom: ""
+              }
+          ],
+          gas: "5000",
+      }
+    }
+    let foundChain = $chains.find(item => item.chain_id == source);
+    if (foundChain) {
+      fromChain = foundChain;
+      fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom
+      fees.gas = (fromChain.fees.fee_tokens[0].average_gas_price * 1000000).toString()
+    }
+    if (fromChain && fromChain.address) {
+      fromAddress = fromChain.address;
+    }
     if ($balances) {
       let source_chain = $balances.filter(item => item.chain_id == source)[0];
       if (source_chain) {
@@ -43,11 +92,34 @@
   const computeIBCRoute = async () => {
       noRoute = false;
 
-      if (source === destination) {
-          return;
-      }
+      const client = await getClient(fromChain);
 
       try {
+          if (source === destination) {
+            const coins = [
+              {
+                denom: selected.denom,
+                amount: (amount * 1000000).toString(),  
+              },
+            ]
+
+            const tx = await client.sendTokens(fromAddress, recipient, coins, fees);
+            
+            if (tx.code == 0) {
+              await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash})
+            } else {
+              if (tx.rawLog) {
+                $state.alertText = tx.rawLog
+              } else {
+                $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
+              }
+              $state.alertType = "danger"
+              $state.showAlert = true
+            }
+
+            return tx
+          }
+
           const skipRec = await getSkipRecommendation(selected.denom, source, destination);
 
           if (!Array.isArray(skipRec.recommendations) || skipRec.recommendations.length === 0) {
@@ -61,21 +133,11 @@
 
           const adjustedAmount = (amount * 1000000).toString();
 
-          const msg = await getMsgs(source, selected.denom, destination, firstRec.denom, adjustedAmount, slippage, $chains);
+          const msg = await getMsgs(source, selected.denom, destination, firstRec.denom, adjustedAmount, slippage, $chains, recipient);
 
           if (!Array.isArray(msg.msgs)) {
               throw new Error("Invalid message data.");
           }
-
-          const fees = {
-              amount: [
-                  {
-                      amount: "100000",
-                      denom: "uosmo"
-                  }
-              ],
-              gas: "300000",
-          };
 
           const messages: Msg[] = msg.msgs.map(item => {
               if (!item.msg || !item.msg_type_url) {
@@ -90,7 +152,19 @@
               };
           });
 
-          await window.cosmos.signAndBroadcast(source, messages, fees);
+          let tx = await window.cosmos.signAndBroadcast(source, messages, fees);
+
+          if (tx.code == 0) {
+            await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash})
+          } else {
+            if (tx.rawLog) {
+              $state.alertText = tx.rawLog
+            } else {
+              $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
+            }
+            $state.alertType = "danger"
+            $state.showAlert = true
+          }
 
       } catch (error: any) {
           console.error(error);

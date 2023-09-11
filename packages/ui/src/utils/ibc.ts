@@ -183,7 +183,8 @@ export const getMsgs = async (
   destAsset: string,
   amount: string,
   slippageTolerance: string,
-  chains: Chain[]
+  chains: Chain[],
+  toAddress: string
 ): Promise<SkipMsgs> => {
 
   const url = 'https://api.skip.money/v1/fungible/msgs_direct';
@@ -191,7 +192,11 @@ export const getMsgs = async (
   let chain_ids_to_addresses: Record<string, string> = {};
   chains.map(item => {
     if (item.address) {
-      chain_ids_to_addresses[item.chain_id] = item.address
+      if (item.chain_id == destChainId) {
+        chain_ids_to_addresses[item.chain_id] = toAddress
+      } else {
+        chain_ids_to_addresses[item.chain_id] = item.address
+      }
     }
   })
 

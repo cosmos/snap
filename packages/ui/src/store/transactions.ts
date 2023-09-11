@@ -22,7 +22,7 @@ export async function getTransactions(chains: Chain[]): Promise<Transaction[]> {
 export async function addTransaction(data: {
   address: string;
   chain: string;
-  when: Date;
+  when: string;
   tx_hash: string;
 }) {
   const res = await fetch(`${denoUrl}/transactions/add`, {

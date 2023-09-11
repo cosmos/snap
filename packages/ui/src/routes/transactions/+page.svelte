@@ -2,16 +2,21 @@
   import Grid from "gridjs-svelte";
   import TxMobile from "../../components/TxMobile.svelte";
   import { transactions, type Transaction } from "../../store/transactions";
+	import { onMount } from "svelte";
+	import type { TDataArray } from "gridjs/dist/src/types";
 
-  let data: Transaction[] = [];
+  type Cell = string | number | boolean;
+
+  let data: any[] = [];
 
   const setTransactions = async () => {
     data = await $transactions
   }
 
-  $: {
+  onMount(() => {
     setTransactions();
-  }
+    if (!data) { data = []; }
+  })
 
   let columns = [
     {

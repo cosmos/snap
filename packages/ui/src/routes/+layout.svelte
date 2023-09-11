@@ -42,10 +42,10 @@
         <slot/>
       </div>
   {:else} 
-    <Alert />
     <slot/>
   {/if}
 </div>
+<Alert />
 
 <style>
     @import 'tailwindcss/base';

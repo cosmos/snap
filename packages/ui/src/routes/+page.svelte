@@ -5,7 +5,7 @@
   import { isMetaMaskInstalled, initSnap, isSnapInitialized, isSnapInstalled, installSnap } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
-	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
+	import { LOCAL_STORAGE_CHAINS, LOCAL_STORAGE_INIT } from '../utils/general';
 	import { chains } from '../store/chains';
 
   let loading = true;
@@ -13,17 +13,19 @@
   let isSnapInstalledValue: boolean = false;
   let isSnapInitValue: boolean = false;
 
-  const runInstallSnap = async () => { 
+  const runInstallSnap = async () => {
     await installSnap(); 
-    isSnapInstalledValue = true; 
-    await initializeSnap();
+    isSnapInstalledValue = true;
+    isSnapInitValue = false;
+    localStorage.setItem(LOCAL_STORAGE_INIT, "false") ;
   }
 
   const initializeSnap = async () => {
     let chainsFromInit = await initSnap();
     if (chainsFromInit) {
-      localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit))
+      localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
       chains.set(chainsFromInit);
+      localStorage.setItem(LOCAL_STORAGE_INIT, "true")
     }
     isSnapInitValue = true; 
     $state.connected = true; 
@@ -45,11 +47,11 @@
       isSnapInstalledValue = isSnapInstalledRaw;
     }
 
-    let isSnapInitValueRaw = await isSnapInitialized()
+    let isSnapInitValueRaw = localStorage.getItem(LOCAL_STORAGE_INIT)
     if (isSnapInitValueRaw === undefined) {
       isSnapInitValue = false;
     } else {
-      isSnapInitValue = isSnapInitValueRaw;
+      isSnapInitValue = isSnapInitValueRaw == "true" ? true : false;
     }
 
     if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {

@@ -160,9 +160,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       messages.map((item) => {
         uiTransact.push(heading(item.typeUrl)),
         uiTransact.push(text(JSON.stringify(item.value, null, 2))),
-        uiTransact.push(divider()),
-        uiTransact.push(text(""))
+        uiTransact.push(divider())
       });
+
+      uiTransact.push(text("Fees"))
+      uiTransact.push(text(JSON.stringify(fees, null, 4)))
 
       // Ensure user confirms transaction
       let confirmationTransact = await snap.request({

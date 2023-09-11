@@ -1,4 +1,3 @@
-import type { Coin } from "@cosmjs/stargate";
 import _ from "lodash";
 import type { CoinIBC } from "./ibc";
 import type { ChainInfo } from "@keplr-wallet/types";

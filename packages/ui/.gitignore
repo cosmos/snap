@@ -9,3 +9,7 @@ node_modules
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vercel
+rpcs.json
+*/rpcs.json
+apis.json
+*/apis.json
