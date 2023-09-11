@@ -16,6 +16,7 @@
 	"devDependencies": {
 		"@fullhuman/postcss-purgecss": "^5.0.0",
 		"@sveltejs/adapter-auto": "^2.0.0",
+		"@sveltejs/adapter-vercel": "^3.0.3",
 		"@sveltejs/kit": "^1.5.0",
 		"@types/lunr": "^2.3.5",
 		"flowbite-svelte": "^0.44.4",
