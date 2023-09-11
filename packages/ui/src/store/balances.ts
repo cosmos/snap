@@ -3,8 +3,8 @@ import type { Chain } from '../../../snap/src/types/chains';
 import { chains } from './chains'; 
 import type { CoinIBC } from '../utils/ibc';
 
-if (!import.meta.env.VITE_BALANCE_FUNCTION_URL) {
-    throw new Error("VITE_BALANCE_FUNCTION_URL not set...");
+if (!import.meta.env.VITE_DENO_SERVERLESS_URL) {
+    throw new Error("VITE_DENO_SERVERLESS_URL not set...");
 }
 export const denoUrl = import.meta.env.VITE_DENO_SERVERLESS_URL;
 
