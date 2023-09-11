@@ -4,7 +4,8 @@
         "src": "package.json",
         "use": "@vercel/node",
         "config": {
-          "buildCommand": "cp ./src/rpcs.json dist/ && yarn workspace ui build"
-        }  
+          "buildCommand": "cp ./src/rpcs.json dist/ && yarn workspace ui build",
+          "tsconfig": "tsconfig.json" 
+        }
       }]
 }
