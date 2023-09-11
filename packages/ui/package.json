@@ -51,6 +51,5 @@
 		"svelte-ace": "^1.0.21",
 		"svelte-jsoneditor": "^0.18.3",
 		"svelte-preprocess": "^5.0.4"
-	},
-	"workspace": "../"
+	}
 }

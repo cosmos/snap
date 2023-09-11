@@ -6,7 +6,6 @@
     "type": "git",
     "url": "https://github.com/cosmos/snap.git"
   },
-  "workspace": "../",
   "license": "MIT",
   "author": "Mystic Labs, Inc",
   "main": "src/index.ts",
