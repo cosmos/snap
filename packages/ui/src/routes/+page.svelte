@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
   import MainTitle from '../components/MainTitle.svelte';
 	import Step from '../components/Step.svelte';
-  import { isMetaMaskInstalled, initSnap, isSnapInitialized, isSnapInstalled, installSnap } from '../utils/snap';
+  import { isMetaMaskInstalled, initSnap, isSnapInstalled, installSnap } from '../utils/snap.js';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
 	import { LOCAL_STORAGE_CHAINS, LOCAL_STORAGE_INIT } from '../utils/general.js';
