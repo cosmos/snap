@@ -5,7 +5,7 @@
     export let disabled: boolean = false;
 </script>
 
-<button disabled={loading || disabled} on:click={() => onClick()} class="frame-1-2 frame-1-4 button-send">
+<button disabled={loading || disabled} on:click={() => onClick()} class="frame-1-2 frame-1-4 button-send disabled:opacity-[0.40]">
     <div class="send-amount-1 inter-medium-white-12px">
         {#if loading}
           <div role="status">
