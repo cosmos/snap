@@ -6,6 +6,7 @@
         { route: "/balances", title: "Balances", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/dashboard.svg", path: "/balances" },
         { route: "/transactions", title: "History", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/dns.svg", path: "/transactions" },
         { route: "/address", title: "Address Book", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/account-box.svg", path: "/address" },
+        { route: "/funds", title: "Funds", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/account-box.svg", path: "/funds" },
         { route: "/settings", title: "Settings", icon: "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/settings.svg", path: "/settings" }
     ]
     let active = $page.route.id;

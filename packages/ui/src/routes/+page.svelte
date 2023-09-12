@@ -15,23 +15,36 @@
 
 	$: if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
 		$state.connected = true;
+    loading = false;
 		goto("/balances");
 	}
 
 	const initializeData = async () => {
-    loading = true;
-		isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
-		isSnapInstalledValue = await isSnapInstalled() ?? false;
-		isSnapInitValue = (localStorage.getItem(LOCAL_STORAGE_INIT) === "true");
-    loading = false;
+    try {
+      loading = true;
+      isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
+      isSnapInstalledValue = await isSnapInstalled() ?? false;
+      isSnapInitValue = (localStorage.getItem(LOCAL_STORAGE_INIT) === "true");
+      loading = false;
+    } catch (err: any) {
+      $state.alertText = err.message
+      $state.alertType = "danger"
+      $state.showAlert = true
+    }
 	};
 
 	const runInstallSnap = async () => {
-    loading = true;
-		await installSnap();
-		isSnapInstalledValue = true;
-		isSnapInitValue = false;
-    loading = false;
+    try {
+      loading = true;
+      await installSnap();
+      isSnapInstalledValue = true;
+      isSnapInitValue = false;
+      loading = false;
+    } catch (err: any) {
+      $state.alertText = err.message
+      $state.alertType = "danger"
+      $state.showAlert = true
+    }
 	};
 
 	const initializeSnap = async () => {
@@ -70,7 +83,7 @@
             <div>
               <div class="grid gap-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-3 mb-8 group-24">
                   <Step
-                      bind:loading={loading}
+                      loading={loading}
                       disabled = {isMetaMaskInstalledValue}
                       action={() => { window.open('https://metamask.io/download', '_blank') }}
                       complete={isMetaMaskInstalledValue}
@@ -84,7 +97,7 @@
                   />
 
                   <Step
-                      bind:loading={loading}
+                      loading={loading}
                       disabled={!isMetaMaskInstalledValue || isSnapInstalledValue}
                       action={runInstallSnap}
                       complete={isSnapInstalledValue}
@@ -98,7 +111,7 @@
                   />
 
                   <Step 
-                      bind:loading={loading}
+                      loading={loading}
                       disabled={!isMetaMaskInstalledValue || !isSnapInstalledValue || isSnapInitValue}
                       action={async () => { await initializeSnap(); }}
                       complete={isSnapInitValue}
