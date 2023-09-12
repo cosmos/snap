@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { beforeUpdate, onMount } from "svelte";
+  import { afterUpdate, beforeUpdate, onMount } from "svelte";
   import Balance from "../../components/Balance.svelte";
   import Transfer from "../../components/Transfer.svelte";
   import { balances } from "../../store/balances";
@@ -18,7 +18,11 @@
     }
   }
 
-  onMount(fetchChains);
+  onMount(() => {
+    if ($state.connected) {
+      fetchChains()
+    }
+  });
   beforeUpdate(updateDirectory);
 </script>
 

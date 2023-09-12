@@ -82,7 +82,6 @@
       }
     }
     fromAddress = fromChain.address
-    console.log(fees);
   }
 
   const computeIBCRoute = async () => {

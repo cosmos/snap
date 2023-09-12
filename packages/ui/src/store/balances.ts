@@ -25,7 +25,6 @@ export const balances: Readable<ChainBalances[]> = derived(
 );
 
 const updateBalances = async ($chains: Chain[], set: (value: ChainBalances[]) => void): Promise<void> => {
-    // Set loading state to true
     isLoading.set(true);
     try {
         const res = await fetch(`${denoUrl}/balances`, {
@@ -43,7 +42,6 @@ const updateBalances = async ($chains: Chain[], set: (value: ChainBalances[]) =>
     } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
     } finally {
-        // Set loading state back to false
         isLoading.set(false);
     }
 };
