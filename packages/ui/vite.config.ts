@@ -7,13 +7,6 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	},
 	resolve: {
-		dedupe: ['@cosmsnap/snapper'] 
+		extensions: ['.cjs']
 	},
-	optimizeDeps: {
-		esbuildOptions: {
-			define: {
-				global: 'globalThis'  
-			}
-		}
-	}
 });
