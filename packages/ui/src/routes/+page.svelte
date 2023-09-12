@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { afterUpdate } from 'svelte';
   import MainTitle from '../components/MainTitle.svelte';
 	import Step from '../components/Step.svelte';
   import { isMetaMaskInstalled, initSnap, isSnapInstalled, installSnap } from '../utils/snap';
@@ -12,6 +12,13 @@
   let isMetaMaskInstalledValue: boolean = false;
   let isSnapInstalledValue: boolean = false;
   let isSnapInitValue: boolean = false;
+
+  $: {
+    if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
+      goto("/balances");
+      $state.connected = true;
+    }
+  }
 
   const runInstallSnap = async () => {
     await installSnap(); 
@@ -32,7 +39,7 @@
     goto("/balances");
   }
 
-  onMount(async () => {
+  afterUpdate(async () => {
     let isMetaMaskInstalledRaw = isMetaMaskInstalled()
     if (isMetaMaskInstalledRaw === undefined) {
       isMetaMaskInstalledValue = false;
@@ -52,11 +59,6 @@
       isSnapInitValue = false;
     } else {
       isSnapInitValue = isSnapInitValueRaw == "true" ? true : false;
-    }
-
-    if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
-      goto("/balances");
-      $state.connected = true;
     }
 
     loading = false;
