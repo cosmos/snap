@@ -21,14 +21,17 @@
   let recipient = "";
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
+  let feesAmount = 0.10;
+  let gas = 0.025;
+  let feesOpen = false;
   let fees = {
       amount: [
           {
-              amount: "100000",
+              amount: feesAmount.toString(),
               denom: ""
           }
       ],
-      gas: "5000",
+      gas: gas.toString(),
   };
   let fromAddress: string | undefined = "";
   let fromChain: Chain = {
@@ -53,24 +56,22 @@
     if (typeof amount != "number") {
       amount = 0
     }
-    if (!fees || !fees.amount) {
+    if (feesAmount) {
       fees = {
           amount: [
               {
-                  amount: "100000",
+                  amount: (feesAmount * 1000000).toString(),
                   denom: ""
               }
           ],
-          gas: "5000",
+          gas: (gas * 1000000).toString(),
       }
     }
-    if (source !== fromChain.chain_id) {
-      let foundChain = $chains.find(item => item.chain_id === source);
-      if (foundChain) {
-        fromChain = foundChain;
-        fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom;
-        fees.gas = (fromChain.fees.fee_tokens[0].average_gas_price * 1000000).toString();
-      }
+    let foundChain = $chains.find(item => item.chain_id === source);
+    if (foundChain) {
+      fromChain = foundChain;
+      fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom;
+      gas = (fromChain.fees.fee_tokens[0].average_gas_price);
       
       if ($balances) {
         let source_chain = $balances.filter(item => item.chain_id == source)[0];
@@ -81,6 +82,7 @@
       }
     }
     fromAddress = fromChain.address
+    console.log(fees);
   }
 
   const computeIBCRoute = async () => {
@@ -176,8 +178,13 @@
 </script>
 
 <div class="overlap-group1">
-    <div class="ibc-transfer inter-medium-white-16px">
-        {source == destination ? "Transfer" : "IBC Transfer"}
+    <div class="flex w-full justify-between items-center">
+      <div class="ibc-transfer inter-medium-white-16px">
+          {source == destination ? "Transfer" : "IBC Transfer"}
+      </div>
+      <svg on:click={() => feesOpen = !feesOpen} class="w-4 h-4 text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 1h4m0 0v4m0-4-5 5.243M5 15H1m0 0v-4m0 4 5.243-5"/>
+      </svg>  
     </div>
     <div class="flex w-full items-start">
       <div class="percent inter-medium-white-14px">
@@ -205,6 +212,26 @@
         Route Not Found
     </div>
     <input bind:value={recipient} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+    <div hidden={!feesOpen}>
+      <div id="fees-container" class="flex">
+        <div class="w-[50%] mr-2">
+          <div class="percent inter-medium-white-14px">
+            Gas
+          </div>
+          <div class="">
+            <input bind:value={gas} type="number" placeholder="Enter amount" class="w-full enter-amount inter-medium-white-14px overlap-group-7"/>
+          </div>
+        </div>
+        <div class="w-[50%] ml-2">
+          <div class="percent inter-medium-white-14px">
+            Fees
+          </div>
+          <div class="">
+            <input bind:value={feesAmount} type="number" placeholder="Enter amount" class="w-full enter-amount inter-medium-white-14px overlap-group-7"/>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
         Available: {_.round((Number(selected.amount) / 1000000))} {selected.display}
