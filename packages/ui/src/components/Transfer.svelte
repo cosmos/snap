@@ -10,6 +10,7 @@
 	import { addTransaction } from "../store/transactions";
 	import Button from "./Button.svelte";
 	import ChainSelector from "./ChainSelector.svelte";
+  import Select from "./Select.svelte";
 
   let loading = false;
   let source = "cosmoshub-4";
@@ -20,8 +21,6 @@
   let recipient = "";
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
-  let setInitial = false;
-  let fromAddress = "";
   let fees = {
       amount: [
           {
@@ -31,6 +30,7 @@
       ],
       gas: "5000",
   };
+  let fromAddress: string | undefined = "";
   let fromChain: Chain = {
 	  chain_name: "",
 	  chain_id: "",
@@ -64,44 +64,35 @@
           gas: "5000",
       }
     }
-    let foundChain = $chains.find(item => item.chain_id == source);
-    if (foundChain) {
-      fromChain = foundChain;
-      fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom
-      fees.gas = (fromChain.fees.fee_tokens[0].average_gas_price * 1000000).toString()
-    }
-    if (fromChain && fromChain.address) {
-      fromAddress = fromChain.address;
-    }
-    if ($balances) {
-      let source_chain = $balances.filter(item => item.chain_id == source)[0];
-      if (source_chain) {
-        sourceBalances = source_chain.balances;
-        if (!setInitial) {
+    if (source !== fromChain.chain_id) {
+      let foundChain = $chains.find(item => item.chain_id === source);
+      if (foundChain) {
+        fromChain = foundChain;
+        fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom;
+        fees.gas = (fromChain.fees.fee_tokens[0].average_gas_price * 1000000).toString();
+      }
+      
+      if ($balances) {
+        let source_chain = $balances.filter(item => item.chain_id == source)[0];
+        if (source_chain) {
+          sourceBalances = source_chain.balances;
           selected = sourceBalances[0];
-          setInitial = true;
         }
       }
     }
-  }
-
-  const setSelected = async (e: Event) => {
-    const target = e.target as HTMLSelectElement;
-    if (sourceBalances) {
-      let find = sourceBalances.find(item => item.denom.toUpperCase() == target.value.toUpperCase());
-      if (find) {
-        selected = find
-      }
-    }
+    fromAddress = fromChain.address
   }
 
   const computeIBCRoute = async () => {
       loading = true;
       noRoute = false;
 
-      const client = await getClient(fromChain);
-
       try {
+          const client = await getClient(fromChain);
+          if (fromAddress == undefined) {
+            throw new Error(`Address not found for ${fromChain.pretty_name}`)
+          }
+
           if (source === destination) {
             const coins = [
               {
@@ -109,7 +100,6 @@
                 amount: (amount * 1000000).toString(),  
               },
             ]
-
             const tx = await client.sendTokens(fromAddress, recipient, coins, fees);
             
             if (tx.code == 0) {
@@ -143,7 +133,6 @@
           const adjustedAmount = (amount * 1000000).toString();
 
           const msg = await getMsgs(source, selected.denom, destination, firstRec.denom, adjustedAmount, slippage, $chains, recipient);
-
           if (!Array.isArray(msg.msgs)) {
               throw new Error("Invalid message data.");
           }
@@ -156,12 +145,11 @@
               const msgCamel = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
 
               return {
-                  value: msgCamel,
+                  value: JSON.parse(JSON.stringify(msgCamel)),
                   typeUrl: item.msg_type_url
               };
           });
-
-          let tx = await client.signAndBroadcast(source, messages, fees);
+          let tx = await client.signAndBroadcast(fromAddress, messages, fees);
 
           if (tx.code == 0) {
             await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash})
@@ -201,11 +189,7 @@
         <div class="percent inter-medium-white-14px">
             Asset
         </div>
-        <select on:change={async e => { await setSelected(e) }} id="denom" name="denom" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-            {#each sourceBalances as balance}
-              <option class="source-chain-osmosis inter-medium-white-14px" value={balance.ibc ? balance.ibc_denom : balance.denom}>{balance.display}</option>
-            {/each}
-        </select>
+        <Select items={sourceBalances} bind:selectedItem={selected}/>
     </div>
     <input bind:value={amount} type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
     <div class="flex w-full items-end">
@@ -257,32 +241,6 @@
   font-size: var(--font-size-l);
   font-style: normal;
   font-weight: 500;
-}
-
-.group-32-1 {
-  -webkit-backdrop-filter: blur(15px) brightness(100%);
-  align-items: center;
-  backdrop-filter: blur(15px) brightness(100%);
-  background-color: var(--licorice);
-  border: 1px solid;
-  border-color: var(--white-2);
-  border-radius: 10px;
-  display: flex;
-  height: 41px;
-  margin-left: 1px;
-  margin-top: 15px;
-  min-width: 272px;
-  padding: 4px 5px;
-  width: 100%;
-}
-
-.source-chain-osmosis {
-  letter-spacing: -0.28px;
-  line-height: normal;
-  min-height: 17px;
-  min-width: 147px;
-  width: 100%;
-  padding-left: 10px;
 }
 
 .inter-medium-white-14px {
@@ -371,18 +329,5 @@
   width: fit-content;
   margin-top: 20px;
   display: flex;
-}
-
-select {
-  border-radius: 5px;
-  padding: 10px;
-}
-
-option {
-  font-size: 16px;
-  padding: 10px;
-  background-color: #141414;
-  border-radius: 5px;
-  border: 1px;
 }
 </style>

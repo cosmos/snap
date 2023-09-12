@@ -1,17 +1,19 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import type { Chain } from "@cosmsnap/snapper";
-  import { chains } from "../store/chains";
+  import { onMount, createEventDispatcher } from 'svelte';
 
   let isOpen = false;
   let shouldOpenUpwards = false;
-  export let selectedChain = "";
-  let selectedPrettyName = "";
+  export let selectedItem :any = "";
   let dropdown: HTMLDivElement;
+  export let items: any[] = [];
+  const dispatch = createEventDispatcher();
+  export let text = "Select Asset";
+  export let showKey = "display";
 
-  function selectChain(chain: Chain) {
-    selectedChain = chain.chain_id;
+  function selectItem(item: any) {
+    selectedItem = item;
     isOpen = false;
+    dispatch('change', selectedItem);
   }
 
   onMount(() => {
@@ -25,18 +27,9 @@
       shouldOpenUpwards = spaceBelow < 200;
     }
   }
-
-  $: {
-    if (selectedChain) {
-      let chainCurrent = $chains.find(item => item.chain_id == selectedChain)
-      if (chainCurrent) {
-        selectedPrettyName = chainCurrent.pretty_name
-      }
-    }
-  }
 </script>
 
-<div bind:this={dropdown} class="relative inline-block text-left w-full z-[500]">
+<div bind:this={dropdown} class="relative inline-block text-left w-full" class:z-[500]={isOpen}>
   <div>
     <button
       type="button"
@@ -49,13 +42,13 @@
         checkDropdownDirection();
       }}
     >
-      {selectedPrettyName || "Select a Chain"}
+      {selectedItem[showKey] || `${text}`}
     </button>
   </div>
 
   {#if isOpen}
     <div
-      class={`origin-top-right absolute right-0 ${shouldOpenUpwards ? 'bottom-full mb-3' : 'mt-2'} w-full rounded-md shadow-lg custom-bg text-white ring-1 ring-black ring-opacity-5 z-[500] overflow-y-auto max-h-[200px] hide-scrollbar`}
+      class={`origin-top-right absolute right-0 ${shouldOpenUpwards ? 'bottom-full mb-3' : 'mt-2'} w-full rounded-md shadow-lg custom-bg text-white ring-1 ring-black ring-opacity-5 ${isOpen ? 'z-[500]' : ''} overflow-y-auto max-h-[200px] hide-scrollbar`}
     >
       <div
         class="py-1 inter-font"
@@ -63,15 +56,10 @@
         aria-orientation="vertical"
         aria-labelledby="options-menu"
       >
-        {#each $chains as chain (chain)}
+        {#each items as item (item)}
           <!-- svelte-ignore a11y-invalid-attribute -->
-          <a href="#" class="flex items-center px-4 py-2 hover:bg-[#ffffff17] hover:rounded-[10px] h-[40px]" on:click={() => selectChain(chain)}>
-            {#if chain.logo_URIs?.svg}
-              <img src={chain.logo_URIs?.svg} class="w-5 h-5 rounded-full mr-2" alt={chain.chain_id} />
-            {:else}
-              <img src="https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.svg" class="w-5 h-5 rounded-full mr-2" alt={chain.chain_id} />
-            {/if}
-            {chain.pretty_name}
+          <a href="#" class="w-full flex items-center px-4 py-2 hover:bg-[#ffffff17] hover:rounded-[10px] h-[40px]" on:click={() => selectItem(item)}>
+            {item[showKey]}
           </a>
         {/each}
       </div>
