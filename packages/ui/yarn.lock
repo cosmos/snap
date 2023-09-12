@@ -263,14 +263,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cosmsnap/snapper@npm:^0.1.20":
-  version: 0.1.20
-  resolution: "@cosmsnap/snapper@npm:0.1.20"
+"@cosmsnap/snapper@npm:^0.1.21":
+  version: 0.1.21
+  resolution: "@cosmsnap/snapper@npm:0.1.21"
   dependencies:
     "@keplr-wallet/proto-types": 0.12.12
     "@keplr-wallet/types": 0.12.12
     ses: ^0.18.4
-  checksum: 0fd9e9eeb560bdf73475cb92636e361eb0ba9b4ad9f5202c4fd549d14b6a16e92902ecad240b3429339cec6fffdf5765e0a3cb62558e2ba9f0528a55ddc5a55b
+  checksum: 1257d525d52fdd0e723ee32dffbf033bbf819b7cb48e9a523085b3b4b129d2a63d0101325c65e6a921b388834d376e174da74d4c1427a47ab2924e594cfac977
   languageName: node
   linkType: hard
 
@@ -280,7 +280,7 @@ __metadata:
   dependencies:
     "@cosmjs/crypto": ^0.31.1
     "@cosmjs/stargate": ^0.31.1
-    "@cosmsnap/snapper": ^0.1.20
+    "@cosmsnap/snapper": ^0.1.21
     "@fullhuman/postcss-purgecss": ^5.0.0
     "@keplr-wallet/types": 0.12.12
     "@metamask/detect-provider": ^2.0.0
