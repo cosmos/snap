@@ -4,19 +4,35 @@
   import { ADD_CHAIN_EXAMPLE } from '../utils/constants';
 	import type { ChainInfo } from '@keplr-wallet/types';
 	import { validateChainInfo } from '../utils/general';
+  import Button from './Button.svelte';
+	import { fetchChains } from '../store/chains';
 
   export let chainInfo: ChainInfo = ADD_CHAIN_EXAMPLE;
   let content = { text: undefined, json: chainInfo as any };
+  let loading = false;
 
   const addChain = async () => {
-    let good = validateChainInfo(chainInfo);
-    if (!good) {
+    try {
+      loading = true;
+      let good = validateChainInfo(chainInfo);
+      if (!good) {
+        $state.alertType = "danger";
+        $state.alertText = "Chain info is not supplied properly.";
+        $state.showAlert = true;
+        loading = false;
+        throw new Error("Chain info is not supplied properly.")
+      }
+      await window.cosmos.experimentalSuggestChain(chainInfo);
+      await fetchChains();
+      loading = false;
+    } catch (err) {
+      console.error(err);
+      loading = false;
+      // @ts-ignore
+      $state.alertText = err.message;
       $state.alertType = "danger";
-      $state.alertText = "Chain info is not supplied properly.";
-      $state.showAlert = true;
-      throw new Error("Chain info is not supplied properly.")
+      $state.showMenu = true;
     }
-    await window.cosmos.experimentalSuggestChain(chainInfo);
   }
 
   function handleChange(updatedContent: any, previousContent: any, { contentErrors, patchResult }: any) {
@@ -36,17 +52,15 @@
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
                       <img on:click={() => $state.openAddChainPopup = false} class="clear" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/clear@2x.png" alt="clear">
                   </div>
-                      <img class="line-5 line" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/line-5.png" alt="Line 5">
-                  </div>
+                  <img class="line-5 line" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/line-5.png" alt="Line 5">
+              </div>
                   <div class="group-4447">
-                      <div class="group-4445">
-                          <div class="overlap-group jse-theme-dark">
-                            <JSONEditor onChange="{handleChange}" content={content} mainMenuBar={false} navigationBar={false} statusBar={false} mode={Mode.tree}/>
-                          </div>
+                    <div class="group-4445">
+                      <div class="overlap-group jse-theme-dark">
+                        <JSONEditor onChange="{handleChange}" content={content} mainMenuBar={false} navigationBar={false} statusBar={false} mode={Mode.tree}/>
                       </div>
-                  <button on:click={addChain} class="frame-1-2 create-new-chain inter-medium-white-12px">
-                      Add Chain
-                  </button>
+                  </div>
+                  <Button onClick={addChain} text="Add chain" bind:loading={loading}/>
               </div>
           </div>
       </div>
@@ -204,32 +218,4 @@
     overflow-y: scroll;
     max-height: 375px;
   }
-  
-  .frame-1-2 {
-    align-items: center;
-    background-color: var(--blueberry);
-    border-radius: 10px;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-right: 1px;
-    overflow: hidden;
-    padding: 13px 23px;
-    width: 132px;
-    margin-top: 20px;
-  }
-  
-  .create-new-chain {
-    letter-spacing: -0.24px;
-    line-height: normal;
-    width: fit-content;
-  }
-  
-  .inter-medium-white-12px {
-    color: var(--white);
-    font-family: var(--font-family-inter);
-    font-size: var(--font-size-s);
-    font-style: normal;
-    font-weight: 500;
-  }
-  </style>
+</style>

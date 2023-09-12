@@ -8,7 +8,9 @@
   import _ from 'lodash';
 	import { getClient } from "../utils/tx";
 	import { addTransaction } from "../store/transactions";
+	import Button from "./Button.svelte";
 
+  let loading = false;
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
   let selected: CoinIBC = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()};
@@ -44,6 +46,9 @@
   };
 
   $: {
+    if (!selected) {
+      selected = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()};
+    }
     if (typeof amount != "number") {
       amount = 0
     }
@@ -90,6 +95,7 @@
   }
 
   const computeIBCRoute = async () => {
+      loading = true;
       noRoute = false;
 
       const client = await getClient(fromChain);
@@ -116,6 +122,8 @@
               $state.alertType = "danger"
               $state.showAlert = true
             }
+
+            loading = false;
 
             return tx
           }
@@ -166,7 +174,10 @@
             $state.showAlert = true
           }
 
+          loading = false;
+
       } catch (error: any) {
+          loading = false;
           console.error(error);
           $state.alertType = "danger";
           $state.showAlert = true;
@@ -221,11 +232,7 @@
     <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
         Available: {_.round((Number(selected.amount) / 1000000))} {selected.display}
     </div>
-    <button on:click={computeIBCRoute} class="frame-1-2 frame-1-4 button-send">
-        <div class="send-amount-1 inter-medium-white-12px">
-            Send amount
-        </div>
-    </button>
+    <Button onClick={computeIBCRoute} bind:loading={loading}/>
 </div>
 
 <style>
@@ -353,40 +360,6 @@
   text-align: right;
 }
 
-.frame-1-2 {
-  margin-left: 1px;
-  margin-top: 35px;
-  width: 272px;
-}
-
-.frame-1-4 {
-  align-items: center;
-  background-color: var(--blueberry);
-  border-radius: 10px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  overflow: hidden;
-  padding: 13px 23px;
-  width: 100%;
-}
-
-.send-amount-1 {
-  letter-spacing: -0.24px;
-  line-height: normal;
-  margin-top: -1px;
-  position: relative;
-  width: fit-content;
-}
-
-.inter-medium-white-12px {
-  color: var(--white);
-  font-family: var(--font-family-inter);
-  font-size: var(--font-size-s);
-  font-style: normal;
-  font-weight: 500;
-}
-
 .inter-medium-white-14px {
   color: var(--white);
   font-family: var(--font-family-inter);
@@ -405,22 +378,6 @@
   width: fit-content;
   margin-top: 20px;
   display: flex;
-}
-
-.button-send {
-  letter-spacing: -0.36px;
-  line-height: normal;
-  margin-top: 15px;
-  position: relative;
-  width: fit-content;
-  height: 40px;
-  min-width: 100px;
-  width: 100%;
-}
-
-.button-send:hover {
-  background-color: var(--blueberry);
-  filter: brightness(1.1);
 }
 
 select {

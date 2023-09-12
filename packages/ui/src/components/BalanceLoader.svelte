@@ -1,7 +1,7 @@
 <script>
 </script>
 
-<div class="group-55">
+<div role="status" class="group-55 animate-pulse">
     <div class="group-51">
         <div class="group-28">
             <div class="group-46">

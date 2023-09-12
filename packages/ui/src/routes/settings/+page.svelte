@@ -4,7 +4,7 @@
 	import { state } from "../../store/state";
 	import { deleteChain } from '../../utils/snap';
   import lunr from 'lunr';
-	import type { Chain } from '@cosmsnap/snapper';
+	import { getChains, type Chain } from '@cosmsnap/snapper';
 
   let searchResults: lunr.Index.Result[] = [];
   let currentChains: Chain[] = $chains;
@@ -39,7 +39,8 @@
   }
 
   const deleteChainFromSnap = async (chain_id: string) => {
-    deleteChain(chain_id);
+    await deleteChain(chain_id);
+    await getChains();
   }
 </script>
 

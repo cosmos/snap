@@ -3,9 +3,20 @@
   import Balance from "../../components/Balance.svelte";
   import Transfer from "../../components/Transfer.svelte";
   import { balances } from "../../store/balances";
-  import { fetchChains } from "../../store/chains";
+  import { chains, fetchChains } from "../../store/chains";
   import { updateDirectory } from "../../store/directory";
   import BalanceLoader from "../../components/BalanceLoader.svelte";
+	import { state } from "../../store/state";
+
+  $: {
+    if (!$chains) {
+      $state.alertType = "warning"
+      $state.alertText = "Generating your keys. This can take a minute."
+      $state.showAlert = true
+    } else {
+      $state.showAlert = false
+    }
+  }
 
   onMount(fetchChains);
   beforeUpdate(updateDirectory);

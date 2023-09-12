@@ -3,15 +3,28 @@
 	import { chains } from "../store/chains";
   import { state } from "../store/state";
 	import { addAddressToBook } from "../utils/snap";
+	import Button from "./Button.svelte";
 
   let chain_id = $chains.length > 0 ? $chains[0].chain_id : "cosmoshub-4";
   let address = "cosmos163gulek3trdckcktcv820dpxntnm7qkkgfkcga";
   let name = "John Doe";
+  let loading = false;
 
   const addAddress = async () => {
-    await addAddressToBook(chain_id, address, name);
-    $state.openAddAddressPopup = false;
-    await getAddressBook();
+    try {
+      loading = true;
+      await addAddressToBook(chain_id, address, name);
+      $state.openAddAddressPopup = false;
+      await getAddressBook();
+      loading = false;
+    } catch (err) {
+      console.error(err);
+      loading = false;
+      // @ts-ignore
+      $state.alertText = err.message;
+      $state.alertType = "danger";
+      $state.showMenu = true;
+    }
   }
 </script>
 
@@ -49,9 +62,7 @@
                           </select>
                         </div>
                     </div>
-                <button on:click={addAddress} class="frame-1-2 create-new-chain inter-medium-white-12px">
-                    Add address
-                </button>
+                <Button onClick={addAddress} text="Add address" bind:loading={loading}/>
             </div>
         </div>
     </div>
@@ -198,45 +209,6 @@
   min-height: 330px;
   font-family: var(--font-family-inter);
   color: var(--white);
-}
-
-.frame-1-2 {
-  align-items: center;
-  background-color: var(--blueberry);
-  border-radius: 10px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-right: 1px;
-  overflow: hidden;
-  padding: 13px 23px;
-  width: 132px;
-  margin-top: 20px;
-}
-
-.create-new-chain {
-    padding: 10px 20px;
-    color: var(--white);
-    background-color: var(--blueberry);
-    border-radius: 10px;
-    letter-spacing: -0.24px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    height: 40px;
-    min-width: 120px;
-}
-
-.create-new-chain:hover {
-    background-color: var(--blueberry);
-    filter: brightness(1.1);
-}
-
-.inter-medium-white-12px {
-  color: var(--white);
-  font-family: var(--font-family-inter);
-  font-size: var(--font-size-s);
-  font-style: normal;
-  font-weight: 500;
 }
 
 .enter-amount {
