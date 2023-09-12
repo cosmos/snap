@@ -159,6 +159,7 @@
     min-height: 17px;
     min-width: 160px;
     text-align: center;
+    margin-bottom: 20px;
 }
 
 /* Responsive Styles */
@@ -189,7 +190,6 @@
     min-height: 17px;
     min-width: 160px;
     text-align: center;
-    margin-bottom: 20px;
   }
 }
 </style>
