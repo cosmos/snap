@@ -7,6 +7,6 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	},
 	resolve: {
-		extensions: ['.cjs']
+		extensions: ['.cjs', '.js', '.ts']
 	},
 });
