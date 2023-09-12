@@ -11,6 +11,7 @@
 	let isMetaMaskInstalledValue = false;
 	let isSnapInstalledValue = false;
 	let isSnapInitValue = false;
+  let loading = false;
 
 	$: if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
 		$state.connected = true;
@@ -18,18 +19,23 @@
 	}
 
 	const initializeData = async () => {
+    loading = true;
 		isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
 		isSnapInstalledValue = await isSnapInstalled() ?? false;
 		isSnapInitValue = (localStorage.getItem(LOCAL_STORAGE_INIT) === "true");
+    loading = false;
 	};
 
 	const runInstallSnap = async () => {
+    loading = true;
 		await installSnap();
 		isSnapInstalledValue = true;
 		isSnapInitValue = false;
+    loading = false;
 	};
 
 	const initializeSnap = async () => {
+    loading = true;
     try {
       const chainsFromInit = await initSnap();
       localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
@@ -37,7 +43,9 @@
       localStorage.setItem(LOCAL_STORAGE_INIT, "true");
       isSnapInitValue = true;
       $state.connected = true;
+      loading = false;
     } catch (err: any) {
+      loading = false;
       if (err.message == "The Cosmos Snap has already been initialized.") {
         localStorage.setItem(LOCAL_STORAGE_INIT, "true");
         isSnapInitValue = true;
@@ -62,6 +70,7 @@
             <div>
               <div class="grid gap-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-3 mb-8 group-24">
                   <Step
+                      bind:loading={loading}
                       disabled = {isMetaMaskInstalledValue}
                       action={() => { window.open('https://metamask.io/download', '_blank') }}
                       complete={isMetaMaskInstalledValue}
@@ -75,6 +84,7 @@
                   />
 
                   <Step
+                      bind:loading={loading}
                       disabled={!isMetaMaskInstalledValue || isSnapInstalledValue}
                       action={runInstallSnap}
                       complete={isSnapInstalledValue}
@@ -88,6 +98,7 @@
                   />
 
                   <Step 
+                      bind:loading={loading}
                       disabled={!isMetaMaskInstalledValue || !isSnapInstalledValue || isSnapInitValue}
                       action={async () => { await initializeSnap(); }}
                       complete={isSnapInitValue}

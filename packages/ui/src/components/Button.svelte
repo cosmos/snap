@@ -2,9 +2,10 @@
     export let onClick: Function = () => {}
     export let loading = false;
     export let text = "Transfer";
+    export let disabled: boolean = false;
 </script>
 
-<button disabled={loading} on:click={() => onClick()} class="frame-1-2 frame-1-4 button-send">
+<button disabled={loading || disabled} on:click={() => onClick()} class="frame-1-2 frame-1-4 button-send">
     <div class="send-amount-1 inter-medium-white-12px">
         {#if loading}
           <div role="status">

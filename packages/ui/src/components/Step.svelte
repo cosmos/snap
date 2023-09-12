@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Button from "./Button.svelte";
+
     export let stepNumber: string;
     export let stepTitle: string;
     export let stepLongTitle: string;
@@ -9,6 +11,7 @@
     export let action: () => any
     export let complete: boolean = false;
     export let disabled: boolean = true;
+    export let loading = false;
 </script>
 
 <div class="overlap-group1">
@@ -29,6 +32,7 @@
     {/if}
     </div>
     <div class="group-9-1 group-9-3">
+    <!-- svelte-ignore a11y-img-redundant-alt -->
     <img
         class="image-3"
         src="{stepImage}"
@@ -42,9 +46,7 @@
         {stepDescription}
         </p>
     </div>
-      <button disabled={disabled} class="frame-1-2 frame-1-4 sign-in-meta-mask inter-medium-white-12px" on:click={action}>
-        {actionText}
-      </button>
+        <Button bind:loading={loading} disabled={disabled} onClick={action} text={actionText}/>
     </div>
     <div class="group-10-1 s-y_bCXRrkrYfP">
       <div class="install-metamask inter-bold-white-20px s-y_bCXRrkrYfP">
@@ -79,28 +81,6 @@
     font-size: var(--font-size-s);
     font-style: normal;
     font-weight: 400;
-  }
-
-  .frame-1-4 {
-    align-items: center;
-    background-color: var(--blueberry);
-    border-radius: 10px;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 15px;
-    overflow: hidden;
-    padding: 10px 16px;
-    position: relative;
-    width: fit-content;
-  }
-
-  .inter-medium-white-12px {
-    color: var(--white);
-    font-family: var(--font-family-inter);
-    font-size: var(--font-size-s);
-    font-style: normal;
-    font-weight: 500;
   }
 
   .step {
@@ -210,44 +190,6 @@
     text-align: center;
   }
 
-  .frame-1-2 {
-    margin-right: 2px;
-  }
-
-  .frame-1-4 {
-    align-items: center;
-    background-color: var(--blueberry);
-    border-radius: 10px;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 35px;
-    overflow: hidden;
-    padding: 10px 16px;
-    position: relative;
-    width: fit-content;
-  }
-
-  .sign-in-meta-mask {
-    letter-spacing: -0.36px;
-    line-height: normal;
-    margin-top: 15px;
-    position: relative;
-    width: fit-content;
-    height: 35px;
-    min-width: 100px;
-  }
-
-  .sign-in-meta-mask:hover {
-    background-color: var(--blueberry);
-    filter: brightness(1.1);
-  }
-
-  .sign-in-meta-mask:disabled {
-    background-color: var(--blueberry);
-    opacity: 0.50;
-  }
-
   .group-10-1 {
     align-items: center;
     display: flex;
@@ -307,12 +249,6 @@
       font-size: var(--responsive-font-size);
     }
 
-    .frame-1-4 {
-      gap: var(--responsive-gap);
-      padding: var(--responsive-padding);
-      margin-top: var(--responsive-margin);
-    }
-
     .flex-row-1 {
       gap: 100px; /* reduced gap for smaller screens */
     }
@@ -342,12 +278,6 @@
       font-size: var(--responsive-font-size);
     }
 
-    .frame-1-4 {
-      gap: var(--responsive-gap);
-      padding: var(--responsive-padding);
-      margin-top: var(--responsive-margin);
-    }
-
     .flex-row-1 {
       gap: 50px; /* further reduced gap for mobile screens */
     }
@@ -358,11 +288,6 @@
 
     .group-9-3 {
       width: 220px; /* further reduced width */
-    }
-
-    .sign-in-meta-mask {
-      height: 35px;
-      min-width: 100px;
     }
   }
 </style>
