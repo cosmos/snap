@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { chains } from '../../store/chains';
+  import { chains } from '../../store/chains.js';
   import AddChain from '../../components/AddChain.svelte';
-	import { state } from "../../store/state";
-	import { deleteChain } from '../../utils/snap';
+	import { state } from "../../store/state.js";
+	import { deleteChain } from '../../utils/snap.js';
   import lunr from 'lunr';
 	import type { Chain } from '@cosmsnap/snapper';
 

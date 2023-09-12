@@ -1,8 +1,8 @@
 <script>
-	import { getAddressBook } from "../store/addressbook";
-	import { chains } from "../store/chains";
-  import { state } from "../store/state";
-	import { addAddressToBook } from "../utils/snap";
+	import { getAddressBook } from "../store/addressbook.js";
+	import { chains } from "../store/chains.js";
+  import { state } from "../store/state.js";
+	import { addAddressToBook } from "../utils/snap.js";
 
   let chain_id = $chains.length > 0 ? $chains[0].chain_id : "cosmoshub-4";
   let address = "cosmos163gulek3trdckcktcv820dpxntnm7qkkgfkcga";

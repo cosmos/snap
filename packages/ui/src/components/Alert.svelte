@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { state } from "../store/state";
+    import { state } from "../store/state.js";
 </script>
 
 <div hidden={!$state.showAlert} style="font-family: 'Inter'; position: fixed; right: 10px; bottom: 0px; z-index: 1000;">

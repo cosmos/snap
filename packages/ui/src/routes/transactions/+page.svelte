@@ -1,11 +1,8 @@
 <script lang="ts">
   import Grid from "gridjs-svelte";
   import TxMobile from "../../components/TxMobile.svelte";
-  import { transactions, type Transaction } from "../../store/transactions";
+  import { transactions } from "../../store/transactions.js";
 	import { onMount } from "svelte";
-	import type { TDataArray } from "gridjs/dist/src/types";
-
-  type Cell = string | number | boolean;
 
   let data: any[] = [];
 
@@ -103,8 +100,9 @@
 <div id="main-grid-container-mobile">
   <div class="tx-title-mobile">Transaction history</div>
   <div class="table-div">
-    <TxMobile/>
-    <TxMobile/>
+    {#each data as tx}
+      <TxMobile data={tx}/>
+    {/each}
   </div>
 </div>
 
