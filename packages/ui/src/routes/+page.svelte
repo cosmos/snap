@@ -30,13 +30,25 @@
 	};
 
 	const initializeSnap = async () => {
-		const chainsFromInit = await initSnap();
-    localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
-    chains.set(chainsFromInit);
-    localStorage.setItem(LOCAL_STORAGE_INIT, "true");
-    isSnapInitValue = true;
-    $state.connected = true;
-    console.log("All Setup");
+    try {
+      const chainsFromInit = await initSnap();
+      localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
+      chains.set(chainsFromInit);
+      localStorage.setItem(LOCAL_STORAGE_INIT, "true");
+      isSnapInitValue = true;
+      $state.connected = true;
+    } catch (err: any) {
+      if (err.message == "The Cosmos Snap has already been initialized.") {
+        localStorage.setItem(LOCAL_STORAGE_INIT, "true");
+        isSnapInitValue = true;
+        $state.connected = true;
+        goto("/balances")
+      } else {
+        $state.alertText = `${err.message}`
+        $state.alertType = "danger"
+        $state.showAlert = true
+      }
+    }
 	};
 
 	afterUpdate(initializeData);
