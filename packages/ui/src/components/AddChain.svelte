@@ -1,9 +1,9 @@
 <script lang="ts">
   import { JSONEditor, Mode } from 'svelte-jsoneditor';
-  import { state } from '../store/state.js';
-  import { ADD_CHAIN_EXAMPLE } from '../utils/constants.js';
+  import { state } from '../store/state';
+  import { ADD_CHAIN_EXAMPLE } from '../utils/constants';
 	import type { ChainInfo } from '@keplr-wallet/types';
-	import { validateChainInfo } from '../utils/general.js';
+	import { validateChainInfo } from '../utils/general';
 
   export let chainInfo: ChainInfo = ADD_CHAIN_EXAMPLE;
   let content = { text: undefined, json: chainInfo as any };

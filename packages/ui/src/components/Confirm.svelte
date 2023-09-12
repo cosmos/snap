@@ -1,5 +1,5 @@
 <script>
-	import { state } from "../store/state.js";
+	import { state } from "../store/state";
 
     export let text = "Are you sure you want to delete this product?"
     export let yesButtonText = "Yes, I'm sure"

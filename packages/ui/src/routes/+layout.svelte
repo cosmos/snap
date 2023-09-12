@@ -6,9 +6,9 @@
   import { onMount } from "svelte";
   import Alert from "../components/Alert.svelte";
 	import Menu from "../components/Menu.svelte";
-	import { updateDirectory } from "../store/directory.js";
+	import { updateDirectory } from "../store/directory";
 	import { CosmosSnap } from "@cosmsnap/snapper";
-	import { snapId } from "../utils/snap.js";
+	import { snapId } from "../utils/snap";
 
   onMount(async () => {
     window.cosmos = new CosmosSnap();

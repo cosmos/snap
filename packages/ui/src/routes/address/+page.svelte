@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
   import AddAddress from "../../components/AddAddress.svelte";
-	import { getAddressBook, addressbook } from "../../store/addressbook.js";
-	import { state } from "../../store/state.js";
-	import { copyToClipboard } from "../../utils/general.js";
+	import { getAddressBook, addressbook } from "../../store/addressbook";
+	import { state } from "../../store/state";
+	import { copyToClipboard } from "../../utils/general";
 	import lunr from "lunr";
 	import type { Address } from "@cosmsnap/snapper";
 

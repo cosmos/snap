@@ -2,9 +2,9 @@
   import { beforeUpdate, onMount } from "svelte";
   import Balance from "../../components/Balance.svelte";
   import Transfer from "../../components/Transfer.svelte";
-  import { balances } from "../../store/balances.js";
-  import { fetchChains } from "../../store/chains.js";
-  import { updateDirectory } from "../../store/directory.js";
+  import { balances } from "../../store/balances";
+  import { fetchChains } from "../../store/chains";
+  import { updateDirectory } from "../../store/directory";
   import BalanceLoader from "../../components/BalanceLoader.svelte";
 
   onMount(fetchChains);

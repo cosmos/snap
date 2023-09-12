@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { chains } from "../store/chains.js";
+  import { chains } from "../store/chains";
 	import Info from "./Info.svelte";
-	import { balances } from "../store/balances.js";
-  import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/ibc.js';
-	import { state } from "../store/state.js";
+	import { balances } from "../store/balances";
+  import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/ibc';
+	import { state } from "../store/state";
 	import type { Chain, Msg } from "@cosmsnap/snapper";
   import _ from 'lodash';
-	import { getClient } from "../utils/tx.js";
-	import { addTransaction } from "../store/transactions.js";
+	import { getClient } from "../utils/tx";
+	import { addTransaction } from "../store/transactions";
 
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Grid from "gridjs-svelte";
   import TxMobile from "../../components/TxMobile.svelte";
-  import { transactions } from "../../store/transactions.js";
+  import { transactions } from "../../store/transactions";
 	import { onMount } from "svelte";
 
   let data: any[] = [];

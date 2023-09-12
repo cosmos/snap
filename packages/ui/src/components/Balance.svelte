@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { copyToClipboard } from "../utils/general.js";
-  import { directory } from "../store/directory.js";
+	import { copyToClipboard } from "../utils/general";
+  import { directory } from "../store/directory";
   import _ from "lodash";
 
   export let chain_id = "osmosis-1";

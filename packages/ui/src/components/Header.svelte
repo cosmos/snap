@@ -1,6 +1,6 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-	import { state } from "../store/state.js";
+	import { state } from "../store/state";
 
     export let connected: boolean = true;
     export let logoSrc: string;
