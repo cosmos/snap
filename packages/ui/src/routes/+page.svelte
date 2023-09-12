@@ -14,23 +14,38 @@
   let loading = false;
 
 	$: if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
+
 		$state.connected = true;
 		goto("/balances");
 	}
 
 	const initializeData = async () => {
-    loading = true;
-		isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
-		isSnapInstalledValue = await isSnapInstalled() ?? false;
-    loading = false;
+    try {
+      loading = true;
+      isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
+      isSnapInstalledValue = await isSnapInstalled() ?? false;
+      loading = false;
+     } catch (err: any) {
+      loading = false;
+      $state.alertText = `${err.message}`
+      $state.alertType = "danger"
+      $state.showAlert = true
+    }
 	};
 
 	const runInstallSnap = async () => {
-    loading = true;
-		await installSnap();
-		isSnapInstalledValue = true;
-		isSnapInitValue = false;
-    loading = false;
+    try {
+      loading = true;
+      await installSnap();
+      isSnapInstalledValue = true;
+      isSnapInitValue = false;
+      loading = false;
+    } catch (err: any) {
+      loading = false;
+      $state.alertText = `${err.message}`
+      $state.alertType = "danger"
+      $state.showAlert = true
+    }
 	};
 
 	const initializeSnap = async () => {
