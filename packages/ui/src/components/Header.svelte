@@ -107,4 +107,10 @@
         font-style: normal;
         font-weight: 500;
     }
+
+    @media (max-width: 900px) { 
+        .navbar {
+            padding: 24px 10px;
+        }
+    }    
 </style>
