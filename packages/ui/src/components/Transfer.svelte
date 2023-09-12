@@ -152,7 +152,7 @@
               };
           });
 
-          let tx = await window.cosmos.signAndBroadcast(source, messages, fees);
+          let tx = await client.signAndBroadcast(source, messages, fees);
 
           if (tx.code == 0) {
             await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash})
