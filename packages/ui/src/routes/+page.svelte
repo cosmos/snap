@@ -5,7 +5,7 @@
 	import { isMetaMaskInstalled, initSnap, isSnapInstalled, installSnap } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
-	import { LOCAL_STORAGE_CHAINS, LOCAL_STORAGE_INIT } from '../utils/general';
+	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
 	import { chains } from '../store/chains';
 
 	let isMetaMaskInstalledValue = false;
@@ -22,7 +22,6 @@
     loading = true;
 		isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
 		isSnapInstalledValue = await isSnapInstalled() ?? false;
-		isSnapInitValue = (localStorage.getItem(LOCAL_STORAGE_INIT) === "true");
     loading = false;
 	};
 
@@ -40,14 +39,12 @@
       const chainsFromInit = await initSnap();
       localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
       chains.set(chainsFromInit);
-      localStorage.setItem(LOCAL_STORAGE_INIT, "true");
       isSnapInitValue = true;
       $state.connected = true;
       loading = false;
     } catch (err: any) {
       loading = false;
       if (err.message == "The Cosmos Snap has already been initialized.") {
-        localStorage.setItem(LOCAL_STORAGE_INIT, "true");
         isSnapInitValue = true;
         $state.connected = true;
         goto("/balances")
