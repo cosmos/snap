@@ -7,13 +7,43 @@
   import Alert from "../components/Alert.svelte";
 	import Menu from "../components/Menu.svelte";
 	import { updateDirectory } from "../store/directory";
-	import { CosmosSnap } from "@cosmsnap/snapper";
-	import { snapId } from "../utils/snap";
+	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "@cosmsnap/snapper";
+	import { isMetaMaskInstalled, snapId } from "../utils/snap";
+
+	$: if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapInstalledValue) {
+
+		$state.connected = true;
+		goto("/balances");
+	}
+
+	const initializeData = async () => {
+    try {
+      $state.loading = true;
+      $state.isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
+      if ($state.isMetaMaskInstalledValue) {
+        $state.loading = true;
+        $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.loading = false;
+        if ($state.isSnapInstalledValue) {
+          $state.loading = true;
+          $state.isSnapInitValue = await isSnapInitialized();
+          $state.loading = false;
+        }
+      }
+      $state.loading = false;
+     } catch (err: any) {
+      $state.loading = false;
+      $state.alertText = `${err.message}`
+      $state.alertType = "danger"
+      $state.showAlert = true
+    }
+	};
 
   onMount(async () => {
     window.cosmos = new CosmosSnap();
     window.cosmos.changeSnapId(snapId);
     updateDirectory();
+    initializeData();
     if (!$state.connected) {
       goto("/");
     } else {

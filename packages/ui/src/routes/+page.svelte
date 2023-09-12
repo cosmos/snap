@@ -1,67 +1,43 @@
 <script lang="ts">
-	import { afterUpdate } from 'svelte';
 	import MainTitle from '../components/MainTitle.svelte';
 	import Step from '../components/Step.svelte';
-	import { isMetaMaskInstalled, initSnap, isSnapInstalled, installSnap } from '../utils/snap';
+	import { initSnap, installSnap } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
-	import { LOCAL_STORAGE_CHAINS, LOCAL_STORAGE_INIT } from '../utils/general';
+	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
 	import { chains } from '../store/chains';
-
-	let isMetaMaskInstalledValue = false;
-	let isSnapInstalledValue = false;
-	let isSnapInitValue = false;
-  let loading = false;
-
-	$: if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
-		$state.connected = true;
-    loading = false;
-		goto("/balances");
-	}
-
-	const initializeData = async () => {
-    try {
-      loading = true;
-      isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
-      isSnapInstalledValue = await isSnapInstalled() ?? false;
-      isSnapInitValue = (localStorage.getItem(LOCAL_STORAGE_INIT) === "true");
-      loading = false;
-    } catch (err: any) {
-      $state.alertText = err.message
-      $state.alertType = "danger"
-      $state.showAlert = true
-    }
-	};
 
 	const runInstallSnap = async () => {
     try {
-      loading = true;
+      $state.loading = true;
       await installSnap();
-      isSnapInstalledValue = true;
-      isSnapInitValue = false;
-      loading = false;
+      $state.isSnapInstalledValue = true;
+      $state.isSnapInitValue = false;
+      $state.loading = false;
     } catch (err: any) {
-      $state.alertText = err.message
+      $state.loading = false;
+      $state.alertText = `${err.message}`
       $state.alertType = "danger"
       $state.showAlert = true
     }
 	};
 
 	const initializeSnap = async () => {
-    loading = true;
+    $state.loading = true;
     try {
       const chainsFromInit = await initSnap();
       localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
       chains.set(chainsFromInit);
-      localStorage.setItem(LOCAL_STORAGE_INIT, "true");
-      isSnapInitValue = true;
+      $state.isSnapInitValue = true;
       $state.connected = true;
-      loading = false;
+      $state.alertText = `Generating keys. This may take a minute.`
+      $state.alertType = "warning"
+      $state.showAlert = true
+      $state.loading = false;
     } catch (err: any) {
-      loading = false;
+      $state.loading = false;
       if (err.message == "The Cosmos Snap has already been initialized.") {
-        localStorage.setItem(LOCAL_STORAGE_INIT, "true");
-        isSnapInitValue = true;
+        $state.isSnapInitValue = true;
         $state.connected = true;
         goto("/balances")
       } else {
@@ -71,8 +47,6 @@
       }
     }
 	};
-
-	afterUpdate(initializeData);
 </script>
 
 <div class="x1-connect-metamask screen">
@@ -83,10 +57,10 @@
             <div>
               <div class="grid gap-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-3 mb-8 group-24">
                   <Step
-                      loading={loading}
-                      disabled = {isMetaMaskInstalledValue}
+                      bind:loading={$state.loading}
+                      disabled = {$state.isMetaMaskInstalledValue}
                       action={() => { window.open('https://metamask.io/download', '_blank') }}
-                      complete={isMetaMaskInstalledValue}
+                      complete={$state.isMetaMaskInstalledValue}
                       stepNumber="1"
                       stepTitle="Install Metamask"
                       stepImage="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/metamask-1.svg"
@@ -97,10 +71,10 @@
                   />
 
                   <Step
-                      loading={loading}
-                      disabled={!isMetaMaskInstalledValue || isSnapInstalledValue}
+                      bind:loading={$state.loading}
+                      disabled={!$state.isMetaMaskInstalledValue || $state.isSnapInstalledValue}
                       action={runInstallSnap}
-                      complete={isSnapInstalledValue}
+                      complete={$state.isSnapInstalledValue}
                       stepNumber="2"
                       stepTitle="Install Cosmos Snap"
                       stepImage="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/image-3@2x.png"
@@ -111,10 +85,10 @@
                   />
 
                   <Step 
-                      loading={loading}
-                      disabled={!isMetaMaskInstalledValue || !isSnapInstalledValue || isSnapInitValue}
+                      bind:loading={$state.loading}
+                      disabled={!$state.isMetaMaskInstalledValue || !$state.isSnapInstalledValue || $state.isSnapInitValue}
                       action={async () => { await initializeSnap(); }}
-                      complete={isSnapInitValue}
+                      complete={$state.isSnapInitValue}
                       stepNumber="3"
                       stepTitle="Initiate Cosmos Snap"
                       stepImage="/cosmos-atom-logo.png"

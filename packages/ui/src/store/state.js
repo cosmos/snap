@@ -8,5 +8,9 @@ export const state = writable({
     confirmDeleteChainPopup: false,
     alertText: "",
     showAlert: false,
-    alertType: "success"
+    alertType: "success",
+    isMetaMaskInstalledValue: false,
+    isSnapInstalledValue: false,
+    isSnapInitValue: false,
+    loading: false
 });
