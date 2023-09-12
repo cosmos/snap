@@ -13,7 +13,7 @@ export const snapId = import.meta.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
 const snapVersion = import.meta.env.VITE_SNAP_VERSION;
 const initialJsonString = "{}";
 const installParams = JSON.parse(initialJsonString);
-installParams[snapId] = { version: snapVersion };
+console.log(installParams);
 
 export const isMetaMaskInstalled = (): boolean | undefined => !!window.ethereum && window.ethereum.isMetaMask;
 
