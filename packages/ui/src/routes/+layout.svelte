@@ -110,7 +110,7 @@
 
     .left-content {
       backdrop-filter: blur(15px) brightness(100%);
-      background-color: var(--black);
+      background-color: #05000b;
       border: 1px solid;
       border-color: var(--white-2);
       border-top: 0px;

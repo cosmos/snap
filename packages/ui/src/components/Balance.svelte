@@ -49,7 +49,7 @@
           <p class="price inter-medium-white-12px">
             ${_.round(dollarAmount, 2)}
           </p>
-          <p class="percent inter-medium-white-14px w-[150px]">
+          <p class="percent inter-medium-white-14px w-[100%]">
             {_.round(tokenAmount, 2) + " " + tokenDenom}
           </p>
       </div>
