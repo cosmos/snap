@@ -31,14 +31,12 @@
 
 	const initializeSnap = async () => {
 		const chainsFromInit = await initSnap();
-		if (chainsFromInit) {
-			localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
-			chains.set(chainsFromInit);
-			localStorage.setItem(LOCAL_STORAGE_INIT, "true");
-			isSnapInitValue = true;
-			$state.connected = true;
-			goto("/balances");
-		}
+    localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
+    chains.set(chainsFromInit);
+    localStorage.setItem(LOCAL_STORAGE_INIT, "true");
+    isSnapInitValue = true;
+    $state.connected = true;
+    console.log("All Setup");
 	};
 
 	afterUpdate(initializeData);
