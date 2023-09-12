@@ -4,8 +4,8 @@ import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { Long } from 'long';
 import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
 import { DeliverTxResponse } from "@cosmjs/stargate";
-import { addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap';
-import { CosmJSOfflineSigner } from './signer';
+import { addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
+import { CosmJSOfflineSigner } from './signer.js';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
 declare global {

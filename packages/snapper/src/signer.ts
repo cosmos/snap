@@ -1,7 +1,7 @@
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { AccountData, AminoSignResponse, StdSignDoc } from '@cosmjs/amino';
 import { DirectSignResponse, OfflineDirectSigner } from '@cosmjs/proto-signing';
-import { getAccountInfo, signAmino, signDirect, DEFAULT_SNAP_ID } from './snap';
+import { getAccountInfo, signAmino, signDirect, DEFAULT_SNAP_ID } from './snap.js';
 
 export class CosmJSOfflineSigner implements OfflineDirectSigner {
   readonly chainId: string;
