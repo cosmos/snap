@@ -170,7 +170,7 @@
           console.error(error);
           $state.alertType = "danger";
           $state.showAlert = true;
-          $state.alertText = `Error Occurred Finding Route: ${error.message}`;
+          $state.alertText = `${error.message}`;
       }
   };
 </script>
