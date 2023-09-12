@@ -1,68 +1,47 @@
 <script lang="ts">
 	import { afterUpdate } from 'svelte';
-  import MainTitle from '../components/MainTitle.svelte';
+	import MainTitle from '../components/MainTitle.svelte';
 	import Step from '../components/Step.svelte';
-  import { isMetaMaskInstalled, initSnap, isSnapInstalled, installSnap } from '../utils/snap';
+	import { isMetaMaskInstalled, initSnap, isSnapInstalled, installSnap } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
 	import { LOCAL_STORAGE_CHAINS, LOCAL_STORAGE_INIT } from '../utils/general';
 	import { chains } from '../store/chains';
 
-  let loading = true;
-  let isMetaMaskInstalledValue: boolean = false;
-  let isSnapInstalledValue: boolean = false;
-  let isSnapInitValue: boolean = false;
+	let isMetaMaskInstalledValue = false;
+	let isSnapInstalledValue = false;
+	let isSnapInitValue = false;
 
-  $: {
-    if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
-      goto("/balances");
-      $state.connected = true;
-    }
-  }
+	$: if (isMetaMaskInstalledValue && isSnapInitValue && isSnapInstalledValue) {
+		$state.connected = true;
+		goto("/balances");
+	}
 
-  const runInstallSnap = async () => {
-    await installSnap(); 
-    isSnapInstalledValue = true;
-    isSnapInitValue = false;
-    localStorage.setItem(LOCAL_STORAGE_INIT, "false") ;
-  }
+	const initializeData = async () => {
+		isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
+		isSnapInstalledValue = await isSnapInstalled() ?? false;
+		isSnapInitValue = (localStorage.getItem(LOCAL_STORAGE_INIT) === "true");
+	};
 
-  const initializeSnap = async () => {
-    let chainsFromInit = await initSnap();
-    if (chainsFromInit) {
-      localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
-      chains.set(chainsFromInit);
-      localStorage.setItem(LOCAL_STORAGE_INIT, "true")
-    }
-    isSnapInitValue = true; 
-    $state.connected = true; 
-    goto("/balances");
-  }
+	const runInstallSnap = async () => {
+		await installSnap();
+		isSnapInstalledValue = true;
+		isSnapInitValue = false;
+	};
 
-  afterUpdate(async () => {
-    let isMetaMaskInstalledRaw = isMetaMaskInstalled()
-    if (isMetaMaskInstalledRaw === undefined) {
-      isMetaMaskInstalledValue = false;
-    } else {
-      isMetaMaskInstalledValue = isMetaMaskInstalledRaw;
-    }
+	const initializeSnap = async () => {
+		const chainsFromInit = await initSnap();
+		if (chainsFromInit) {
+			localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(chainsFromInit));
+			chains.set(chainsFromInit);
+			localStorage.setItem(LOCAL_STORAGE_INIT, "true");
+			isSnapInitValue = true;
+			$state.connected = true;
+			goto("/balances");
+		}
+	};
 
-    let isSnapInstalledRaw = await isSnapInstalled()
-    if (isSnapInstalledRaw === undefined) {
-      isSnapInstalledValue = false;
-    } else {
-      isSnapInstalledValue = isSnapInstalledRaw;
-    }
-
-    let isSnapInitValueRaw = localStorage.getItem(LOCAL_STORAGE_INIT)
-    if (isSnapInitValueRaw === undefined) {
-      isSnapInitValue = false;
-    } else {
-      isSnapInitValue = isSnapInitValueRaw == "true" ? true : false;
-    }
-
-    loading = false;
-  })
+	afterUpdate(initializeData);
 </script>
 
 <div class="x1-connect-metamask screen">
