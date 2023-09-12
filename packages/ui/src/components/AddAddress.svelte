@@ -4,6 +4,7 @@
   import { state } from "../store/state";
 	import { addAddressToBook } from "../utils/snap";
 	import Button from "./Button.svelte";
+	import ChainSelector from "./ChainSelector.svelte";
 
   let chain_id = $chains.length > 0 ? $chains[0].chain_id : "cosmoshub-4";
   let address = "cosmos163gulek3trdckcktcv820dpxntnm7qkkgfkcga";
@@ -55,11 +56,7 @@
                           <div class="percent inter-medium-white-14px">
                             Chain
                           </div>
-                          <select bind:value={chain_id} id="source_chain" name="source_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-                            {#each $chains as chain}
-                              <option class="source-chain-osmosis inter-medium-white-14px" value={chain.chain_id}>{chain.pretty_name}</option>
-                            {/each}
-                          </select>
+                          <ChainSelector bind:selectedChain={chain_id}/>
                         </div>
                     </div>
                 <Button onClick={addAddress} text="Add address" bind:loading={loading}/>
@@ -245,37 +242,6 @@
   padding: 10px 17px;
   width: 100%;
   justify-content: space-between;
-}
-
-.group-32-1 {
-  align-items: center;
-  backdrop-filter: blur(15px) brightness(100%);
-  background-color: var(--licorice);
-  border: 1px solid;
-  border-color: var(--white-2);
-  border-radius: 10px;
-  display: flex;
-  height: 41px;
-  min-width: 272px;
-  padding: 4px 5px;
-  width: 100%;
-}
-
-.source-chain-osmosis {
-  letter-spacing: -0.28px;
-  line-height: normal;
-  min-height: 17px;
-  min-width: 147px;
-  width: 100%;
-  padding-left: 10px;
-}
-
-option {
-    font-size: 16px;
-    padding: 10px;
-    background-color: #141414;
-    border-radius: 5px;
-    border: 1px;
 }
 
 .percent {

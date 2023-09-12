@@ -9,6 +9,7 @@
 	import { getClient } from "../utils/tx";
 	import { addTransaction } from "../store/transactions";
 	import Button from "./Button.svelte";
+	import ChainSelector from "./ChainSelector.svelte";
 
   let loading = false;
   let source = "cosmoshub-4";
@@ -195,11 +196,7 @@
           Source Chain
       </div>
     </div>
-    <select bind:value={source} id="source_chain" name="source_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-      {#each $chains as chain}
-        <option class="source-chain-osmosis inter-medium-white-14px" value={chain.chain_id}>{chain.pretty_name}</option>
-      {/each}
-    </select>
+    <ChainSelector bind:selectedChain={source}/>
     <div style="width: 100%;">
         <div class="percent inter-medium-white-14px">
             Asset
@@ -215,15 +212,11 @@
       <div class="percent inter-medium-white-14px">
           Destination Chain
       </div>
-      <div class="z-[1000]">
+      <div class="hover:z-[500]">
           <Info/>
       </div>
     </div>
-    <select bind:value={destination} id="dest_chain" name="dest_chain" class="group-32-1 source-chain-osmosis inter-medium-white-14px">
-      {#each $chains as chain}
-        <option class="source-chain-osmosis inter-medium-white-14px" value={chain.chain_id}>{chain.pretty_name}</option>
-      {/each}
-    </select>
+    <ChainSelector bind:selectedChain={destination}/>
     <div hidden={!noRoute} class="text-align-left w-full mt-4 inter-medium-red-14px">
         Route Not Found
     </div>
