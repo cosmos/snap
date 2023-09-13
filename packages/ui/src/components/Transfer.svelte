@@ -116,7 +116,6 @@
             if (tx.code == 0) {
               await addTransaction({address: fromAddress, chain: source, when: new Date().toLocaleString(), tx_hash: tx.transactionHash})
             } else {
-              console.log(tx.rawLog);
               if (tx.rawLog) {
                 $state.alertText = tx.rawLog
               } else {

@@ -200,8 +200,6 @@ export const getMsgs = async (
     }
   })
 
-  console.log(chain_ids_to_addresses);
-
   const body = {
     chain_ids_to_addresses,
     source_asset_denom: sourceAsset,

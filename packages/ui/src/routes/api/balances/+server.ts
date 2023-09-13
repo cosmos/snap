@@ -31,7 +31,6 @@ const getDenomFromIBC = async (url: HttpEndpoint | string, ibc_coin: Coin) => {
 export async function POST({ request }) {
     
   let { chains } = await request.json();
-  console.log(chains);
 
   /**
    * Fetches the balance for a given chain.

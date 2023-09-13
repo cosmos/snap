@@ -32,9 +32,6 @@ export interface Transaction {
  * @returns {Object} - The presentable coin object
  */
 export const makeCoinPresentable = (coin: CoinIBC): CoinIBC => {
-  console.log("coin: ");
-  console.log(coin);
-
   const ibc = coin.ibc;
   const ibc_denom = ibc ? coin.denom : undefined;
   const denom = coin.denom;

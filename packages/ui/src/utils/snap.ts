@@ -161,7 +161,7 @@ export const initialize = async () => {
     await initSnap();
     
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
 }
 
