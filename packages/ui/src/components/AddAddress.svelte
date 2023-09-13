@@ -10,12 +10,13 @@
   let address = "cosmos163gulek3trdckcktcv820dpxntnm7qkkgfkcga";
   let name = "John Doe";
   let loading = false;
+  export let open = false;
 
   const addAddress = async () => {
     try {
       loading = true;
       await addAddressToBook(chain_id, address, name);
-      $state.openAddAddressPopup = false;
+      open = false;
       await getAddressBook();
       loading = false;
     } catch (err) {
@@ -29,7 +30,7 @@
   }
 </script>
 
-<div class="rectangle-66">
+<div hidden={!open} class="rectangle-66">
     <div class="group-4449">
         <div class="group-4448">
             <div class="group-4446">
@@ -38,7 +39,7 @@
                             Add address
                     </div>
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <img on:click={() => $state.openAddAddressPopup = false} class="clear" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/clear@2x.png" alt="clear">
+                    <img on:click={() => open = false} class="clear" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/clear@2x.png" alt="clear">
                 </div>
                     <img class="line-5 line" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/line-5.png" alt="Line 5">
                 </div>

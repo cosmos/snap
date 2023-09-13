@@ -11,6 +11,7 @@
   let searchResults: lunr.Index.Result[] = [];
   let currentAddresses: Address[] = $addressbook;
   let copied = false; 
+  let open = false;
 
   const idx = lunr(function () {
     // Use this ref function to get the id that will refer to each document
@@ -52,13 +53,13 @@
 </script>
 
 <div class="w-full flex flex-col justify-center items-center h-full bg-[transparent]">
-  <div hidden={!$state.openAddAddressPopup}>
-    <AddAddress/>
+  <div hidden={!open}>
+    <AddAddress bind:open={open}/>
   </div>
   <div class="rectangle-13">
     <div class="w-full flex justify-between mb-[20px]">
       <div class="chain-management">Address book</div>
-      <button on:click={() => $state.openAddAddressPopup = true} class="connect-button button-text">
+      <button on:click={() => open = true} class="connect-button button-text">
         Add address
       </button>
     </div>
