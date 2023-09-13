@@ -18,19 +18,23 @@
   let columns = [
     {
       id: 'address',
-      name: 'Address'
+      name: 'Address',
+      width: "25%",
     }, 
     {
       id: 'chain',
-      name: 'Chain'
+      name: 'Chain',
+      width: "25%",
     }, 
     {
       id: 'tx_hash',
-      name: 'Transaction ID'
+      name: 'Transaction ID',
+      width: "25%",
     }, 
     {
       id: 'when',
-      name: 'When'
+      name: 'When',
+      width: "25%",
     }
   ]
 
@@ -95,7 +99,7 @@
 
 <div id="main-grid-container">
   <div class="tx-title">Transaction history</div>
-  <Grid data={data} sort={true} search={true} pagination={true} className={config} style={style} columns={columns}/>
+  <Grid width="100%" data={data} sort={true} search={true} pagination={true} className={config} style={style} columns={columns}/>
 </div>
 <div id="main-grid-container-mobile">
   <div class="tx-title-mobile">Transaction history</div>

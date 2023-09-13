@@ -11,18 +11,21 @@
 	import Button from "./Button.svelte";
 	import ChainSelector from "./ChainSelector.svelte";
   import Select from "./Select.svelte";
+	import { isMsgTransferEncodeObject } from "@cosmjs/stargate";
+  import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 
   let loading = false;
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
-  let selected: CoinIBC = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()};
+  let selected: any;
+  let sourceChainChange = false;
   let amount = 0;
   let noRoute = false;
   let recipient = "";
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
-  let feesAmount = 0.10;
-  let gas = 0.025;
+  let feesAmount = 0.25;
+  let gas = 0.25;
   let feesOpen = false;
   let fees = {
       amount: [
@@ -50,12 +53,6 @@
   };
 
   $: {
-    if (!selected) {
-      selected = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()};
-    }
-    if (typeof amount != "number") {
-      amount = 0
-    }
     if (feesAmount) {
       fees = {
           amount: [
@@ -71,17 +68,22 @@
     if (foundChain) {
       fromChain = foundChain;
       fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom;
-      gas = (fromChain.fees.fee_tokens[0].average_gas_price);
       
       if ($balances) {
         let source_chain = $balances.filter(item => item.chain_id == source)[0];
         if (source_chain) {
           sourceBalances = source_chain.balances;
-          selected = sourceBalances[0];
+          if(sourceChainChange) {
+            selected = sourceBalances[0];
+            sourceChainChange = false;
+          }
         }
       }
     }
-    fromAddress = fromChain.address
+    fromAddress = fromChain.address;
+    if (!selected) {
+      selected = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()}; 
+    }
   }
 
   const computeIBCRoute = async () => {
@@ -101,15 +103,24 @@
                 amount: (amount * 1000000).toString(),  
               },
             ]
-            const tx = await client.sendTokens(fromAddress, recipient, coins, fees);
+            const msg = {
+              typeUrl: '/cosmos.bank.v1beta1.MsgSend', 
+              value: {
+                fromAddress: fromAddress,
+                toAddress: recipient,
+                amount: coins
+              }
+            };
+            const tx = await window.cosmos.signAndBroadcast(source, [msg], fees);
             
             if (tx.code == 0) {
-              await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash})
+              await addTransaction({address: fromAddress, chain: source, when: new Date().toLocaleString(), tx_hash: tx.transactionHash})
             } else {
+              console.log(tx.rawLog);
               if (tx.rawLog) {
                 $state.alertText = tx.rawLog
               } else {
-                $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
+                $state.alertText = "There was an issue while submitting your transaction."
               }
               $state.alertType = "danger"
               $state.showAlert = true
@@ -190,7 +201,7 @@
           Source Chain
       </div>
     </div>
-    <ChainSelector bind:selectedChain={source}/>
+    <ChainSelector onChange={() => sourceChainChange = true} bind:selectedChain={source}/>
     <div style="width: 100%;">
         <div class="percent inter-medium-white-14px">
             Asset
@@ -211,13 +222,13 @@
         Route Not Found
     </div>
     <input bind:value={recipient} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
-    <div hidden={!feesOpen}>
-      <div id="fees-container" class="flex">
+    <div class="w-full" hidden={!feesOpen}>
+      <div id="fees-container w-full" class="flex">
         <div class="w-[50%] mr-2">
           <div class="percent inter-medium-white-14px">
             Gas
           </div>
-          <div class="">
+          <div class="w-full">
             <input bind:value={gas} type="number" placeholder="Enter amount" class="w-full enter-amount inter-medium-white-14px overlap-group-7"/>
           </div>
         </div>

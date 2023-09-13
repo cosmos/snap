@@ -25,11 +25,15 @@ export async function addTransaction(data: {
   when: string;
   tx_hash: string;
 }) {
-  const res = await fetch(`${denoUrl}/transactions/add`, {
-    method: "POST", 
-    body: JSON.stringify(data)
-  });
-  return await res.json();
+  try {
+    const res = await fetch(`${denoUrl}/transactions/add`, {
+      method: "POST", 
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch (err) {
+    throw err
+  }
 }
 
 export const transactions = derived(chains, ($chains) => {
