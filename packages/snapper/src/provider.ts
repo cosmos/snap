@@ -4,7 +4,7 @@ import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { Long } from 'long';
 import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
 import { DeliverTxResponse } from "@cosmjs/stargate";
-import { addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
+import { DEFAULT_SNAP_ID, addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
 import { CosmJSOfflineSigner } from './signer.js';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
@@ -60,7 +60,7 @@ export interface SnapProvider {
 }
 
 export class CosmosSnap implements SnapProvider {
-    snap_id: string;
+    snap_id: string = DEFAULT_SNAP_ID;
     changeSnapId(snap_id: string): void {
         this.snap_id = snap_id;
     }
