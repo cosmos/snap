@@ -208,6 +208,10 @@
         <Select items={sourceBalances} bind:selectedItem={selected}/>
     </div>
     <input bind:value={amount} type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
+        Available: {_.round((Number(selected.amount) / 1000000))} {selected.display}
+    </div>
     <div class="flex w-full items-end">
       <div class="percent inter-medium-white-14px">
           Destination Chain
@@ -240,10 +244,6 @@
           </div>
         </div>
       </div>
-    </div>
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
-        Available: {_.round((Number(selected.amount) / 1000000))} {selected.display}
     </div>
     <Button onClick={computeIBCRoute} bind:loading={loading}/>
 </div>
