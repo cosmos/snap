@@ -18,23 +18,19 @@
   let columns = [
     {
       id: 'address',
-      name: 'Address',
-      width: "25%",
+      name: 'Address'
     }, 
     {
       id: 'chain',
-      name: 'Chain',
-      width: "25%",
+      name: 'Chain'
     }, 
     {
       id: 'tx_hash',
-      name: 'Transaction ID',
-      width: "25%",
+      name: 'Transaction ID'
     }, 
     {
       id: 'when',
-      name: 'When',
-      width: "25%",
+      name: 'When'
     }
   ]
 
@@ -49,7 +45,8 @@
     table: {
       'background-color': '#14141473',
       'height': '505px',
-      'border-radius': '8px'
+      'border-radius': '8px',
+      'white-space': 'nowrap'
     },
     container: {
       'background-color': 'transparent',
