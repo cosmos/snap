@@ -30,7 +30,6 @@ export const isSnapInitialized = async (snapId = DEFAULT_SNAP_ID): Promise<boole
 
 export const installSnap = async (snapId = DEFAULT_SNAP_ID) => {
     let installed = await isSnapInstalled();
-    let initialized = await isSnapInitialized();
     if (!installed) {
         await window.ethereum.request({
             method: 'wallet_requestSnaps',
@@ -41,7 +40,7 @@ export const installSnap = async (snapId = DEFAULT_SNAP_ID) => {
             },
         });
     }
-
+    let initialized = await isSnapInitialized();
     if (!initialized) {
         await window.ethereum.request({
             method: 'wallet_invokeSnap',
