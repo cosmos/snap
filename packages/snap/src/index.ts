@@ -11,6 +11,7 @@ import { COIN_TYPES, DEFAULT_FEES } from "./constants";
 import { SignDoc, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { StdSignDoc } from "@cosmjs/amino";
 import { decodeProtoMessage } from "./parser";
+import Long from "long";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -320,8 +321,10 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
 
       let signDoc: SignDoc = request.params.sign_doc as unknown as SignDoc;
+      let {low, high, unsigned} = signDoc.accountNumber
+      let accountNumber = new Long(low, high, unsigned);
       let signDocNew: SignDoc = {
-        accountNumber: signDoc.accountNumber,
+        accountNumber,
         bodyBytes: new Uint8Array(Object.values(signDoc.bodyBytes)),
         authInfoBytes: new Uint8Array(Object.values(signDoc.authInfoBytes)),
         chainId: signDoc.chainId

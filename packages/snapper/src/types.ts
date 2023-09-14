@@ -90,3 +90,9 @@ export interface CosmosAddress {
   chain_id: string;
   address: string;
 }
+
+export interface SnapResponse<T> {
+  data: T;
+  success: boolean;
+  statusCode: number;
+}

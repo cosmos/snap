@@ -1,9 +1,10 @@
-import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
+import { Address, Chain, CosmosAddress, Fees, Msg, SnapResponse } from './types';
 import { StdSignDoc, AminoSignResponse } from "@cosmjs/amino";
 import { DirectSignResponse } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from "@cosmjs/stargate";
 import { AccountData } from '@cosmjs/amino';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import Long from 'long';
 
 export const DEFAULT_SNAP_ID = "npm:@cosmsnap/snap";
 
@@ -251,8 +252,8 @@ export const signDirect = async (
     signer: string,
     sign_doc: SignDoc,
     snapId = DEFAULT_SNAP_ID
-): Promise<DirectSignResponse> => {
-    const result = await window.ethereum.request({
+): Promise<any> => {
+    const result: SnapResponse<DirectSignResponse> = await window.ethereum.request({
         method: 'wallet_invokeSnap',
         params: {
             snapId,
@@ -266,7 +267,18 @@ export const signDirect = async (
             },
         },
     });
-    return result.data;
+    let accountNumber = result.data.signed.accountNumber;
+    let editAccountNumber = new Long(accountNumber.low, accountNumber.high, accountNumber.unsigned)
+    const sig = {
+      signature: result.data.signature,
+      signed: {
+        ...result.data.signed,
+        accountNumber: `${editAccountNumber.toString()}`,
+        authInfoBytes: new Uint8Array(Object.values(result.data.signed.authInfoBytes)),
+        bodyBytes: new Uint8Array(Object.values(result.data.signed.bodyBytes)),
+      },
+    };
+    return sig
 };
 
 export const signAmino = async (

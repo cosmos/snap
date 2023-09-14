@@ -33,17 +33,18 @@ export class CosmJSOfflineSigner implements OfflineDirectSigner {
     signDoc: SignDoc,
   ): Promise<DirectSignResponse> {
     if (this.chainId !== signDoc.chainId) {
-      throw new Error('Chain IDs do not match');
+      throw new Error('Chain IDs do not match.');
     }
     const accounts = await this.getAccounts();
 
     let account = accounts[0];
 
     if (account.address !== signerAddress) {
-      throw new Error('Signer address does not match wallet address');
+      throw new Error('Signer address and wallet address do not match.');
     }
 
-    let signRes = signDirect(this.chainId, account.address, signDoc, this.snapId);
+    console.log(signDoc.accountNumber);
+    let signRes = await signDirect(this.chainId, signerAddress, signDoc, this.snapId);
 
     return signRes;
   }
@@ -62,10 +63,10 @@ export class CosmJSOfflineSigner implements OfflineDirectSigner {
     let account = accounts[0];
 
     if (account.address !== signerAddress) {
-      throw new Error('Signer address does not match wallet address');
+      throw new Error('Signer address and wallet address do not match.');
     }
 
-    let signRes = signAmino(this.chainId, account.address, signDoc, this.snapId);
+    let signRes = await signAmino(this.chainId, account.address, signDoc, this.snapId);
 
     return signRes;
   }

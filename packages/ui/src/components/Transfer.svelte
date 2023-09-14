@@ -11,9 +11,8 @@
 	import Button from "./Button.svelte";
 	import ChainSelector from "./ChainSelector.svelte";
   import Select from "./Select.svelte";
-	import { isMsgTransferEncodeObject } from "@cosmjs/stargate";
-  import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 
+  
   let loading = false;
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
@@ -103,15 +102,7 @@
                 amount: (amount * 1000000).toString(),  
               },
             ]
-            const msg = {
-              typeUrl: '/cosmos.bank.v1beta1.MsgSend', 
-              value: {
-                fromAddress: fromAddress,
-                toAddress: recipient,
-                amount: coins
-              }
-            };
-            const tx = await window.cosmos.signAndBroadcast(source, [msg], fees);
+            const tx = await client.sendTokens(fromAddress, recipient, coins, fees);
             
             if (tx.code == 0) {
               await addTransaction({address: fromAddress, chain: source, when: new Date().toLocaleString(), tx_hash: tx.transactionHash})
