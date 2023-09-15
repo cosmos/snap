@@ -22,6 +22,11 @@ export const isSnapInstalled = async (): Promise<boolean | undefined> => {
   return Object.keys(result).includes(snapId);
 };
 
+export const isSnapLatestVersion = async (): Promise<boolean> => {
+  const result = await window.ethereum.request({ method: 'wallet_getSnaps' });
+  return result[snapId]["version"] == snapVersion
+};
+
 export const isSnapInitialized = async (): Promise<boolean | undefined> => {
   const result = await window.ethereum.request({
     method: 'wallet_invokeSnap',

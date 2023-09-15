@@ -1,7 +1,7 @@
 <script lang="ts">
 	import MainTitle from '../components/MainTitle.svelte';
 	import Step from '../components/Step.svelte';
-	import { initSnap, installSnap, isMetaMaskInstalled } from '../utils/snap';
+	import { initSnap, installSnap, isMetaMaskInstalled, isSnapLatestVersion } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
 	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
@@ -21,9 +21,10 @@
       if ($state.isSnapInstalledValue) {
         $state.loading = true;
         $state.isSnapInitValue = await isSnapInitialized();
+        $state.isSnapLatestVersion = await isSnapLatestVersion();
         $state.loading = false;
       }
-      if ($state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapInitValue ) {
+      if ($state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapInitValue && $state.isSnapLatestVersion ) {
         $state.connected = true;
       }
      } catch (err: any) {
@@ -100,21 +101,21 @@
 
                   <Step
                       bind:loading={$state.loading}
-                      disabled={$state.isMetaMaskInstalledValue && $state.isSnapInstalledValue}
-                      action={runInstallSnap}
-                      complete={$state.isSnapInstalledValue}
+                      disabled={$state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapLatestVersion}
+                      action={$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? () => { window.open("https://snaps.metamask.io/snap/npm/cosmsnap/snap/")} : runInstallSnap}
+                      complete={$state.isSnapInstalledValue && $state.isSnapLatestVersion}
                       stepNumber="2"
-                      stepTitle={"Install Cosmos Snap"}
+                      stepTitle={$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Upgrade Cosmos Snap" : "Install Cosmos Snap"}
                       stepImage="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/image-3@2x.png"
-                      actionText={"Install Snap"}
-                      stepDescription = "Login to Metamask and install the Cosmos Snap."
-                      stepLongTitle = {"Install Cosmos Snap"}
-                      stepLongDescription = "Install the official Cosmos Metamask Snap into Metamask."
+                      actionText={$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Upgrade Snap" : "Install Snap"}
+                      stepDescription = {$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Login to Metamask and upgrade the Cosmos Snap." : "Login to Metamask and install the Cosmos Snap."}
+                      stepLongTitle = {$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Upgrade Cosmos Snap" : "Install Cosmos Snap"}
+                      stepLongDescription = { $state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Please upgrade to the latest Cosmos MetaMask Snap" : "Install the official Cosmos Metamask Snap into Metamask."}
                   />
 
                   <Step 
                       bind:loading={$state.loading}
-                      disabled={!$state.isMetaMaskInstalledValue || !$state.isSnapInstalledValue || $state.isSnapInitValue}
+                      disabled={!$state.isMetaMaskInstalledValue || !$state.isSnapInstalledValue || !$state.isSnapLatestVersion || $state.isSnapInitValue}
                       action={async () => { await initializeSnap(); }}
                       complete={$state.isSnapInitValue}
                       stepNumber="3"
