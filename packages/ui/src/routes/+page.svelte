@@ -7,6 +7,7 @@
 	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
 	import { chains } from '../store/chains';
 	import { isSnapInitialized, isSnapInstalled } from '@cosmsnap/snapper';
+	import { onMount } from 'svelte';
 
 	const initializeData = async () => {
     try {
@@ -16,12 +17,12 @@
       if ($state.isMetaMaskInstalledValue) {
         $state.loading = true;
         $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.isSnapLatestVersion = await isSnapLatestVersion();
         $state.loading = false;
       }
       if ($state.isSnapInstalledValue) {
         $state.loading = true;
         $state.isSnapInitValue = await isSnapInitialized();
-        $state.isSnapLatestVersion = await isSnapLatestVersion();
         $state.loading = false;
       }
       if ($state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapInitValue && $state.isSnapLatestVersion ) {
@@ -76,6 +77,8 @@
       }
     }
 	};
+
+  onMount(initializeData);
 </script>
 
 <div class="x1-connect-metamask screen">
@@ -99,23 +102,39 @@
                       stepLongDescription = "Download and install the Metamask extension in your browser."
                   />
 
-                  <Step
-                      bind:loading={$state.loading}
-                      disabled={$state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapLatestVersion}
-                      action={$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? () => { window.open("https://snaps.metamask.io/snap/npm/cosmsnap/snap/")} : runInstallSnap}
-                      complete={$state.isSnapInstalledValue && $state.isSnapLatestVersion}
-                      stepNumber="2"
-                      stepTitle={$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Upgrade Cosmos Snap" : "Install Cosmos Snap"}
-                      stepImage="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/image-3@2x.png"
-                      actionText={$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Upgrade Snap" : "Install Snap"}
-                      stepDescription = {$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Login to Metamask and upgrade the Cosmos Snap." : "Login to Metamask and install the Cosmos Snap."}
-                      stepLongTitle = {$state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Upgrade Cosmos Snap" : "Install Cosmos Snap"}
-                      stepLongDescription = { $state.isSnapInstalledValue && !$state.isSnapLatestVersion ? "Please upgrade to the latest Cosmos MetaMask Snap" : "Install the official Cosmos Metamask Snap into Metamask."}
-                  />
+                  {#if $state.isSnapInstalledValue && !$state.isSnapLatestVersion}
+                    <Step
+                        bind:loading={$state.loading}
+                        disabled={$state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapLatestVersion}
+                        action={() => { window.location.href = "https://snaps.metamask.io/snap/npm/cosmsnap/snap/"; }}
+                        complete={$state.isSnapInstalledValue && $state.isSnapLatestVersion}
+                        stepNumber="2"
+                        stepTitle="Upgrade Cosmos Snap"
+                        stepImage="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/image-3@2x.png"
+                        actionText="Upgrade Snap"
+                        stepDescription="Login to Metamask and upgrade the Cosmos Snap." 
+                        stepLongTitle="Upgrade Cosmos Snap"
+                        stepLongDescription={"Please upgrade to the latest Cosmos MetaMask Snap."}
+                    />
+                  {:else}
+                    <Step
+                        bind:loading={$state.loading}
+                        disabled={$state.isMetaMaskInstalledValue && $state.isSnapInstalledValue}
+                        action={runInstallSnap}
+                        complete={$state.isSnapInstalledValue}
+                        stepNumber="2"
+                        stepTitle={"Install Cosmos Snap"}
+                        stepImage="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/image-3@2x.png"
+                        actionText={"Install Snap"}
+                        stepDescription = "Login to Metamask and install the Cosmos Snap."
+                        stepLongTitle = {"Install Cosmos Snap"}
+                        stepLongDescription = "Install the official Cosmos Metamask Snap into Metamask."
+                    />
+                  {/if}
 
                   <Step 
                       bind:loading={$state.loading}
-                      disabled={!$state.isMetaMaskInstalledValue || !$state.isSnapInstalledValue || !$state.isSnapLatestVersion || $state.isSnapInitValue}
+                      disabled={!$state.isMetaMaskInstalledValue || !$state.isSnapInstalledValue || $state.isSnapInitValue}
                       action={async () => { await initializeSnap(); }}
                       complete={$state.isSnapInitValue}
                       stepNumber="3"

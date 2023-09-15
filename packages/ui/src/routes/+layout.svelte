@@ -8,10 +8,10 @@
 	import Menu from "../components/Menu.svelte";
 	import { updateDirectory } from "../store/directory";
 	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "@cosmsnap/snapper";
-	import { isMetaMaskInstalled, snapId } from "../utils/snap";
+	import { isMetaMaskInstalled, isSnapLatestVersion, snapId } from "../utils/snap";
 
 	$: {
-    if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapInstalledValue) {
+    if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapLatestVersion && $state.isSnapInstalledValue) {
 		  $state.connected = true;
 		  goto("/balances");
 	  }
@@ -25,9 +25,10 @@
       if ($state.isMetaMaskInstalledValue) {
         $state.loading = true;
         $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.isSnapLatestVersion = await isSnapLatestVersion();
         $state.loading = false;
       }
-      if ($state.isSnapInstalledValue) {
+      if ($state.isSnapInstalledValue && $state.isSnapLatestVersion) {
         $state.loading = true;
         $state.isSnapInitValue = await isSnapInitialized();
         $state.loading = false;
@@ -44,7 +45,7 @@
     window.cosmos = new CosmosSnap();
     window.cosmos.changeSnapId(snapId);
     updateDirectory();
-    initializeData();
+    await initializeData();
     if (!$state.connected) {
       goto("/");
     } else {
