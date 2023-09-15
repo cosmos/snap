@@ -10,25 +10,30 @@
 	import { addTransaction } from "../store/transactions";
 	import Button from "./Button.svelte";
 	import ChainSelector from "./ChainSelector.svelte";
+  import { sendTxAlert } from "@cosmsnap/snapper";
   import Select from "./Select.svelte";
-
+  
   let loading = false;
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
-  let selected: CoinIBC = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()};
+  let selected: any;
+  let sourceChainChange = false;
   let amount = 0;
   let noRoute = false;
   let recipient = "";
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
+  let feesAmount = 0.25;
+  let gas = 0.25;
+  let feesOpen = false;
   let fees = {
       amount: [
           {
-              amount: "100000",
+              amount: feesAmount.toString(),
               denom: ""
           }
       ],
-      gas: "5000",
+      gas: gas.toString(),
   };
   let fromAddress: string | undefined = "";
   let fromChain: Chain = {
@@ -47,40 +52,37 @@
   };
 
   $: {
-    if (!selected) {
-      selected = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()};
-    }
-    if (typeof amount != "number") {
-      amount = 0
-    }
-    if (!fees || !fees.amount) {
+    if (feesAmount) {
       fees = {
           amount: [
               {
-                  amount: "100000",
+                  amount: (feesAmount * 1000000).toString(),
                   denom: ""
               }
           ],
-          gas: "5000",
+          gas: (gas * 1000000).toString(),
       }
     }
-    if (source !== fromChain.chain_id) {
-      let foundChain = $chains.find(item => item.chain_id === source);
-      if (foundChain) {
-        fromChain = foundChain;
-        fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom;
-        fees.gas = (fromChain.fees.fee_tokens[0].average_gas_price * 1000000).toString();
-      }
+    let foundChain = $chains.find(item => item.chain_id === source);
+    if (foundChain) {
+      fromChain = foundChain;
+      fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom;
       
       if ($balances) {
         let source_chain = $balances.filter(item => item.chain_id == source)[0];
         if (source_chain) {
           sourceBalances = source_chain.balances;
-          selected = sourceBalances[0];
+          if(sourceChainChange) {
+            selected = sourceBalances[0];
+            sourceChainChange = false;
+          }
         }
       }
     }
-    fromAddress = fromChain.address
+    fromAddress = fromChain.address;
+    if (!selected) {
+      selected = {amount: "0", denom: "uatom", ibc: false, display: "uatom".substring(1).toUpperCase()}; 
+    }
   }
 
   const computeIBCRoute = async () => {
@@ -100,15 +102,24 @@
                 amount: (amount * 1000000).toString(),  
               },
             ]
-            const tx = await client.sendTokens(fromAddress, recipient, coins, fees);
+            let msg = {
+              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
+              value: {
+                fromAddress,
+                toAddress: recipient, 
+                amount: coins
+              }
+            }
+            const tx = await client.signAndBroadcast(fromAddress, [msg], fees);
             
             if (tx.code == 0) {
-              await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash})
+              await addTransaction({address: fromAddress, chain: source, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
+              await sendTxAlert(source, tx.transactionHash);
             } else {
               if (tx.rawLog) {
                 $state.alertText = tx.rawLog
               } else {
-                $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
+                $state.alertText = "There was an issue while submitting your transaction."
               }
               $state.alertType = "danger"
               $state.showAlert = true
@@ -149,10 +160,11 @@
                   typeUrl: item.msg_type_url
               };
           });
-          let tx = await window.cosmos.signAndBroadcast(fromAddress, messages, fees);
+          const tx = await client.signAndBroadcast(fromAddress, messages, fees);
 
           if (tx.code == 0) {
-            await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash})
+            await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash});
+            await sendTxAlert(source, tx.transactionHash);
           } else {
             if (tx.rawLog) {
               $state.alertText = tx.rawLog
@@ -176,15 +188,20 @@
 </script>
 
 <div class="overlap-group1">
-    <div class="ibc-transfer inter-medium-white-16px">
-        {source == destination ? "Transfer" : "IBC Transfer"}
+    <div class="flex w-full justify-between items-center">
+      <div class="ibc-transfer inter-medium-white-16px">
+          {source == destination ? "Transfer" : "IBC Transfer"}
+      </div>
+      <svg on:click={() => feesOpen = !feesOpen} class="w-4 h-4 text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 1h4m0 0v4m0-4-5 5.243M5 15H1m0 0v-4m0 4 5.243-5"/>
+      </svg>  
     </div>
     <div class="flex w-full items-start">
       <div class="percent inter-medium-white-14px">
           Source Chain
       </div>
     </div>
-    <ChainSelector bind:selectedChain={source}/>
+    <ChainSelector onChange={() => sourceChainChange = true} bind:selectedChain={source}/>
     <div style="width: 100%;">
         <div class="percent inter-medium-white-14px">
             Asset
@@ -192,6 +209,10 @@
         <Select items={sourceBalances} bind:selectedItem={selected}/>
     </div>
     <input bind:value={amount} type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
+        Available: {_.round((Number(selected.amount) / 1000000))} {selected.display}
+    </div>
     <div class="flex w-full items-end">
       <div class="percent inter-medium-white-14px">
           Destination Chain
@@ -205,9 +226,25 @@
         Route Not Found
     </div>
     <input bind:value={recipient} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
-        Available: {_.round((Number(selected.amount) / 1000000))} {selected.display}
+    <div class="w-full" hidden={!feesOpen}>
+      <div id="fees-container w-full" class="flex">
+        <div class="w-[50%] mr-2">
+          <div class="percent inter-medium-white-14px">
+            Gas
+          </div>
+          <div class="w-full">
+            <input bind:value={gas} type="number" placeholder="Enter amount" class="w-full enter-amount inter-medium-white-14px overlap-group-7"/>
+          </div>
+        </div>
+        <div class="w-[50%] ml-2">
+          <div class="percent inter-medium-white-14px">
+            Fees
+          </div>
+          <div class="">
+            <input bind:value={feesAmount} type="number" placeholder="Enter amount" class="w-full enter-amount inter-medium-white-14px overlap-group-7"/>
+          </div>
+        </div>
+      </div>
     </div>
     <Button onClick={computeIBCRoute} bind:loading={loading}/>
 </div>

@@ -1,7 +1,10 @@
 import { DeliverTxResponse, SigningStargateClient } from "@cosmjs/stargate";
-import { DirectSecp256k1Wallet, DirectSignResponse } from "@cosmjs/proto-signing";
-import { Secp256k1Wallet, AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
-import { Fees } from "./types/chains";
+import { encodeSecp256k1Signature, serializeSignDoc, rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
+import { Secp256k1, sha256 } from "@cosmjs/crypto";
+import { AccountData, DirectSecp256k1Wallet, DirectSignResponse, OfflineDirectSigner, makeSignBytes } from "@cosmjs/proto-signing";
+import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
+import { toBech32 } from "@cosmjs/encoding";
+import { Chain, Fees } from "./types/chains";
 import { ChainState } from "./state";
 import { heading, panel, text } from "@metamask/snaps-ui";
 import {
@@ -11,6 +14,7 @@ import {
   DEFAULT_AVG_GAS,
 } from "./constants";
 import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { getAddress } from "./address";
 
 /**
  * submitTransaction Submits a transaction to the chain specified.
@@ -192,9 +196,9 @@ export const sendTx = async (
  */
 export const signDirect = async (
   chain_id: string,
-  signer: string | null,
+  signer: string,
   sign_doc: SignDoc
-): Promise<DirectSignResponse | undefined> => {
+): Promise<any> => {
   try {
     // get the chain from state
     let chain = await ChainState.getChain(chain_id);
@@ -221,22 +225,17 @@ export const signDirect = async (
     if (pk.startsWith("0x")) {
       pk = pk.substring(2);
     }
+    // create Buffer for pk
+    let bytesPK = new Uint8Array(Buffer.from(pk, 'hex'));
 
-    // create the wallet
-    let wallet = await DirectSecp256k1Wallet.fromKey(
-      Uint8Array.from(Buffer.from(pk, "hex")),
-      chain.bech32_prefix
-    );
+    let wallet = await Wallet.fromKey(bytesPK, chain);
 
-    // get current wallet user as signer if signer not provided
-    if (signer == null) {
-      signer = (await wallet.getAccounts())[0].address;
-    }
+    let response = await wallet.signDirect(signer, sign_doc);
 
-    // sign directly
-    let tx = await wallet.signDirect(signer, sign_doc);
-
-    return tx
+    return {
+      signed: { ...sign_doc, accountNumber: sign_doc.accountNumber.toString() },
+      signature: response.signature,
+    };
   } catch (err: any) {
     console.error("Error During SignDirect: ", err.message);
     await snap.request({
@@ -264,7 +263,7 @@ export const signDirect = async (
  */
 export const signAmino = async (
   chain_id: string,
-  signer: string | null,
+  signer: string,
   sign_doc: StdSignDoc
 ): Promise<AminoSignResponse | undefined> => {
   try {
@@ -293,22 +292,14 @@ export const signAmino = async (
     if (pk.startsWith("0x")) {
       pk = pk.substring(2);
     }
+    // create Buffer for pk
+    let bytesPK = new Uint8Array(Buffer.from(pk, 'hex'));
 
-    // create the wallet for Amino
-    let wallet = await Secp256k1Wallet.fromKey(
-      Uint8Array.from(Buffer.from(pk, "hex")),
-      chain.bech32_prefix
-    );
+    let wallet = await Wallet.fromKey(bytesPK, chain);
 
-    // get current wallet user as signer if signer not provided
-    if (signer == null) {
-      signer = (await wallet.getAccounts())[0].address;
-    }
+    let response = await wallet.signAmino(signer, sign_doc);
 
-    // Sign using Amino
-    const signedTx = await wallet.signAmino(signer, sign_doc);  // Adjust this based on your library
-
-    return signedTx;
+    return response;
   } catch (err: any) {
     console.error("Error During signAmino: ", err.message);
     await snap.request({
@@ -323,3 +314,67 @@ export const signAmino = async (
     });
   }
 };
+
+export class Wallet implements OfflineDirectSigner {
+  /**
+   * Creates a DirectSecp256k1Wallet from the given private key
+   *
+   * @param privkey The private key.
+   * @param prefix The bech32 address prefix (human readable part). Defaults to "cosmos".
+   */
+  public static async fromKey(privkey: Uint8Array, chain: Chain): Promise<Wallet> {
+    const uncompressed = (await Secp256k1.makeKeypair(privkey)).pubkey;
+    return new Wallet(privkey, Secp256k1.compressPubkey(uncompressed), chain);
+  }
+
+  private readonly pubkey: Uint8Array;
+  private readonly privkey: Uint8Array;
+  private readonly chain: Chain;
+
+  private constructor(privkey: Uint8Array, pubkey: Uint8Array, chain: Chain) {
+    this.privkey = privkey;
+    this.pubkey = pubkey;
+    this.chain = chain;
+  }
+
+  public async getAccounts(): Promise<readonly AccountData[]> {
+    let account = await getAddress(this.chain)
+    return [
+      {
+        algo: "secp256k1",
+        address: account,
+        pubkey: this.pubkey,
+      },
+    ];
+  }
+
+  public async signDirect(address: string, signDoc: SignDoc): Promise<DirectSignResponse> {
+    const signBytes = makeSignBytes(signDoc);
+    let checkAddress = await getAddress(this.chain);
+    if (address !== checkAddress) {
+      throw new Error(`Address ${address} not found in wallet`);
+    }
+    const hashedMessage = sha256(signBytes);
+    const signature = await Secp256k1.createSignature(hashedMessage, this.privkey);
+    const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
+    const stdSignature = encodeSecp256k1Signature(this.pubkey, signatureBytes);
+    return {
+      signed: signDoc,
+      signature: stdSignature,
+    };
+  }
+
+  public async signAmino(signerAddress: string, signDoc: StdSignDoc): Promise<AminoSignResponse> {
+    let checkAddress = await getAddress(this.chain);
+    if (signerAddress !== checkAddress) {
+      throw new Error(`Address ${signerAddress} not found in wallet`);
+    }
+    const message = sha256(serializeSignDoc(signDoc));
+    const signature = await Secp256k1.createSignature(message, this.privkey);
+    const signatureBytes = new Uint8Array([...signature.r(32), ...signature.s(32)]);
+    return {
+      signed: signDoc,
+      signature: encodeSecp256k1Signature(this.pubkey, signatureBytes),
+    };
+  }
+}

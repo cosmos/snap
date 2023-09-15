@@ -281,13 +281,5 @@
     .flex-row-1 {
       gap: 50px; /* further reduced gap for mobile screens */
     }
-
-    .overlap-group1 {
-      width: 260px; /* further reduced width */
-    }
-
-    .group-9-3 {
-      width: 220px; /* further reduced width */
-    }
   }
 </style>

@@ -22,16 +22,15 @@ export interface ChainConfig {
 
 export const getClient = async (chain: Chain) => {
   let chainRpc = rpcs.apis.find(item => item.chain_id == chain.chain_id);
+  let signer = window.cosmos.getOfflineSigner(chain.chain_id);
   // if we dont have a production rpc bank on public registry
   if (!chainRpc || !keyNumia) {
-    let signer = await window.cosmos.getOfflineSigner(chain.chain_id);
     const signingClient = await SigningStargateClient.connectWithSigner(
         chain.apis.rpc[0].address,
         signer
     );
     return signingClient
   }
-  let signer = await window.cosmos.getOfflineSigner(chain.chain_id);
   const signingClient = await SigningStargateClient.connectWithSigner(
       { url: chainRpc.rpc, headers: { "Authorization": `Bearer ${keyNumia}` } },
       signer

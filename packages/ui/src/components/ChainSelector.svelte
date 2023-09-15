@@ -8,9 +8,11 @@
   export let selectedChain = "";
   let selectedPrettyName = "";
   let dropdown: HTMLDivElement;
+  export let onChange = () => {};
 
   function selectChain(chain: Chain) {
     selectedChain = chain.chain_id;
+    onChange();
     isOpen = false;
   }
 

@@ -3,13 +3,13 @@
   import { directory } from "../store/directory";
   import _ from "lodash";
 
-  export let chain_id = "osmosis-1";
-  export let name = "Osmosis";
+  export let chain_id: string;
+  export let name: string;
   export let dollarAmount = 0;
-  export let tokenAmount = 48.77;
-  export let tokenDenom = "uosmo";
-  export let chainAddress = "osmo1m9l358xunhdhqp0568dj37mzhvuxx9uxtz4vt7";
-  export let logo = "https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a70dda287bc6479f0ac9fd/img/mask-group-18@2x.png";
+  export let tokenAmount = 0;
+  export let tokenDenom: string;
+  export let chainAddress: string;
+  export let logo: string;
   let copied = false;
 
   $: {
@@ -49,7 +49,7 @@
           <p class="price inter-medium-white-12px">
             ${_.round(dollarAmount, 2)}
           </p>
-          <p class="percent inter-medium-white-14px w-[150px]">
+          <p class="percent inter-medium-white-14px w-[100%]">
             {_.round(tokenAmount, 2) + " " + tokenDenom}
           </p>
       </div>

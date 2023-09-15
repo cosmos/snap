@@ -5,6 +5,7 @@
 		<title>Cosmos MetaMask Extension</title>
 		<link rel="icon" href="%sveltekit.assets%/cosmos-atom-logo.png" />
 		<meta name="viewport" content="width=device-width" />
+		<meta property="og:image" content="/cosmos-atom-logo.png">
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.css" rel="stylesheet" />
 		<style>@import "https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css";</style>
 		<link rel="stylesheet" href="/app.css">
@@ -13,5 +14,9 @@
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
+		<script>
+		window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+		</script>
+		<script defer src="/_vercel/insights/script.js"></script>
 	</body>
 </html>

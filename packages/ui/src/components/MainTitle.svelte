@@ -28,7 +28,6 @@
         margin-bottom: 60px;
         min-height: 136px;
         text-align: center;
-        width: 731px;
     }
 
     .span1 {

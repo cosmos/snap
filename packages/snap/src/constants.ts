@@ -5,7 +5,7 @@ export const DEFAULT_FEES = {
 
 export const DEFAULT_SLIP44 = 118;
 
-export const WALLET_URL = "https://wallet.mysticlabs.xyz";
+export const WALLET_URL = "https://metamask.mysticlabs.xyz";
 
 // The multiplier to use to get u{denom} from {denom}
 export const U_MULTIPLIER = 1000000;

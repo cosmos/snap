@@ -8,29 +8,31 @@
 	import Menu from "../components/Menu.svelte";
 	import { updateDirectory } from "../store/directory";
 	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "@cosmsnap/snapper";
-	import { isMetaMaskInstalled, snapId } from "../utils/snap";
+	import { isMetaMaskInstalled, isSnapLatestVersion, snapId } from "../utils/snap";
 
-	$: if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapInstalledValue) {
-
-		$state.connected = true;
-		goto("/balances");
-	}
+	$: {
+    if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapLatestVersion && $state.isSnapInstalledValue) {
+		  $state.connected = true;
+		  goto("/balances");
+	  }
+  }
 
 	const initializeData = async () => {
     try {
       $state.loading = true;
       $state.isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
+      $state.loading = false;
       if ($state.isMetaMaskInstalledValue) {
         $state.loading = true;
         $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.isSnapLatestVersion = await isSnapLatestVersion();
         $state.loading = false;
-        if ($state.isSnapInstalledValue) {
-          $state.loading = true;
-          $state.isSnapInitValue = await isSnapInitialized();
-          $state.loading = false;
-        }
       }
-      $state.loading = false;
+      if ($state.isSnapInstalledValue && $state.isSnapLatestVersion) {
+        $state.loading = true;
+        $state.isSnapInitValue = await isSnapInitialized();
+        $state.loading = false;
+      }
      } catch (err: any) {
       $state.loading = false;
       $state.alertText = `${err.message}`
@@ -43,7 +45,7 @@
     window.cosmos = new CosmosSnap();
     window.cosmos.changeSnapId(snapId);
     updateDirectory();
-    initializeData();
+    await initializeData();
     if (!$state.connected) {
       goto("/");
     } else {
@@ -110,7 +112,7 @@
 
     .left-content {
       backdrop-filter: blur(15px) brightness(100%);
-      background-color: var(--black);
+      background-color: #05000b;
       border: 1px solid;
       border-color: var(--white-2);
       border-top: 0px;

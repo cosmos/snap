@@ -289,6 +289,6 @@ test.serial("AddressState Failing Tests", async (t) => {
   await failing_tests.getAddressFailTest(
     t,
     "5",
-    "5 is not found. Add the address to your address book at https://wallet.mysticlabs.xyz"
+    "5 is not found. Add the address to your address book at https://metamask.mysticlabs.xyz"
   );
 });

@@ -1,7 +1,8 @@
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { AccountData, AminoSignResponse, StdSignDoc } from '@cosmjs/amino';
-import { DirectSignResponse, OfflineDirectSigner } from '@cosmjs/proto-signing';
+import { OfflineDirectSigner } from '@cosmjs/proto-signing';
 import { getAccountInfo, signAmino, signDirect, DEFAULT_SNAP_ID } from './snap.js';
+import Long from 'long';
 
 export class CosmJSOfflineSigner implements OfflineDirectSigner {
   readonly chainId: string;
@@ -16,40 +17,55 @@ export class CosmJSOfflineSigner implements OfflineDirectSigner {
     }
   }
 
-  async getAccounts(): Promise<AccountData[]> {
+  public async getAccounts(): Promise<readonly AccountData[]> {
     let address = await getAccountInfo(this.chainId, this.snapId);
-
     return [
-        {
-          address: address.address,
-          algo: address.algo,
-          pubkey: new Uint8Array(Object.values(address.pubkey))
-        }
+      {
+        algo: "secp256k1",
+        address: address.address,
+        pubkey: new Uint8Array(Object.values(address.pubkey)),
+      },
     ];
   }
 
-  async signDirect(
+  public async signDirect(
     signerAddress: string,
     signDoc: SignDoc,
-  ): Promise<DirectSignResponse> {
+  ): Promise<any> {
     if (this.chainId !== signDoc.chainId) {
-      throw new Error('Chain IDs do not match');
+      throw new Error('Chain IDs do not match.');
     }
     const accounts = await this.getAccounts();
 
     let account = accounts[0];
 
     if (account.address !== signerAddress) {
-      throw new Error('Signer address does not match wallet address');
+      throw new Error('Signer address and wallet address do not match.');
     }
 
-    let signRes = signDirect(this.chainId, account.address, signDoc, this.snapId);
+    let signRes = await signDirect(this.chainId, signerAddress, signDoc, this.snapId);
 
-    return signRes;
+    const { accountNumber } = signDoc;
+
+    const accountNumberLong = new Long(accountNumber?.low || 0, accountNumber?.high, accountNumber?.unsigned, );
+  
+    const sign = {
+      signature: signRes.signature,
+      signed: {
+        ...signRes.signed,
+        accountNumber: `${accountNumberLong.toString()}`,
+        authInfoBytes: new Uint8Array(
+          Object.values(signRes.signed.authInfoBytes),
+        ),
+        bodyBytes: new Uint8Array(Object.values(signRes.signed.bodyBytes)),
+      },
+    };
+  
+    return sign;
   }
 
   // This has been added as a placeholder.
-  async signAmino(
+  public async signAmino(
     signerAddress: string,
     signDoc: StdSignDoc,
   ): Promise<AminoSignResponse> {
@@ -62,10 +78,10 @@ export class CosmJSOfflineSigner implements OfflineDirectSigner {
     let account = accounts[0];
 
     if (account.address !== signerAddress) {
-      throw new Error('Signer address does not match wallet address');
+      throw new Error('Signer address and wallet address do not match.');
     }
 
-    let signRes = signAmino(this.chainId, account.address, signDoc, this.snapId);
+    let signRes = await signAmino(this.chainId, account.address, signDoc, this.snapId);
 
     return signRes;
   }

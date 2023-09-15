@@ -263,14 +263,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cosmsnap/snapper@npm:^0.1.21":
-  version: 0.1.21
-  resolution: "@cosmsnap/snapper@npm:0.1.21"
+"@cosmsnap/snapper@npm:^0.1.25":
+  version: 0.1.25
+  resolution: "@cosmsnap/snapper@npm:0.1.25"
   dependencies:
     "@keplr-wallet/proto-types": 0.12.12
     "@keplr-wallet/types": 0.12.12
     ses: ^0.18.4
-  checksum: 1257d525d52fdd0e723ee32dffbf033bbf819b7cb48e9a523085b3b4b129d2a63d0101325c65e6a921b388834d376e174da74d4c1427a47ab2924e594cfac977
+  checksum: 65f23e43e880c1d8f2fff7f3716a7b178f5e0e1c963eb8753e93a0cbb5ba92b581417dd92c530c746132a44dc4fb34aab2fc9e49602d7280ba3c331f353ece4e
   languageName: node
   linkType: hard
 
@@ -280,7 +280,7 @@ __metadata:
   dependencies:
     "@cosmjs/crypto": ^0.31.1
     "@cosmjs/stargate": ^0.31.1
-    "@cosmsnap/snapper": ^0.1.21
+    "@cosmsnap/snapper": ^0.1.25
     "@fullhuman/postcss-purgecss": ^5.0.0
     "@keplr-wallet/types": 0.12.12
     "@metamask/detect-provider": ^2.0.0
@@ -315,10 +315,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@endo/env-options@npm:^0.1.3":
-  version: 0.1.3
-  resolution: "@endo/env-options@npm:0.1.3"
-  checksum: da8c66865d4d30b0053a00960657dc36f022975a888f0dd6a2f6bb37b9fe731f45a02a2cf263d93b1a40fcb37b25f8ba7076cb8af9e93fd95f496365d9382930
+"@endo/env-options@npm:^0.1.4":
+  version: 0.1.4
+  resolution: "@endo/env-options@npm:0.1.4"
+  checksum: 6099f0a6b700a60bee7b226aa2a39bb5748e22f25e9606d70e5a66a8e62cbd8c972b0fe578735a658f80bf2ebece62e28c20aa3f16417cbfe6c19a8689966dd3
   languageName: node
   linkType: hard
 
@@ -3988,11 +3988,11 @@ autoprefixer@latest:
   linkType: hard
 
 "ses@npm:^0.18.4":
-  version: 0.18.7
-  resolution: "ses@npm:0.18.7"
+  version: 0.18.8
+  resolution: "ses@npm:0.18.8"
   dependencies:
-    "@endo/env-options": ^0.1.3
-  checksum: 75ac014771d9bc1f747193c6d0f9e7d2d7700a10311ba8d805d9bc78d4c20d4ef40537f0535b1ea6abf06babf67e70f8bd37b2ad68ad54992a0c5ce842181c87
+    "@endo/env-options": ^0.1.4
+  checksum: d7976d2ee218baec021c5cfdfb193d63b52bf2b6cbdbbb90c19d835915a1872b6924910f7fd42bc849eb2de78fc7bdd6e7b4667e1df3c79244cc92d4ede48aa6
   languageName: node
   linkType: hard
 

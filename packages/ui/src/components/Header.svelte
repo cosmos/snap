@@ -28,7 +28,7 @@
             <div class="logo-text">{logoText}</div>
         </div>
         <div class="button-container">
-            <button class="connect-button inter-medium-white-12px">
+            <button on:click={() => goto("/")} class="connect-button inter-medium-white-12px">
                 {connectWalletTxt}
             </button>
         </div>
@@ -107,4 +107,10 @@
         font-style: normal;
         font-weight: 500;
     }
+
+    @media (max-width: 900px) { 
+        .navbar {
+            padding: 24px 10px;
+        }
+    }    
 </style>

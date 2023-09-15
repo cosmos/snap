@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { beforeUpdate, onMount } from "svelte";
+  import { afterUpdate, beforeUpdate, onMount } from "svelte";
   import Balance from "../../components/Balance.svelte";
   import Transfer from "../../components/Transfer.svelte";
   import { balances } from "../../store/balances";
@@ -18,7 +18,11 @@
     }
   }
 
-  onMount(fetchChains);
+  onMount(() => {
+    if ($state.connected) {
+      fetchChains()
+    }
+  });
   beforeUpdate(updateDirectory);
 </script>
 
@@ -35,11 +39,11 @@
               <div class="balance col-span-2 lg:col-span-1">
                 <Balance
                   name={b?.pretty_name}
-                  dollarAmount={Math.round((Number(amount.amount) / 1_000_000) * 100) / 100}
+                  chain_id={b.chain_id}
                   tokenAmount={Math.round((Number(amount.amount) / 1_000_000) * 100) / 100}
                   tokenDenom={amount.display}
-                  chainAddress={b?.address}
-                  logo={b.logo_URIs ? b.logo_URIs.svg : undefined}
+                  chainAddress={b?.address ?? ""}
+                  logo={b.logo_URIs ? b.logo_URIs.svg : "/cosmos-atom-logo.png"}
                 />
               </div>
             {/each}

@@ -45,7 +45,8 @@
     table: {
       'background-color': '#14141473',
       'height': '505px',
-      'border-radius': '8px'
+      'border-radius': '8px',
+      'white-space': 'nowrap'
     },
     container: {
       'background-color': 'transparent',
@@ -95,7 +96,7 @@
 
 <div id="main-grid-container">
   <div class="tx-title">Transaction history</div>
-  <Grid data={data} sort={true} search={true} pagination={true} className={config} style={style} columns={columns}/>
+  <Grid width="100%" data={data} sort={true} search={true} pagination={true} className={config} style={style} columns={columns}/>
 </div>
 <div id="main-grid-container-mobile">
   <div class="tx-title-mobile">Transaction history</div>
