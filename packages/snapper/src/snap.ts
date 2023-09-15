@@ -1,9 +1,10 @@
-import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
+import { Address, Chain, CosmosAddress, Fees, Msg, SnapResponse } from './types';
 import { StdSignDoc, AminoSignResponse } from "@cosmjs/amino";
 import { DirectSignResponse } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from "@cosmjs/stargate";
 import { AccountData } from '@cosmjs/amino';
-import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import Long from 'long';
+import { Key } from '@keplr-wallet/types';
 
 export const DEFAULT_SNAP_ID = "npm:@cosmsnap/snap";
 
@@ -25,7 +26,7 @@ export const isSnapInitialized = async (snapId = DEFAULT_SNAP_ID): Promise<boole
         },
     });
 
-    return initialized
+    return initialized.data.initialized
 }
 
 export const installSnap = async (snapId = DEFAULT_SNAP_ID) => {
@@ -229,6 +230,22 @@ export const getAccountInfo = async (chain_id: string, snapId = DEFAULT_SNAP_ID)
     return result.data;
 };
 
+export const getKey = async (chain_id: string, snapId = DEFAULT_SNAP_ID): Promise<Key> => {
+    const result = await window.ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: {
+            snapId,
+            request: {
+                method: 'getKey',
+                params: {
+                    chain_id,
+                }
+            },
+        },
+    });
+    return result.data;
+};
+
 export const sendTx = async (chain_id: string, tx: Uint8Array, snapId = DEFAULT_SNAP_ID): Promise<DeliverTxResponse> => {
     const result = await window.ethereum.request({
         method: 'wallet_invokeSnap',
@@ -249,10 +266,15 @@ export const sendTx = async (chain_id: string, tx: Uint8Array, snapId = DEFAULT_
 export const signDirect = async (
     chain_id: string,
     signer: string,
-    sign_doc: SignDoc,
+    sign_doc:{
+        bodyBytes?: Uint8Array | null;
+        authInfoBytes?: Uint8Array | null;
+        chainId?: string | null;
+        accountNumber?: Long | null;
+    },
     snapId = DEFAULT_SNAP_ID
 ): Promise<DirectSignResponse> => {
-    const result = await window.ethereum.request({
+    const result: SnapResponse<DirectSignResponse> = await window.ethereum.request({
         method: 'wallet_invokeSnap',
         params: {
             snapId,
@@ -266,7 +288,7 @@ export const signDirect = async (
             },
         },
     });
-    return result.data;
+    return result.data
 };
 
 export const signAmino = async (
@@ -290,4 +312,20 @@ export const signAmino = async (
         },
     });
     return result.data;
+};
+
+export const sendTxAlert = async (chain_id: string, hash: string, snapId = DEFAULT_SNAP_ID): Promise<void> => {
+    await window.ethereum.request({
+        method: 'wallet_invokeSnap',
+        params: {
+            snapId,
+            request: {
+                method: 'txAlert',
+                params: {
+                    chain_id,
+                    hash
+                }
+            },
+        },
+    });
 };

@@ -1,10 +1,10 @@
-import { AccountData, ChainInfo, OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
+import { AccountData, ChainInfo, Key, OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
 import { DirectSignResponse } from "@cosmjs/proto-signing";
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { Long } from 'long';
 import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
 import { DeliverTxResponse } from "@cosmjs/stargate";
-import { DEFAULT_SNAP_ID, addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
+import { DEFAULT_SNAP_ID, addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, getKey, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
 import { CosmJSOfflineSigner } from './signer.js';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 
@@ -16,7 +16,7 @@ declare global {
 }
 
 export interface SnapProvider {
-  experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
+  experimentalSuggestChain(chainInfo: ChainInfo): Promise<boolean>;
   signAmino(
     chainId: string,
     signer: string,
@@ -43,9 +43,9 @@ export interface SnapProvider {
     chainId: string,
     tx: Uint8Array,
   ): Promise<DeliverTxResponse>;
-  getOfflineSigner(chainId: string): Promise<OfflineAminoSigner & OfflineDirectSigner>;
-  enabled(): Promise<boolean>;
-  install(): Promise<void>;
+  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner;
+  getKey(chainId: string): Promise<Key>
+  enable(): Promise<boolean>;
   getChains(): Promise<Chain[]>;
   deleteChain(chain_id: string): Promise<void>;
   signAndBroadcast(chain_id: string, msgs: Msg[], fees: Fees): Promise<DeliverTxResponse>;
@@ -67,6 +67,10 @@ export class CosmosSnap implements SnapProvider {
     async getAccount(chain_id: string): Promise<AccountData> {
         let account = await getAccountInfo(chain_id, this.snap_id);
         return account
+    }
+    async getKey(chain_id: string): Promise<Key> {
+        let key = await getKey(chain_id, this.snap_id);
+        return key
     }
     async deleteChain(chain_id: string): Promise<void> {
         await deleteChain(chain_id, this.snap_id);
@@ -97,19 +101,20 @@ export class CosmosSnap implements SnapProvider {
         let address = getBech32Address(chain_id, this.snap_id);
         return address;
     }
-    async enabled(): Promise<boolean> {
-        let installed = await isSnapInstalled(this.snap_id);
-        let initialized = await isSnapInitialized(this.snap_id);
-        return installed && initialized
-    }
-    async install(): Promise<void> {
+    async enable(): Promise<boolean> {
         await installSnap(this.snap_id);
+        return true;
     }
     async getChains(): Promise<Chain[]> {
         let chains = await getChains(this.snap_id);
         return chains;
     }
-    async experimentalSuggestChain(chainInfo: ChainInfo): Promise<void> {
+    async experimentalSuggestChain(chainInfo: ChainInfo): Promise<boolean> {
+        let chains = await this.getChains();
+        let chainIds = chains.map(item => item.chain_id);
+        if (chainIds.includes(chainInfo.chainId)) {
+            return true
+        }
         let chain: Chain = {
             pretty_name: chainInfo.chainName,
             chain_name: chainInfo.chainName,
@@ -132,26 +137,25 @@ export class CosmosSnap implements SnapProvider {
                 ]
             },
             logo_URIs: {
-                png: chainInfo.chainSymbolImageUrl,
-                svg: chainInfo.chainSymbolImageUrl
+                png: chainInfo.chainSymbolImageUrl ?? undefined,
+                svg: chainInfo.chainSymbolImageUrl ?? undefined
             },
             apis: {
                 rpc: [
                     {
                         address: chainInfo.rpc,
-                        provider: chainInfo.nodeProvider.name
                     }
                 ],
                 rest: [
                     {
                         address: chainInfo.rest,
-                        provider: chainInfo.nodeProvider.name
                     }
                 ]
             },
             address: undefined
         }
         await suggestChain(chain, this.snap_id)
+        return true;
     }
     async signAmino(chainId: string, signer: string, signDoc: StdSignDoc): Promise<AminoSignResponse> {
         let res = await signAmino(chainId, signer, signDoc, this.snap_id);
@@ -165,7 +169,7 @@ export class CosmosSnap implements SnapProvider {
         let res = await sendTx(chainId, tx, this.snap_id);
         return res
     }
-    async getOfflineSigner(chainId: string): Promise<OfflineAminoSigner & OfflineDirectSigner> {
+    getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
         return new CosmJSOfflineSigner(chainId, this.snap_id);
     }
 }

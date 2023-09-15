@@ -10,10 +10,9 @@
 	import { addTransaction } from "../store/transactions";
 	import Button from "./Button.svelte";
 	import ChainSelector from "./ChainSelector.svelte";
+  import { sendTxAlert } from "@cosmsnap/snapper";
   import Select from "./Select.svelte";
-	import { isMsgTransferEncodeObject } from "@cosmjs/stargate";
-  import { MsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
-
+  
   let loading = false;
   let source = "cosmoshub-4";
   let destination = "cosmoshub-4";
@@ -103,18 +102,19 @@
                 amount: (amount * 1000000).toString(),  
               },
             ]
-            const msg = {
-              typeUrl: '/cosmos.bank.v1beta1.MsgSend', 
+            let msg = {
+              typeUrl: "/cosmos.bank.v1beta1.MsgSend",
               value: {
-                fromAddress: fromAddress,
-                toAddress: recipient,
+                fromAddress,
+                toAddress: recipient, 
                 amount: coins
               }
-            };
-            const tx = await window.cosmos.signAndBroadcast(source, [msg], fees);
+            }
+            const tx = await client.signAndBroadcast(fromAddress, [msg], fees);
             
             if (tx.code == 0) {
-              await addTransaction({address: fromAddress, chain: source, when: new Date().toLocaleString(), tx_hash: tx.transactionHash})
+              await addTransaction({address: fromAddress, chain: source, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
+              await sendTxAlert(source, tx.transactionHash);
             } else {
               if (tx.rawLog) {
                 $state.alertText = tx.rawLog
@@ -160,10 +160,11 @@
                   typeUrl: item.msg_type_url
               };
           });
-          let tx = await window.cosmos.signAndBroadcast(source, messages, fees);
+          const tx = await client.signAndBroadcast(fromAddress, messages, fees);
 
           if (tx.code == 0) {
-            await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash})
+            await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash});
+            await sendTxAlert(source, tx.transactionHash);
           } else {
             if (tx.rawLog) {
               $state.alertText = tx.rawLog

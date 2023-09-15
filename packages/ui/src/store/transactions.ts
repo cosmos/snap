@@ -30,7 +30,7 @@ export async function addTransaction(data: {
       method: "POST", 
       body: JSON.stringify(data)
     });
-    return await res.json();
+    return await res.text();
   } catch (err) {
     throw err
   }
