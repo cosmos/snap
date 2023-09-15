@@ -10,27 +10,23 @@
 	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "@cosmsnap/snapper";
 	import { isMetaMaskInstalled, snapId } from "../utils/snap";
 
-	$: {
-    if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapInstalledValue) {
-		  $state.connected = true;
-		  goto("/balances");
-	  }
-  }
-
 	const initializeData = async () => {
     try {
       $state.loading = true;
       $state.isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
       $state.loading = false;
+      if ($state.isMetaMaskInstalledValue) {
+        $state.loading = true;
+        $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.loading = false;
+      }
       if ($state.isSnapInstalledValue) {
         $state.loading = true;
         $state.isSnapInitValue = await isSnapInitialized();
         $state.loading = false;
       }
-      if ($state.isMetaMaskInstalledValue) {
-        $state.loading = true;
-        $state.isSnapInstalledValue = await isSnapInstalled();
-        $state.loading = false;
+      if ($state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapInitValue ) {
+        $state.connected = true;
       }
      } catch (err: any) {
       $state.loading = false;
@@ -44,7 +40,7 @@
     window.cosmos = new CosmosSnap();
     window.cosmos.changeSnapId(snapId);
     updateDirectory();
-    initializeData();
+    await initializeData();
     if (!$state.connected) {
       goto("/");
     } else {
