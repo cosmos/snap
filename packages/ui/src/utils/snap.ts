@@ -11,8 +11,9 @@ declare global {
 
 export const snapId = import.meta.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
 const initialJsonString = "{}";
+const snapVersion = import.meta.env.VITE_SNAP_VERSION;
 const installParams = JSON.parse(initialJsonString);
-installParams[snapId] = {};
+installParams[snapId] = { version: snapVersion };
 
 export const isMetaMaskInstalled = (): boolean | undefined => !!window.ethereum && window.ethereum.isMetaMask;
 
