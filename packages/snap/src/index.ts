@@ -12,6 +12,8 @@ import { SignDoc, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { StdSignDoc } from "@cosmjs/amino";
 import { decodeProtoMessage } from "./parser";
 import Long from "long";
+import { Key } from '@keplr-wallet/types';
+import { fromBech32 } from '@cosmjs/encoding';
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -245,7 +247,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           typeof request.params.chain_id == "string"
         )
       ) {
-        throw new Error("Invalid transact request");
+        throw new Error("Invalid sendTx request");
       }
 
       let txBytes: Uint8Array = JSON.parse(request.params.tx)
@@ -307,17 +309,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           typeof request.params == "object" &&
           "sign_doc" in request.params &&
           "chain_id" in request.params &&
-          typeof request.params.chain_id == "string"
+          "signer" in request.params &&
+          typeof request.params.chain_id == "string" &&
+          typeof request.params.signer == "string"
         )
       ) {
-        throw new Error("Invalid transact request");
-      }
-
-      let signer: string | null = null;
-      if (request.params.signer) {
-        if (typeof request.params.signer == "string") {
-          signer = request.params.signer
-        }
+        throw new Error("Invalid signDirect request");
       }
 
       let signDoc: SignDoc = request.params.sign_doc as unknown as SignDoc;
@@ -365,10 +362,17 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error("Transaction was denied.");
       }
 
+      let newSignDoc: SignDoc = {
+        bodyBytes: new Uint8Array(Object.values(signDoc.bodyBytes)),
+        authInfoBytes: new Uint8Array(Object.values(signDoc.authInfoBytes)),
+        chainId: signDoc.chainId,
+        accountNumber: new Long(signDoc.accountNumber.low, signDoc.accountNumber.high, signDoc.accountNumber.unsigned)
+      }
+
       let resultTx = await signDirect(
         request.params.chain_id,
-        signer,
-        signDoc
+        request.params.signer,
+        newSignDoc
       );
 
       if (typeof resultTx === "undefined") {
@@ -392,10 +396,12 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           typeof request.params == "object" &&
           "sign_doc" in request.params &&
           "chain_id" in request.params &&
-          typeof request.params.chain_id == "string"
+          "signer" in request.params &&
+          typeof request.params.chain_id == "string" &&
+          typeof request.params.signer == "string"
         )
       ) {
-        throw new Error("Invalid transact request");
+        throw new Error("Invalid signAmino request");
       }
 
       let signerAmino: string | null = null;
@@ -438,7 +444,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       let resultTxAmino = await signAmino(
         request.params.chain_id,
-        signerAmino,
+        request.params.signer,
         signDocAmino
       );
 
@@ -781,20 +787,88 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           typeof request.params.chain_id == "string"
         )
       ) {
-        throw new Error("Invalid getChainAddress request");
+        throw new Error("Invalid getAccountInfo request");
       }
 
       let account: AccountData = await ChainState.GetAccount(request.params.chain_id);
 
       return {
         data: {
-          algo: account.algo.toString(),
+          algo: 'secp256k1',
           address: account.address,
-          pubkey: new Uint8Array(Object.values(account.pubkey))
+          pubkey: new Uint8Array(Object.values(account.pubkey)),
         },
         success: true,
         statusCode: 200,
       };
+
+    case "getKey":  
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "chain_id" in request.params &&
+          typeof request.params.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid getKey request");
+      }
+
+      let accountKey: AccountData = await ChainState.GetAccount(request.params.chain_id);
+      const bechInfo = fromBech32(accountKey.address);
+      const addressBytes = Uint8Array.from(bechInfo.data);
+
+      let key: Key = {
+        algo: 'secp256k1',
+        address: addressBytes,
+        pubKey: new Uint8Array(Object.values(accountKey.pubkey)),
+        bech32Address: accountKey.address,
+        name: "Cosmos MetaMask Extension",
+        isNanoLedger: false,
+        isKeystone: false
+      }
+
+      return {
+        data: key,
+        success: true,
+        statusCode: 200,
+    };
+
+    case "txAlert":
+
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "chain_id" in request.params &&
+          "hash" in request.params &&
+          typeof request.params.chain_id == "string" &&
+          typeof request.params.hash == "string"
+        )
+      ) {
+        throw new Error("Invalid txAlert request");
+      }
+
+      let hash: string = request.params.hash;
+
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Transaction Successful"),
+            text(
+              `Transaction with the hash ${hash} has been broadcasted to the chain ${request.params.chain_id}.`
+            ),
+            copyable(`${hash}`),
+          ]),
+        },
+      });
+      return {
+        data: {},
+        success: true,
+        statusCode: 200,
+      };      
 
     default:
       throw new Error("Method not found.");

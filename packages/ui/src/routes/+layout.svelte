@@ -10,27 +10,28 @@
 	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "../../../snapper";
 	import { isMetaMaskInstalled, snapId } from "../utils/snap";
 
-	$: if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapInstalledValue) {
-
-		$state.connected = true;
-		goto("/balances");
-	}
+	$: {
+    if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapInstalledValue) {
+		  $state.connected = true;
+		  goto("/balances");
+	  }
+  }
 
 	const initializeData = async () => {
     try {
       $state.loading = true;
       $state.isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
+      $state.loading = false;
+      if ($state.isSnapInstalledValue) {
+        $state.loading = true;
+        $state.isSnapInitValue = await isSnapInitialized();
+        $state.loading = false;
+      }
       if ($state.isMetaMaskInstalledValue) {
         $state.loading = true;
         $state.isSnapInstalledValue = await isSnapInstalled();
         $state.loading = false;
-        if ($state.isSnapInstalledValue) {
-          $state.loading = true;
-          $state.isSnapInitValue = await isSnapInitialized();
-          $state.loading = false;
-        }
       }
-      $state.loading = false;
      } catch (err: any) {
       $state.loading = false;
       $state.alertText = `${err.message}`

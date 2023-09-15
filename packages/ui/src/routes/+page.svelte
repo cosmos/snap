@@ -72,15 +72,15 @@
 
                   <Step
                       bind:loading={$state.loading}
-                      disabled={!$state.isMetaMaskInstalledValue || $state.isSnapInstalledValue}
+                      disabled={$state.isMetaMaskInstalledValue && $state.isSnapInstalledValue}
                       action={runInstallSnap}
                       complete={$state.isSnapInstalledValue}
                       stepNumber="2"
-                      stepTitle="Install Cosmos Snap"
+                      stepTitle={"Install Cosmos Snap"}
                       stepImage="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/image-3@2x.png"
-                      actionText="Install Snap"
+                      actionText={"Install Snap"}
                       stepDescription = "Login to Metamask and install the Cosmos Snap."
-                      stepLongTitle = "Install Cosmos Snap"
+                      stepLongTitle = {"Install Cosmos Snap"}
                       stepLongDescription = "Install the official Cosmos Metamask Snap into Metamask."
                   />
 
