@@ -11,14 +11,30 @@ declare global {
 
 export const snapId = import.meta.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
 const initialJsonString = "{}";
+const snapVersion = import.meta.env.VITE_SNAP_VERSION;
+if (!snapVersion) {
+  throw new Error("VITE_SNAP_VERSION has to be set.");
+}
 const installParams = JSON.parse(initialJsonString);
-installParams[snapId] = {};
+installParams[snapId] = { version: snapVersion };
 
 export const isMetaMaskInstalled = (): boolean | undefined => !!window.ethereum && window.ethereum.isMetaMask;
 
 export const isSnapInstalled = async (): Promise<boolean | undefined> => {
   const result = await window.ethereum.request({ method: 'wallet_getSnaps' });
+  console.log(result);
   return Object.keys(result).includes(snapId);
+};
+
+export const isSnapLatestVersion = async (): Promise<boolean> => {
+  const result = await window.ethereum.request({ method: 'wallet_getSnaps' });
+  if (!result[snapId]) {
+    return false
+  }
+  if (!result[snapId]["version"]) {
+    return false
+  }
+  return result[snapId]["version"] === snapVersion
 };
 
 export const isSnapInitialized = async (): Promise<boolean | undefined> => {

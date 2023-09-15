@@ -12,5 +12,6 @@ export const state = writable({
     isMetaMaskInstalledValue: false,
     isSnapInstalledValue: false,
     isSnapInitValue: false,
+    isSnapLatestVersion: false,
     loading: false
 });

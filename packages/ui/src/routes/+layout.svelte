@@ -8,7 +8,14 @@
 	import Menu from "../components/Menu.svelte";
 	import { updateDirectory } from "../store/directory";
 	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "@cosmsnap/snapper";
-	import { isMetaMaskInstalled, snapId } from "../utils/snap";
+	import { isMetaMaskInstalled, isSnapLatestVersion, snapId } from "../utils/snap";
+
+	$: {
+    if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapLatestVersion && $state.isSnapInstalledValue) {
+		  $state.connected = true;
+		  goto("/balances");
+	  }
+  }
 
 	const initializeData = async () => {
     try {
@@ -18,15 +25,13 @@
       if ($state.isMetaMaskInstalledValue) {
         $state.loading = true;
         $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.isSnapLatestVersion = await isSnapLatestVersion();
         $state.loading = false;
       }
-      if ($state.isSnapInstalledValue) {
+      if ($state.isSnapInstalledValue && $state.isSnapLatestVersion) {
         $state.loading = true;
         $state.isSnapInitValue = await isSnapInitialized();
         $state.loading = false;
-      }
-      if ($state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapInitValue ) {
-        $state.connected = true;
       }
      } catch (err: any) {
       $state.loading = false;
