@@ -45,21 +45,23 @@ export class CosmJSOfflineSigner implements OfflineDirectSigner {
 
     let signRes = await signDirect(this.chainId, signerAddress, signDoc, this.snapId);
 
-    let { accountNumber } = signDoc;
+    const { accountNumber } = signDoc;
 
-    let newAN = new Long(accountNumber?.low || 0, accountNumber?.high, accountNumber?.unsigned);
+    const accountNumberLong = new Long(accountNumber?.low || 0, accountNumber?.high, accountNumber?.unsigned, );
   
-    let sig = {
+    const sign = {
       signature: signRes.signature,
       signed: {
-        authInfoBytes: new Uint8Array(Object.values(signRes.signed.authInfoBytes)),
-        bodyBytes: new Uint8Array(Object.values(signRes.signed.bodyBytes)),
-        accountNumber: `${newAN.toString()}`,
         ...signRes.signed,
+        accountNumber: `${accountNumberLong.toString()}`,
+        authInfoBytes: new Uint8Array(
+          Object.values(signRes.signed.authInfoBytes),
+        ),
+        bodyBytes: new Uint8Array(Object.values(signRes.signed.bodyBytes)),
       },
     };
-
-    return sig;
+  
+    return sign;
   }
 
   // This has been added as a placeholder.

@@ -1,16 +1,44 @@
 <script lang="ts">
 	import MainTitle from '../components/MainTitle.svelte';
 	import Step from '../components/Step.svelte';
-	import { initSnap, installSnap } from '../utils/snap';
+	import { initSnap, installSnap, isMetaMaskInstalled } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
 	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
 	import { chains } from '../store/chains';
+	import { isSnapInitialized, isSnapInstalled } from '@cosmsnap/snapper';
+
+	const initializeData = async () => {
+    try {
+      $state.loading = true;
+      $state.isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
+      $state.loading = false;
+      if ($state.isMetaMaskInstalledValue) {
+        $state.loading = true;
+        $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.loading = false;
+      }
+      if ($state.isSnapInstalledValue) {
+        $state.loading = true;
+        $state.isSnapInitValue = await isSnapInitialized();
+        $state.loading = false;
+      }
+      if ($state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapInitValue ) {
+        $state.connected = true;
+      }
+     } catch (err: any) {
+      $state.loading = false;
+      $state.alertText = `${err.message}`
+      $state.alertType = "danger"
+      $state.showAlert = true
+    }
+	};
 
 	const runInstallSnap = async () => {
     try {
       $state.loading = true;
       await installSnap();
+      await initializeData();
       $state.isSnapInstalledValue = true;
       $state.isSnapInitValue = false;
       $state.loading = false;

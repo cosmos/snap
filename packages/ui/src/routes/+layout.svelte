@@ -22,14 +22,14 @@
       $state.loading = true;
       $state.isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
       $state.loading = false;
-      if ($state.isSnapInstalledValue) {
-        $state.loading = true;
-        $state.isSnapInitValue = await isSnapInitialized();
-        $state.loading = false;
-      }
       if ($state.isMetaMaskInstalledValue) {
         $state.loading = true;
         $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.loading = false;
+      }
+      if ($state.isSnapInstalledValue) {
+        $state.loading = true;
+        $state.isSnapInitValue = await isSnapInitialized();
         $state.loading = false;
       }
      } catch (err: any) {
