@@ -10,7 +10,7 @@
 	import { addTransaction } from "../store/transactions";
 	import Button from "./Button.svelte";
 	import ChainSelector from "./ChainSelector.svelte";
-  import { sendTxAlert } from "../../../snapper/dist/snap";
+  import { sendTxAlert } from "@cosmsnap/snapper/src/snap";
   import Select from "./Select.svelte";
   
   let loading = false;

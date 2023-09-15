@@ -7,7 +7,7 @@
   import Alert from "../components/Alert.svelte";
 	import Menu from "../components/Menu.svelte";
 	import { updateDirectory } from "../store/directory";
-	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "../../../snapper";
+	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "@cosmsnap/snapper";
 	import { isMetaMaskInstalled, snapId } from "../utils/snap";
 
 	$: {
