@@ -2,6 +2,7 @@ import { Chains, Chain, CosmosAddress } from "./types/chains";
 import { Addresses, Address } from "./types/address";
 import { AccountData, DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
 import { DEFAULT_SLIP44, WALLET_URL } from "./constants";
+import { getWallet } from "./wallet";
 
 /**
  * ChainState is the class to manage all Chain state within Metamask.
@@ -37,30 +38,7 @@ export class ChainState {
       throw new Error(`Chain with Chain Id ${chain_id} does not exist.`);
     }
 
-    // get signer info
-    let node = await snap.request({
-      method: "snap_getBip44Entropy",
-      params: {
-        coinType:
-          typeof chain.slip44 == "number" ? chain.slip44 : DEFAULT_SLIP44,
-      },
-    });
-
-    if (typeof node.privateKey === "undefined") {
-      throw Error("Private key from node is undefined");
-    }
-
-    // Create bytes key
-    let pk = node.privateKey;
-    if (pk.startsWith("0x")) {
-      pk = pk.substring(2);
-    }
-
-    // create the wallet
-    let wallet = await DirectSecp256k1Wallet.fromKey(
-      Uint8Array.from(Buffer.from(pk, "hex")),
-      chain.bech32_prefix
-    );
+    let wallet = await getWallet(chain);
 
     let address = (await wallet.getAccounts())[0].address;
 
@@ -83,29 +61,7 @@ export class ChainState {
       throw new Error(`Chain with Chain Id ${chain_id} does not exist.`);
     }
 
-    // get signer info
-    let node = await snap.request({
-      method: "snap_getBip44Entropy",
-      params: {
-        coinType: DEFAULT_SLIP44,
-      },
-    });
-
-    if (typeof node.privateKey === "undefined") {
-      throw Error("Private key from node is undefined");
-    }
-
-    // Create bytes key
-    let pk = node.privateKey;
-    if (pk.startsWith("0x")) {
-      pk = pk.substring(2);
-    }
-
-    // create the wallet
-    let wallet = await DirectSecp256k1Wallet.fromKey(
-      Uint8Array.from(Buffer.from(pk, "hex")),
-      chain.bech32_prefix
-    );
+    let wallet = await getWallet(chain);
 
     let account = (await wallet.getAccounts())[0];
 
