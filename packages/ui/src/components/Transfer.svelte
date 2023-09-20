@@ -160,7 +160,7 @@
                   typeUrl: item.msg_type_url
               };
           });
-          const tx = await client.signAndBroadcast(fromAddress, messages, fees);
+          const tx = await window.cosmos.signAndBroadcast(fromAddress, messages, fees);
 
           if (tx.code == 0) {
             await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash});
@@ -210,8 +210,8 @@
     </div>
     <input bind:value={amount} type="number" placeholder="Enter amount" class="enter-amount inter-medium-white-14px overlap-group-7"/>
     <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000)) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
-        Available: {_.round((Number(selected.amount) / 1000000))} {selected.display}
+    <div on:click={() => { amount = _.round((Number(selected.amount) / 1000000), 2) }} class="available-balance-1454789 inter-medium-blueberry-14px cursor-pointer">
+        Available: {_.round((Number(selected.amount) / 1000000), 2)} {selected.display}
     </div>
     <div class="flex w-full items-end">
       <div class="percent inter-medium-white-14px">
