@@ -86,6 +86,16 @@
     margin-left: 10px;
 }
 
+.gridjs-pagination .gridjs-pages button {
+    background-color: transparent;
+    font-size: var(--font-size-m);
+    border: 1px solid;
+    border-color: #ffffff1a;
+    border-radius: 14px;
+    color: white;
+    margin-left: 10px;
+}
+
 .gridjs-pagination .gridjs-pages button:first-child {
     background-color: transparent;
     font-size: var(--font-size-m);

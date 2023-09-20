@@ -10,7 +10,7 @@ import { sendTx, signAmino, signDirect, submitTransaction } from "./transaction"
 import { COIN_TYPES, DEFAULT_FEES } from "./constants";
 import { SignDoc, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { StdSignDoc } from "@cosmjs/amino";
-import { decodeProtoMessage } from "./parser";
+import { bigintReplacer, decodeProtoMessage } from "./parser";
 import Long from "long";
 import { Key } from '@keplr-wallet/types';
 import { fromBech32 } from '@cosmjs/encoding';
@@ -345,7 +345,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       msgs.map(item => {
         ui.push(heading(item.typeUrl)),
-        ui.push(text(JSON.stringify(item.value, null, 2))),
+        ui.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
         ui.push(divider())
       });
 
@@ -404,13 +404,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         throw new Error("Invalid signAmino request");
       }
 
-      let signerAmino: string | null = null;
-      if (request.params.signer) {
-        if (typeof request.params.signer == "string") {
-          signerAmino = request.params.signer
-        }
-      }
-
       let signDocAmino: StdSignDoc = request.params.sign_doc as unknown as StdSignDoc;
 
       // create all msg prompts
@@ -425,7 +418,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       signDocAmino.msgs.map(item => {
         ui.push(heading(item.type)),
-        ui.push(text(JSON.stringify(item.value, null, 2))),
+        ui.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
         ui.push(divider())
       });
 
