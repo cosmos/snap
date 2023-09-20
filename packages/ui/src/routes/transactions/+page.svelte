@@ -38,7 +38,8 @@
     container: "main-grid-container",
     paginationButtonNext: "next-button",
     paginationButtonPrev: "prev-button",
-    paginationButtonCurrent: "current-button"
+    paginationButtonCurrent: "current-button",
+    paginationButton: "page-button"
   }
 
   let style = {
@@ -136,6 +137,15 @@
     display: flex;
     gap: 20px;
     justify-content: center;
+  }
+
+  .page-button {
+    background-color: transparent;
+    font-size: var(--font-size-m);
+    border: 1px solid;
+    border-color: #ffffff1a;
+    border-radius: 14px;
+    color: white;
   }
 
   @media (min-width: 772px) {

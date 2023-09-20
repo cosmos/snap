@@ -1,7 +1,7 @@
 <script lang="ts">
 	import MainTitle from '../components/MainTitle.svelte';
 	import Step from '../components/Step.svelte';
-	import { initSnap, installSnap, isMetaMaskInstalled, isSnapLatestVersion } from '../utils/snap';
+	import { initSnap, installSnap, isMetaMaskInstalled, isSnapLatestVersion, snapId } from '../utils/snap';
 	import { state } from '../store/state';
 	import { goto } from '$app/navigation';
 	import { LOCAL_STORAGE_CHAINS } from '../utils/general';
@@ -16,13 +16,13 @@
       $state.loading = false;
       if ($state.isMetaMaskInstalledValue) {
         $state.loading = true;
-        $state.isSnapInstalledValue = await isSnapInstalled();
+        $state.isSnapInstalledValue = await isSnapInstalled(snapId);
         $state.isSnapLatestVersion = await isSnapLatestVersion();
         $state.loading = false;
       }
       if ($state.isSnapInstalledValue) {
         $state.loading = true;
-        $state.isSnapInitValue = await isSnapInitialized();
+        $state.isSnapInitValue = await isSnapInitialized(snapId);
         $state.loading = false;
       }
       if ($state.isMetaMaskInstalledValue && $state.isSnapInstalledValue && $state.isSnapInitValue && $state.isSnapLatestVersion ) {
