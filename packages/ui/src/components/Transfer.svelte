@@ -160,11 +160,11 @@
                   typeUrl: item.msg_type_url
               };
           });
-          const tx = await window.cosmos.signAndBroadcast(fromAddress, messages, fees);
+          const tx = await window.cosmos.signAndBroadcast(source, messages, fees);
 
           if (tx.code == 0) {
             await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash});
-            await sendTxAlert(source, tx.transactionHash);
+            //await sendTxAlert(source, tx.transactionHash);
           } else {
             if (tx.rawLog) {
               $state.alertText = tx.rawLog
@@ -176,6 +176,8 @@
           }
 
           loading = false;
+
+          return tx
 
       } catch (error: any) {
           loading = false;
