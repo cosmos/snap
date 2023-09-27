@@ -417,9 +417,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       ]
 
       signDocAmino.msgs.map(item => {
-        ui.push(heading(item.type)),
-        ui.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
-        ui.push(divider())
+        uiAmino.push(heading(item.type)),
+        uiAmino.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
+        uiAmino.push(divider())
       });
 
       // Ensure user confirms transaction

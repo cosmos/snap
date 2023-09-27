@@ -1,7 +1,7 @@
 <script lang="ts">
   import { chains } from "../store/chains";
 	import Info from "./Info.svelte";
-	import { balances } from "../store/balances";
+	import { balances, forceUpdate } from "../store/balances";
   import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/ibc';
 	import { state } from "../store/state";
 	import type { Chain, Msg } from "@cosmsnap/snapper";
@@ -12,6 +12,7 @@
 	import ChainSelector from "./ChainSelector.svelte";
   import { sendTxAlert } from "@cosmsnap/snapper";
   import Select from "./Select.svelte";
+	import { snapId } from "../utils/snap";
   
   let loading = false;
   let source = "cosmoshub-4";
@@ -114,7 +115,8 @@
             
             if (tx.code == 0) {
               await addTransaction({address: fromAddress, chain: source, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
-              await sendTxAlert(source, tx.transactionHash);
+              await sendTxAlert(source, tx.transactionHash, snapId);
+              forceUpdate();
             } else {
               if (tx.rawLog) {
                 $state.alertText = tx.rawLog
@@ -160,11 +162,12 @@
                   typeUrl: item.msg_type_url
               };
           });
-          const tx = await window.cosmos.signAndBroadcast(source, messages, fees);
+          const tx = await client.signAndBroadcast(fromAddress, messages, fees);
 
           if (tx.code == 0) {
             await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash});
-            //await sendTxAlert(source, tx.transactionHash);
+            await sendTxAlert(source, tx.transactionHash, snapId);
+            forceUpdate();
           } else {
             if (tx.rawLog) {
               $state.alertText = tx.rawLog

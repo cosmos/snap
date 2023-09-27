@@ -43,7 +43,7 @@ export interface SnapProvider {
     chainId: string,
     tx: Uint8Array,
   ): Promise<DeliverTxResponse>;
-  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner;
+  getOfflineSigner(chainId: string, mode: string): OfflineAminoSigner & OfflineDirectSigner;
   getKey(chainId: string): Promise<Key>
   enable(): Promise<boolean>;
   getChains(): Promise<Chain[]>;
@@ -169,7 +169,15 @@ export class CosmosSnap implements SnapProvider {
         let res = await sendTx(chainId, tx, this.snap_id);
         return res
     }
-    getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
-        return new CosmJSOfflineSigner(chainId, this.snap_id);
+    getOfflineSigner(chainId: string, mode = 'direct'): OfflineAminoSigner & OfflineDirectSigner {
+        if (mode == 'amino') {
+            let signer = new CosmJSOfflineSigner(chainId, this.snap_id);
+            signer.signDirect = undefined;
+            return signer
+        } else {
+            let signer = new CosmJSOfflineSigner(chainId, this.snap_id);
+            signer.signAmino = undefined;
+            return signer
+        }
     }
 }

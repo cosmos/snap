@@ -3,8 +3,9 @@ import { AccountData, AminoSignResponse, StdSignDoc } from '@cosmjs/amino';
 import { OfflineDirectSigner } from '@cosmjs/proto-signing';
 import { getAccountInfo, signAmino, signDirect, DEFAULT_SNAP_ID } from './snap.js';
 import Long from 'long';
+import { OfflineAminoSigner } from '@cosmjs/amino';
 
-export class CosmJSOfflineSigner implements OfflineDirectSigner {
+export class CosmJSOfflineSigner implements OfflineDirectSigner, OfflineAminoSigner {
   readonly chainId: string;
   readonly snapId: string;
 
