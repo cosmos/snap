@@ -255,7 +255,7 @@ export const sendTx = async (chain_id: string, tx: Uint8Array, snapId = DEFAULT_
                 method: 'sendTx',
                 params: {
                     chain_id,
-                    tx,
+                    tx: JSON.stringify(tx),
                 }
             },
         },
