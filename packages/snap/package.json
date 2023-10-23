@@ -49,6 +49,7 @@
     "@metamask/snaps-ui": "^0.32.2",
     "buffer": "^6.0.3",
     "cosmjs-types": "^0.8.0",
+    "mongoose": "^7.6.3",
     "osmojs": "^16.5.1",
     "ses": "^0.18.4"
   },
