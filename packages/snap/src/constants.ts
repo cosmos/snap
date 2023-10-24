@@ -16,9 +16,3 @@ export const DEFAULT_AVG_GAS = 0.05;
 export const COIN_TYPES = [
   118, 564, 60, 459, 529, 330, 494, 639, 483, 4444, 701, 990, 394, 852, 7777777, 880, 931, 371, 370, 505, 234, 5555
 ]
-
-export const MONGODB_URI = ""
-
-export const DB_NAME = ""
-
-export const NOTIFICATION_EVENTS_COLLECTION_NAME = ""
