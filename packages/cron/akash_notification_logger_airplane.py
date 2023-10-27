@@ -5,7 +5,7 @@ import requests
 api_url = "https://rest.cosmos.directory/akash/akash/deployment/v1beta3/deployments/list"
 
 
-def get_lease_low_balance_event(address: str, lease_id: str, lease_name: str):
+def get_lease_low_balance_event(address, lease_id, lease_name):
     return json.dumps({
         "read" : False,
         "address" : address,
@@ -13,7 +13,7 @@ def get_lease_low_balance_event(address: str, lease_id: str, lease_name: str):
         "notification": f"Lease balance is below $1 for lease {lease_name}. Refill as soon as possible.",
     })
 
-def get_lease_shut_down_event(address: str, lease_id: str, lease_name: str):
+def get_lease_shut_down_event(address, lease_id, lease_name):
     return json.dumps({
         "read" : False,
         "address" : address,
