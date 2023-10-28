@@ -16,13 +16,13 @@ def get_lease_shut_down_events(current_open_leases):
 
 
     for item in prev_open_leases.output:
-        if item not in current_open_leases or item['state'] == "closed":
+        if item not in current_open_leases:
             item['state'] = "closed"
             events.append({
                             "read" : False,
-                            "address" : item['escrow_account']['owner'],
-                            "lease" : item['deployment']['deployment_id']['dseq'],
-                            "notification": f"Lease shut down for {item['escrow_account']['id']['xid']}. Relaunch as soon as possible to limit downtime.",
+                            "address" : item['lease_id'].split('/')[0],
+                            "lease" : item['lease_id'].split('/')[1],
+                            "notification": f"Lease shut down for {item['lease_id']}. Relaunch as soon as possible to limit downtime.",
                         })
 
     airplane.mongodb.insert_many(MONGODB_RESOURCE, OPEN_LEASE_COLLECTION_NAME, current_open_leases)
