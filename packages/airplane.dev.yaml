@@ -1,0 +1,9 @@
+# This file contains configuration for local resources, config variables, and environment variables.
+# For more information, see the docs on the dev config file: https://docs.airplane.dev/dev-lifecycle/dev-config-file
+resources:
+    - connectionString: mongodb+srv://akshay:BZWc9jM6gSl1wYhx@notificationssnap.dxqmd51.mongodb.net/TEST_SNAP?retryWrites=true&w=majority
+      kind: mongodb
+      name: akshay_mongodb
+      slug: akshay_mongodb
+configVars: {}
+envVars: {}
