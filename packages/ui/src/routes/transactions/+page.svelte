@@ -139,15 +139,6 @@
     justify-content: center;
   }
 
-  .page-button {
-    background-color: transparent;
-    font-size: var(--font-size-m);
-    border: 1px solid;
-    border-color: #ffffff1a;
-    border-radius: 14px;
-    color: white;
-  }
-
   @media (min-width: 772px) {
     #main-grid-container {
       display: block;

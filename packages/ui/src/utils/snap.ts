@@ -1,5 +1,7 @@
 import type { Address } from '../../../snap/src/types/address';
 import type { Chain, CosmosAddress } from '../../../snap/src/types/chains';
+import { chains, fetchChains } from '../store/chains';
+import { CELESTIA_CHAIN_REGISTRY_URL } from './constants';
 import { LOCAL_STORAGE_INIT } from './general';
 import type { ChainInfo } from '@keplr-wallet/types';
 
@@ -267,5 +269,39 @@ export const chainToChainInfo = (chain: Chain): ChainInfo => {
     }),
     currencies: [],
     chainSymbolImageUrl: chain.logo_URIs?.svg
+  }
+}
+
+export const addChain = async (chain: Chain) => {
+  try {
+    await window.ethereum.request({
+      method: 'wallet_invokeSnap',
+      params: {
+        snapId,
+        request: {
+          method: 'addChain',
+          params: {
+            chain_info: JSON.stringify(chain)
+          },
+        },
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    throw err
+  }
+};
+
+export const addCelestia = async () => {
+  try {
+    const res = await fetch(CELESTIA_CHAIN_REGISTRY_URL);
+    const celestia: Chain = await res.json();
+    // Set the logo as our local PNG for Celestia
+    celestia.logo_URIs = { png: "", svg: "/TIA_icon.svg" };
+    await addChain(celestia);
+    await fetchChains();
+  } catch (err) {
+    console.error(err);
+    throw err
   }
 }

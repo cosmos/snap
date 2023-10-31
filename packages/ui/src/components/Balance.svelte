@@ -157,7 +157,7 @@
 .price {
   letter-spacing: -0.36px;
   line-height: 16px;
-  min-width: 39px;
+  min-width: 50%;
   white-space: nowrap;
 }
 

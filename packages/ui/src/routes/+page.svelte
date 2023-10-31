@@ -45,6 +45,7 @@
 
 	const runInstallSnap = async () => {
     try {
+      localStorage.removeItem(LOCAL_STORAGE_CHAINS);
       $state.loading = true;
       await installSnap();
       await initializeData();
@@ -67,9 +68,6 @@
       chains.set(chainsFromInit);
       $state.isSnapInitValue = true;
       $state.connected = true;
-      $state.alertText = `Generating keys. This may take a minute.`
-      $state.alertType = "warning"
-      $state.showAlert = true
       $state.loading = false;
     } catch (err: any) {
       $state.loading = false;

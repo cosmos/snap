@@ -24,8 +24,8 @@
   let recipient = "";
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
-  let feesAmount = 0.25;
-  let gas = 0.25;
+  let feesAmount = 0.05;
+  let gas = 0.10;
   let feesOpen = false;
   let fees = {
       amount: [
