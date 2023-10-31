@@ -9,6 +9,13 @@
 	import { isSnapInitialized, isSnapInstalled } from '@cosmsnap/snapper';
 	import { onMount } from 'svelte';
 
+	$: {
+    if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapLatestVersion && $state.isSnapInstalledValue) {
+		  $state.connected = true;
+		  goto("/balances");
+	  }
+  }
+
 	const initializeData = async () => {
     try {
       $state.loading = true;
