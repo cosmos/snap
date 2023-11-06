@@ -4,7 +4,7 @@
 <div class="h-full w-full overflow-hidden" style="padding: 25px;">
     <div class="h-full w-full overflow-hidden">
         <div class="w-full h-full flex justify-center items-center overflow-hidden">
-            <div class="mt-6 w-full h-full flex justify-center items-center h-full max-w-[420px] overflow-hidden"> 
+            <div class="mt-6 w-full h-full flex justify-center items-center max-w-[420px] overflow-hidden"> 
                 <iframe
                     title="squid_widget"
                     width="100%"
