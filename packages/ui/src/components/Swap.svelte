@@ -1,4 +1,24 @@
-<script>
+<script lang="ts">
+    import ChainSelector from "./ChainSelector.svelte";
+    import Select from "./Select.svelte";
+    import type { CoinIBC } from '../utils/ibc';
+    import { balances } from "../store/balances";
+
+    let sourceChain = "";
+    let destinationChain = "";
+    let sourceCoin = "";
+    let destinationCoin = "";
+    let sourceBalances: CoinIBC[] = [];
+    let selected: any;
+
+    $: {
+        if ($balances) {
+            let source_chain = $balances.filter(item => item.chain_id == sourceChain)[0];
+            if (source_chain) {
+            sourceBalances = source_chain.balances;
+            }
+        }
+    }
 </script>
 
 <div class="w-full max-w-[700px] p-[20px] font-inter bg-[#14141440] rounded-3xl border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100">
@@ -18,16 +38,12 @@
                         <div class="font-medium text-white text-base tracking-tight leading-normal">
                             From
                         </div>
-                        <div class="flex justify-between items-center mt-4">
-                            <div class="bg-[#14141473] rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-2 w-1/2 mr-2">
-                                <div class="opacity-25 font-medium text-white text-sm">
-                                    Select chain
-                                </div>
+                        <div class="flex justify-between items-center mt-4 gap-2 z-50">
+                            <div class="w-1/2">
+                                <ChainSelector />
                             </div>
-                            <div class="bg-[#14141473] rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-2 w-1/2 ml-2">
-                                <div class="opacity-25 font-medium text-white text-sm">
-                                    Select coin
-                                </div>
+                            <div class="w-1/2">
+                                <Select items={sourceBalances} bind:selectedItem={selected}/>
                             </div>
                         </div>
                         <div class="mt-4">
@@ -54,16 +70,12 @@
                         <div class="font-medium text-white text-base tracking-tight leading-normal">
                             To
                         </div>
-                        <div class="flex justify-between items-center mt-4">
-                            <div class="bg-[#14141473] rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-2 w-1/2 mr-2">
-                                <div class="opacity-25 font-medium text-white text-sm">
-                                    Select chain
-                                </div>
+                        <div class="flex justify-between items-center mt-4 gap-2 z-50">
+                            <div class="w-1/2">
+                                <ChainSelector />
                             </div>
-                            <div class="bg-[#14141473] rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-2 w-1/2 ml-2">
-                                <div class="opacity-25 font-medium text-white text-sm">
-                                    Select coin
-                                </div>
+                            <div class="w-1/2">
+                                <Select items={sourceBalances} bind:selectedItem={selected}/>
                             </div>
                         </div>
                         <div class="mt-4">
