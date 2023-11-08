@@ -45,7 +45,6 @@
 .frame-47 {
   align-items: flex-start;
   flex-direction: column;
-  margin-top: 40px;
 }
 
 .frame-2 {
