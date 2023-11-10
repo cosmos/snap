@@ -9,6 +9,7 @@
   const dispatch = createEventDispatcher();
   export let text = "Select Asset";
   export let showKey = "display";
+  export let imageKey: string | undefined = undefined;
 
   function selectItem(item: any) {
     selectedItem = item;
@@ -58,7 +59,10 @@
       >
         {#each items as item (item)}
           <!-- svelte-ignore a11y-invalid-attribute -->
-          <a href="#" class="w-full flex items-center px-4 py-2 hover:bg-[#ffffff17] hover:rounded-[10px] h-[40px]" on:click={() => selectItem(item)}>
+          <a href="#" class="flex items-center px-4 py-2 hover:bg-[#ffffff17] hover:rounded-[10px] h-[40px]" on:click={() => selectItem(item)}>
+            {#if imageKey}
+              <img src={item[imageKey]} class="w-5 h-5 rounded-full mr-2" alt={item[showKey]} />
+            {/if}
             {item[showKey]}
           </a>
         {/each}

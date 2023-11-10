@@ -1,24 +1,35 @@
 <script lang="ts">
-    import ChainSelector from "./ChainSelector.svelte";
     import Select from "./Select.svelte";
-    import type { CoinIBC } from '../utils/ibc';
-    import { balances } from "../store/balances";
+    import { Router, type RouteChain, type RouteToken } from "../utils/router"
+	import { afterUpdate, onMount } from "svelte";
+    import _ from "lodash";
 
-    let sourceChain = "";
-    let destinationChain = "";
-    let sourceCoin = "";
-    let destinationCoin = "";
-    let sourceBalances: CoinIBC[] = [];
-    let selected: any;
+    let sourceChain :RouteChain;
+    let destinationChain :RouteChain;
+    let sourceCoin: RouteToken;
+    let destinationCoin: RouteToken;
+    let chains: RouteChain[] = [];
+    let sourceTokens: RouteToken[] = [];
+    let destTokens: RouteToken[] = [];
+    let router: Router;
 
     $: {
-        if ($balances) {
-            let source_chain = $balances.filter(item => item.chain_id == sourceChain)[0];
-            if (source_chain) {
-            sourceBalances = source_chain.balances;
-            }
+        if (router) {
+            router.getTokens(sourceChain.chain_id).then((tokens) => {
+                sourceTokens = _.uniqBy(tokens, "denom");
+            });
+            router.getTokens(destinationChain.chain_id).then((tokens) => {
+                destTokens = _.uniqBy(tokens, "denom");
+            });
         }
     }
+
+    onMount(async () => {
+        router = new Router();
+        setTimeout(async () => {
+            chains = await router.getChains();
+        }, 1000);
+    })
 </script>
 
 <div class="w-full max-w-[700px] p-[20px] font-inter bg-[#14141440] rounded-3xl border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100">
@@ -30,31 +41,31 @@
         </div>
         <div class="w-full mt-4">
             <div class="">
-                <div class="w-full mb-4">
-                    <div class="w-full bg-[#14141480] rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-4">
+                <div class="w-full mb-4 z-50 relative">
+                    <div class="w-full rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-4">
                         <div class="opacity-25 font-medium text-white text-xs text-right">
                             Available balance: 0
                         </div>
                         <div class="font-medium text-white text-base tracking-tight leading-normal">
                             From
                         </div>
-                        <div class="flex justify-between items-center mt-4 gap-2 z-50">
+                        <div class="flex justify-between items-center gap-2 z-50">
                             <div class="w-1/2">
-                                <ChainSelector />
+                                <Select text="Select Chain" items={chains} bind:selectedItem={sourceChain} showKey="chain_name" imageKey="logo_uri"/>
                             </div>
                             <div class="w-1/2">
-                                <Select items={sourceBalances} bind:selectedItem={selected}/>
+                                <Select text="Select Token" items={sourceTokens} bind:selectedItem={sourceCoin} showKey="display" imageKey="logo_uri"/>
                             </div>
                         </div>
-                        <div class="mt-4">
-                            <div class="bg-[#14141473] rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-2">
-                                <div class="opacity-25 font-medium text-white text-sm">
-                                    Enter amount
+                        <div class="">
+                            <form>   
+                                <div class="relative flex justify-center items-center">
+                                    <input type="number" id="dest-amount" class="remove-arrow mt-3 custom-bg outline-none inter-font inline-flex w-full rounded-[10px] border border-gray-600 shadow-sm px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 border-opacity-35 active:border-none focus-visible:border-none focus:border-none" placeholder="Enter amount" required>
+                                    <div class="cursor-pointer absolute top-5 right-4 font-semibold text-[#594bff] text-sm text-right">
+                                        MAX
+                                    </div>
                                 </div>
-                                <div class="cursor-pointer absolute top-2 right-4 font-semibold text-[#594bff] text-sm text-right">
-                                    MAX
-                                </div>
-                            </div>
+                            </form>                            
                         </div>
                     </div>
                 </div>
@@ -63,30 +74,27 @@
                     </div>
                 </div>
                 <div class="w-full">
-                    <div class="w-full bg-[#14141480] rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-4">
+                    <div class="w-full rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-4">
                         <div class="opacity-25 font-medium text-white text-xs text-right">
                             Available balance: 0
                         </div>
                         <div class="font-medium text-white text-base tracking-tight leading-normal">
                             To
                         </div>
-                        <div class="flex justify-between items-center mt-4 gap-2 z-50">
+                        <div class="flex justify-between items-center gap-2 z-50">
                             <div class="w-1/2">
-                                <ChainSelector />
+                                <Select text="Select Chain" items={chains} bind:selectedItem={destinationChain} showKey="chain_name" imageKey="logo_uri"/>
                             </div>
                             <div class="w-1/2">
-                                <Select items={sourceBalances} bind:selectedItem={selected}/>
+                                <Select text="Select Token" items={destTokens} bind:selectedItem={destinationCoin} showKey="display" imageKey="logo_uri"/>
                             </div>
                         </div>
-                        <div class="mt-4">
-                            <div class="bg-[#14141473] rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-2">
-                                <div class="opacity-25 font-medium text-white text-sm">
-                                    Enter amount
+                        <div class="">
+                            <form>   
+                                <div class="relative flex justify-center items-center">
+                                    <input disabled type="number" id="dest-amount" class="remove-arrow mt-3 custom-bg inter-font inline-flex w-full rounded-[10px] border border-gray-600 shadow-sm px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 border-opacity-35 active:border-none focus:border-none focus-visible:border-none" placeholder="Enter amount" required>
                                 </div>
-                                <div class="cursor-pointer absolute top-2 right-4 font-semibold text-[#594bff] text-sm text-right">
-                                    MAX
-                                </div>
-                            </div>
+                            </form>                            
                         </div>
                     </div>
                 </div>
@@ -99,8 +107,23 @@
         </button>
     </div>
 </div>
-<style lang="scss">
-    button {
-        @apply active:scale-95 transition-all duration-300 cursor-pointer;
+
+<style>
+    button:active {
+        transform: scale(0.95);
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .custom-bg {
+        background-color: #141414;
+        --tw-border-opacity: 0.35;
+    }
+    .remove-arrow::-webkit-inner-spin-button,
+    .remove-arrow::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .remove-arrow {
+        -moz-appearance: textfield;
     }
 </style>

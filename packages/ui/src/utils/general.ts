@@ -1,5 +1,5 @@
 import _ from "lodash";
-import type { CoinIBC } from "./ibc";
+import type { CoinIBC } from "./skip";
 import type { ChainInfo } from "@keplr-wallet/types";
 
 export const LOCAL_STORAGE_CHAINS = "cosmsnap:chains";

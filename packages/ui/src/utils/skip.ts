@@ -1,6 +1,54 @@
 import type { Coin, HttpEndpoint } from "@cosmjs/stargate";
 import type { Chain } from "@cosmsnap/snapper";
 
+export type SkipToken = {
+  denom: string;
+  chain_id: string;
+  origin_denom: string;
+  origin_chain_id: string;
+  trace: string;
+  is_cw20: boolean;
+  is_evm: boolean;
+  symbol: string;
+  name: string;
+  logo_uri: string;
+  decimals: number;
+}
+
+export type CosmosModuleSupport = {
+  authz: boolean;
+  feegrant: boolean;
+};
+
+export type GasPrice = {
+  low?: string;
+  average?: string;
+  high?: string;
+} | null;
+
+export type FeeAsset = {
+  denom: string;
+  gas_price?: GasPrice;
+};
+
+export type SkipChain = {
+  chain_name: string;
+  chain_id: string;
+  pfm_enabled: boolean;
+  cosmos_sdk_version: string;
+  modules: Record<string, unknown>;
+  cosmos_module_support: CosmosModuleSupport;
+  supports_memo: boolean;
+  logo_uri: string;
+  bech32_prefix: string;
+  fee_assets: FeeAsset[];
+  chain_type: string;
+};
+
+export type ChainsList = {
+  chains: Chain[];
+};
+
 export interface Route {
   source_asset_denom: string;
   source_asset_chain_id: string;

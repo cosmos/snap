@@ -2,7 +2,7 @@
   import { chains } from "../store/chains";
 	import Info from "./Info.svelte";
 	import { balances, forceUpdate } from "../store/balances";
-  import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/ibc';
+  import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/skip';
 	import { state } from "../store/state";
 	import type { Chain, Msg } from "@cosmsnap/snapper";
   import _ from 'lodash';
