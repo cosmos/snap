@@ -20,6 +20,7 @@
             });
             router.getTokens(destinationChain.chain_id).then((tokens) => {
                 destTokens = _.uniqBy(tokens, "denom");
+                console.log(destTokens);
             });
         }
     }
