@@ -7,8 +7,8 @@ MONGODB_RESOURCE = 'akshay_mongodb'
 OPEN_LEASE_COLLECTION_NAME = 'open_leases'
 NOTIFICATIONS_COLLECTION_NAME = 'notifications'
 
-# Environment variable for Cosmos DB API endpoint
-api_url = os.getenv('COSMOS_API_URL')
+# Environment variable for Akash DB API endpoint
+api_url = os.getenv('AKASH_API_URL')
 
 if not api_url:
     raise EnvironmentError('The environment variable COSMOS_API_URL is not set.')
