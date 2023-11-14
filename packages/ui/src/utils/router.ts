@@ -1,8 +1,9 @@
 import { ethers } from 'ethers';
-import { Squid, type ChainData, type TokenData, type RouteData } from "@0xsquid/sdk";
+import { Squid, type ChainData, type TokenData, type RouteData, type TokenBalance } from "@0xsquid/sdk";
 import { getMsgs, type SkipChain, type SkipToken, type SkipMsgs, type Fee } from './skip';
 import rpcs from '../apis.json';
 import { type DeliverTxResponse, type SigningStargateClient, coins } from '@cosmjs/stargate';
+import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { toUtf8 } from '@cosmjs/encoding';
 import type { EncodeObject } from '@cosmjs/proto-signing';
 import { getClient } from './tx';
@@ -28,7 +29,7 @@ export interface RouteToken {
 }
 
 export class Router {
-    private squid!: Squid;
+    public squid!: Squid;
   
     constructor() {
         /////// Squid ////////
@@ -56,7 +57,7 @@ export class Router {
 
     private async getCosmosSigner(chain: Chain): Promise<SigningStargateClient> {
         if (window.cosmos) {
-            return await getClient(chain)
+            return await getClient(chain, "amino")
         } else {
             throw new Error('Cosmos signer not found.');
         }
@@ -110,6 +111,41 @@ export class Router {
         return _.uniqBy(chains, 'chain_id');
     }
 
+    public async getEVMAddress() {
+        const signer = await this.getEVMSigner();
+        return await signer.getAddress();
+    }
+
+    public async convertEVMToChainType(fromChainEvm: ChainData | undefined): Promise<Chain> {
+        return {
+            address: await this.getEVMAddress(),
+            chain_id: (fromChainEvm?.chainId ?? "").toString(),
+            chain_name: fromChainEvm?.chainName ?? "",
+            pretty_name: fromChainEvm?.chainName ?? "",
+            logo_URIs: {
+                png: fromChainEvm?.chainIconURI ?? "",
+                svg: fromChainEvm?.chainIconURI ?? "",
+            },
+            slip44: 0,
+            bech32_prefix: "0x",
+            fees: {
+                fee_tokens: []
+            },
+            apis: {
+                rpc: [
+                    {
+                        address: fromChainEvm?.rpc ?? "",
+                    }
+                ],
+                rest: [
+                    {
+                        address: fromChainEvm?.rpc ?? "",
+                    }
+                ],
+            }
+        }
+    }
+
     public async getTokens(chain_id: string): Promise<RouteToken[]> {
         await this.initSquid();
         const res = await fetch("https://api.skip.money/v1/fungible/assets?native_only=false&include_no_metadata_assets=false&include_cw20_assets=false&include_evm_assets=false");
@@ -159,20 +195,43 @@ export class Router {
     }
 
     public async execute(fromChain: RouteChain, toChain: RouteChain, route: SkipMsgs | RouteData, fromAddress: string, chain: Chain) {
-        if (fromChain.chain_type === "cosmos" && toChain.chain_type === "cosmos") {
-            return await this.skipExecute(
-                route as SkipMsgs,
-                fromAddress,
+        if (fromChain.chain_type === "evm" || toChain.chain_type === "evm") {
+            return await this.squidExecute(
+                route as RouteData,
+                fromChain.chain_type,
                 chain
-            );
+            )
         }
 
-        return await this.squidExecute(
-            route as RouteData,
-            fromChain.chain_type,
-            fromChain.chain_id,
-            toChain.chain_id
-        )
+        return await this.skipExecute(
+            route as SkipMsgs,
+            fromAddress,
+            chain
+        );
+    }
+
+    public async getEvmBalance(chain_id: string, denom: string): Promise<TokenBalance | undefined> {
+        const signer = await this.getEVMSigner();
+        const address = await signer.getAddress();
+        const chains = [
+            "1",
+            "56",
+            "137",
+            "43114",
+            "42161",
+            "10",
+            "8453",
+            "59144",
+            "5000",
+            "534352",
+            "250",
+            "1284",
+            "42220",
+            "314",
+            "2222"
+        ]
+        const balances = await this.squid.getAllEvmBalances({ userAddress: address, chains });
+        return balances.find(balance => balance.chainId.toString() === chain_id && balance.address == denom);
     }
 
     public async route(fromChain: RouteChain, toChain: RouteChain, fromToken: RouteToken, toToken: RouteToken, amount: string, toAddress: string, fromAddress: string, slippage: number = 1.00, chains: Chain[]) {
@@ -212,47 +271,43 @@ export class Router {
         toAddress: string,
         slippage: number
     ) {
-        const params = {
-            fromChain,
-            fromToken,
-            fromAmount,
-            toChain,
-            toToken,
-            fromAddress,
-            toAddress,
-            slippage,
-            enableForecall: true,
-            quoteOnly: false,
-            collectFees: { 
-                integratorAddress: "0xb1f26cf439308842A0a266F2a5756ab71Cf971A2", 
-                fee: 85
-            }
-        };
+        try {
+            const params = {
+                fromChain,
+                fromToken,
+                fromAmount,
+                toChain,
+                toToken,
+                fromAddress,
+                toAddress,
+                slippage,
+                enableForecall: true,
+                quoteOnly: false,
+                collectFees: { 
+                    integratorAddress: "0xb1f26cf439308842A0a266F2a5756ab71Cf971A2", 
+                    fee: 85
+                }
+            };
 
-        console.log("params: \n", params);
-
-        const { route } = await this.squid.getRoute(params);
-        if (route.transactionRequest === undefined) {
-            throw new Error("No route found");
+            const { route } = await this.squid.getRoute(params);
+            
+            return route;
+        } catch (e: any) {
+            console.error(e);
+            throw new Error(e.errors[0].message);
         }
-        
-        return route;
     }
 
     private async squidExecute(
         route: RouteData,
         type: "cosmos" | "evm",
-        fromChain: string | number, 
-        toChain: string | number, 
+        chain: Chain
     ) {
-        const signer = await this.getSigner(type);
+        let signer = await this.getSigner(type, chain);
 
-        const tx = await this.squid.executeRoute({ signer, route });
-        console.log("tx: ", tx);
-
-        if ('wait' in tx) {
+        if (type === "evm") {
+            const tx = await this.squid.executeRoute({ signer, route }) as ethers.providers.TransactionResponse;
             const txReceipt = await tx.wait();
-            console.log("txReciept: ", txReceipt);
     
             const getStatusParams = {
                 transactionId: txReceipt.transactionHash,
@@ -260,26 +315,20 @@ export class Router {
             };
     
             const status = await this.squid.getStatus(getStatusParams);
-            console.log(status);
 
             return status;
         }
         // Its a Cosmos -> EVM route if we get here
-        const cosmosTx = (await this.squid.executeRoute({
+        const tx = await this.squid.executeRoute({
             signer,
+            signerAddress: chain.address,
             route,
-        })) as unknown as DeliverTxResponse;
+        }) as TxRaw;
+
+        const client = await getClient(chain);
+        const cosmosTx = await client.broadcastTx(TxRaw.encode(tx).finish())
     
-        const txHash = cosmosTx.transactionHash;
-    
-        const status = await this.squid.getStatus({
-            transactionId: txHash,
-            fromChainId: fromChain,
-            toChainId: toChain,
-        });
-    
-        console.log(status);
-        return status;
+        return cosmosTx;
     }
 
     private async skipRoute(
@@ -292,7 +341,6 @@ export class Router {
         slippage: number,
         chains: Chain[],
     ) {
-        const adjustedAmount = (Number(fromAmount) * 1000000).toString();
         const fees: Fee[] = [
             {
                 basis_points_fee: "57",
@@ -304,7 +352,7 @@ export class Router {
             }
         ]
 
-        const msg = await getMsgs(fromChain.chain_id, fromToken, toChain.chain_id, toToken, adjustedAmount, slippage.toString(), chains, toAddress, fees);
+        const msg = await getMsgs(fromChain.chain_id, fromToken, toChain.chain_id, toToken, fromAmount, slippage.toString(), chains, toAddress, fees);
         if (!('msgs' in msg)) {
             if ('message' in msg) {
                 throw new Error(msg.message)

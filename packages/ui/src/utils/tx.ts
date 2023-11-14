@@ -22,9 +22,9 @@ export interface ChainConfig {
   api_key: string; 
 }
 
-export const getClient = async (chain: Chain) => {
+export const getClient = async (chain: Chain, mode: "direct" | "amino" = "direct") => {
   let chainRpc = rpcs.apis.find(item => item.chain_id == chain.chain_id);
-  let signer = window.cosmos.getOfflineSigner(chain.chain_id);
+  let signer = window.cosmos.getOfflineSigner(chain.chain_id, mode);
   // if we dont have a production rpc bank on public registry
   if (chainRpc && keyNumia && keyRhino) {
     if (chainRpc.provider == 'rhino') {

@@ -9,6 +9,8 @@
 	import type { SkipMsgs } from "../utils/skip";
 	import type { RouteData } from "@0xsquid/sdk";
 	import { state } from "../store/state";
+	import type { Chain } from "@cosmsnap/snapper";
+	import Button from "./Button.svelte";
 
     let sourceChain :RouteChain;
     let destinationChain :RouteChain;
@@ -19,6 +21,7 @@
     let destTokens: RouteToken[] = [];
     let router: Router;
     let amount: number = 0;
+    let uamount: number = 0;
     let chainAddress = "";
     let available = "0";
     let receiver = "";
@@ -29,19 +32,14 @@
     let copiedReciever = false;
     let route: SkipMsgs | RouteData;
     let estimatedReceiveAmount = 0;
-    let rate = 0;
     let slippage = 1;
+    let estimatedTime = 1;
+    let loading = false;
 
     $: {
         if (sourceChain && sourceCoin) {
             const chain = $balances.find(balance => balance.chain_id === sourceChain.chain_id);
-            if (!chain) {
-                throw new Error("Invalid source chain.");
-            }
             const availableU = chain?.balances.find(bal => bal.denom == sourceCoin.denom)?.amount ?? "0";
-            if (!availableU) {
-                throw new Error("Invalid source coin.");
-            }
             available = (_.round(Number(availableU)/Math.pow(10, sourceCoin.decimals), 2)).toString();
         }
         
@@ -82,9 +80,24 @@
     }
 
     const getRoute = async () => {
+        loading = true;
         try {
-            const fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
-            const toChain = $chains.find(chain => chain.chain_id === destinationChain.chain_id);
+            let fromChain: Chain | undefined;
+            let toChain: Chain | undefined;
+            fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
+            toChain = $chains.find(chain => chain.chain_id === destinationChain.chain_id);
+            if (fromChain === undefined) {
+                const fromChainEvm = router.squid.chains.find(chain => chain.chainId.toString() === sourceChain.chain_id);
+                if (fromChainEvm != undefined) {
+                    fromChain = await router.convertEVMToChainType(fromChainEvm);
+                }
+            }
+            if (toChain === undefined) {
+                const toChainEvm = router.squid.chains.find(chain => chain.chainId.toString() === destinationChain.chain_id);
+                if (toChainEvm != undefined) {
+                    toChain = await router.convertEVMToChainType(toChainEvm);
+                }
+            }
             if (fromChain === undefined || fromChain.address === undefined) {
                 console.log(fromChain);
                 throw new Error("Invalid source chain or source chain address.");
@@ -93,12 +106,15 @@
                 console.log(toChain);
                 throw new Error("Invalid destination chain or destination chain address.");
             }
-            const res = await router.route(sourceChain, destinationChain, sourceCoin, destinationCoin, amount.toString(), toChain?.address, fromChain?.address, slippage, $chains);
+            const res = await router.route(sourceChain, destinationChain, sourceCoin, destinationCoin, uamount.toString(), toChain?.address, fromChain?.address, slippage, $chains);
             
+            loading = false;
+
             return res;
         } catch (e: any) {
+            loading = false;
             console.error(e);
-            $state.alertText = e.message;
+            $state.alertText = e.message ?? e.errors[0].message;
             $state.alertType = "danger";
             $state.showAlert = true;
             throw e;
@@ -111,25 +127,38 @@
             // It is from Skip
             if (skipRoute.route.estimated_amount_out) {
                 estimatedReceiveAmount = Number(skipRoute.route.estimated_amount_out)/Math.pow(10, destinationCoin.decimals);
+                estimatedTime = 1
             }
         } else {
             // It is from Squid
             const squidRoute = multiRoute as RouteData;
             // It is from Skip
             estimatedReceiveAmount = Number(squidRoute.estimate.toAmount)/Math.pow(10, destinationCoin.decimals);
+            estimatedTime = _.round(squidRoute.estimate.estimatedRouteDuration/60, 0);
         }
     }
 
     const executeRoute = async () => {
+        loading = true;
         try {
-            const fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
+            let fromChain: Chain | undefined;
+            fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
+            console.log(fromChain);
+            if (fromChain === undefined) {
+                const fromChainEvm = router.squid.chains.find(chain => chain.chainId.toString() === sourceChain.chain_id);
+                if (fromChainEvm != undefined) {
+                    fromChain = await router.convertEVMToChainType(fromChainEvm);
+                }
+            }
             if (fromChain === undefined || fromChain.address === undefined) {
                 console.log(fromChain);
                 throw new Error("Invalid source chain or source chain address.");
             }
             const res = await router.execute(sourceChain, destinationChain, route, fromChain?.address, fromChain);
             console.log(res);
+            loading = false;
         } catch (e: any) {
+            loading = false;
             console.error(e);
             $state.alertText = e.message;
             $state.alertType = "danger";
@@ -138,14 +167,30 @@
     }
 
     const update = async () => {
+        loading = true;
+        uamount = amount * Math.pow(10, sourceCoin.decimals);
         if (sourceChain) {
-            const fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
+            let fromChain: Chain | undefined;
+            fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
+            if (fromChain === undefined) {
+                const fromChainEvm = router.squid.chains.find(chain => chain.chainId.toString() === sourceChain.chain_id);
+                if (fromChainEvm != undefined) {
+                    fromChain = await router.convertEVMToChainType(fromChainEvm);
+                }
+            }
             if (fromChain && fromChain.address) {
                 chainAddress = fromChain.address;
             }
         }
         if (destinationChain) {
-            const toChain = $chains.find(chain => chain.chain_id === destinationChain.chain_id);
+            let toChain: Chain | undefined;
+            toChain = $chains.find(chain => chain.chain_id === destinationChain.chain_id);
+            if (toChain === undefined) {
+                const toChainEvm = router.squid.chains.find(chain => chain.chainId.toString() === destinationChain.chain_id);
+                if (toChainEvm != undefined) {
+                    toChain = await router.convertEVMToChainType(toChainEvm);
+                }
+            }
             if (toChain && toChain.address) {
                 receiver = toChain.address;
             }
@@ -163,12 +208,12 @@
             if (destinationChain && !destinationCoin && destTokens.length > 0) {
                 destinationCoin = destTokens[0];
             }
-            if(sourceChain && destinationChain && sourceCoin && destinationCoin && amount > 0) {
+            if(sourceChain && destinationChain && sourceCoin && destinationCoin && uamount > 0) {
                 route = await getRoute();
-                console.log(route);
                 updateRouteState(route);
             }
         }
+        loading = false;
     }
 
     onMount(async () => {
@@ -314,7 +359,7 @@
                                         Estimated time
                                     </div>
                                     <div class="w-1/2 flex mt-3 font-inter text-white text-base justify-end">
-                                        ~ 1 minute
+                                        ~ {estimatedTime} Minute(s)
                                     </div>
                                 </div>
                                 <div class="w-full flex">
@@ -330,7 +375,7 @@
                                         Exchange rate
                                     </div>
                                     <div class="w-1/2 flex mt-3 font-inter text-white text-base justify-end">
-                                        {_.round((amount/estimatedReceiveAmount), 2)} {destinationCoin.display}/{sourceCoin.display}
+                                        {_.round((estimatedReceiveAmount/amount), 2)} {destinationCoin.display}/{sourceCoin.display}
                                     </div>
                                 </div>
                             </div>
@@ -339,20 +384,11 @@
                 </div>
             </div>
         </div>
-        <button on:click={executeRoute} class="cursor-pointer h-[45px] mt-[20px] w-full flex items-center justify-center bg-[#594bff] rounded-lg overflow-hidden">
-            <div class="font-medium text-white text-sm tracking-tight leading-normal">
-                Swap
-            </div>
-        </button>
+        <Button bind:loading={loading} onClick={executeRoute} text="Swap" />
     </div>
 </div>
 
 <style>
-    button:active {
-        transform: scale(0.95);
-        transition: all 0.3s;
-        cursor: pointer;
-    }
     .custom-bg {
         background-color: #141414;
         --tw-border-opacity: 0.35;
