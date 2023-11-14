@@ -252,7 +252,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cosmjs/stargate@npm:^0.31.1, @cosmjs/stargate@npm:^0.31.3":
+"@cosmjs/stargate@npm:^0.31.3":
   version: 0.31.3
   resolution: "@cosmjs/stargate@npm:0.31.3"
   dependencies:
@@ -323,7 +323,7 @@ __metadata:
   dependencies:
     "@0xsquid/sdk": ^1.14.8
     "@cosmjs/crypto": ^0.31.1
-    "@cosmjs/stargate": ^0.31.1
+    "@cosmjs/stargate": ^0.31.3
     "@cosmsnap/snapper": ^0.1.26
     "@fullhuman/postcss-purgecss": ^5.0.0
     "@keplr-wallet/types": 0.12.12

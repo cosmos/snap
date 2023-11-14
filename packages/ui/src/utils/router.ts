@@ -317,25 +317,25 @@ export class Router {
 
     private async skipExecute(msg: SkipMsgs, fromAddress: string, chain: Chain) {
         const messages: EncodeObject[] = msg.msgs.map(item => {
-            if (!item.msg || !item.msg_type_url) {
+            if (!item.multi_chain_msg.msg || !item.multi_chain_msg.msg_type_url) {
                 throw new Error("Invalid message format.");
             }
 
-            let value = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
+            let value = _.mapKeys(JSON.parse(item.multi_chain_msg.msg), (value: any, key: any) => _.camelCase(key));
             
             // If cosmwasm turn the json into bytes
-            if (item.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+            if (item.multi_chain_msg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
                 value.msg = toUtf8(JSON.stringify(value.msg))
             }
 
             console.log({
                 value: value,
-                typeUrl: item.msg_type_url
+                typeUrl: item.multi_chain_msg.msg_type_url
             });
 
             return {
                 value: value,
-                typeUrl: item.msg_type_url
+                typeUrl: item.multi_chain_msg.msg_type_url
             };
         });
         const client = await getClient(chain);

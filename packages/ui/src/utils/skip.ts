@@ -116,6 +116,10 @@ interface Recommendation {
   reason: string;
 }
 
+export interface MultiChainMsg {
+  multi_chain_msg: SkipMsg;
+}
+
 export interface SkipMsg {
   chain_id: string;
   path: string[];
@@ -129,7 +133,7 @@ export interface Fee {
 }
 
 export interface SkipMsgs {
-  msgs: SkipMsg[];
+  msgs: MultiChainMsg[];
   route: Route;
 }
 

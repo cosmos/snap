@@ -23,6 +23,7 @@ export interface Chain {
   };
   explorers?: Explorer[];
   address: string | undefined;
+  type: 'cosmos' | 'evm';
 }
 
 export interface Explorer {
