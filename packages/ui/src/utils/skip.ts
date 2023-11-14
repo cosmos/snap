@@ -171,7 +171,7 @@ export const getRoute = async (
 
     try {
 
-        const url = 'https://api.skip.money/v1/fungible/route';
+        const url = 'https://api.skip.money/v2/fungible/route';
 
         const data = {
             amount_in,
@@ -209,7 +209,7 @@ export const getSkipRecommendation = async (
 
     try {
 
-        const url = 'https://api.skip.money/v1/fungible/recommend_assets';
+        const url = 'https://api.skip.money/v2/fungible/recommend_assets';
 
         const data = {
             source_asset_denom, 
@@ -248,7 +248,7 @@ export const getMsgs = async (
   fees: Fee[] | undefined = undefined,
 ): Promise<SkipMsgs | SkipError> => {
 
-  const url = 'https://api.skip.money/v1/fungible/msgs_direct';
+  const url = 'https://api.skip.money/v2/fungible/msgs_direct';
 
   let chain_ids_to_addresses: Record<string, string> = {};
   chains.map(item => {
@@ -290,7 +290,7 @@ export const getDenomFromIBC = async (url: string | HttpEndpoint, ibc_coin: Coin
   let splits = ibc_coin.denom.toUpperCase().split("IBC/");
   if (splits.length > 1) {
     let hash = splits[1];
-    let res = await fetch(`${url}/ibc/apps/transfer/v1/denom_traces/${hash}`);
+    let res = await fetch(`${url}/ibc/apps/transfer/v2/denom_traces/${hash}`);
     let data = await res.json();
     return {
       denom: data.denom_trace.base_denom,
@@ -301,7 +301,7 @@ export const getDenomFromIBC = async (url: string | HttpEndpoint, ibc_coin: Coin
 }
 
 export const getAssets = async (chain_id: string): Promise<AllAssets> => {
-  const url = `https://api.skip.money/v1/fungible/assets?chain_id=${chain_id}&include_no_metadata_assets=false`;
+  const url = `https://api.skip.money/v2/fungible/assets?chain_id=${chain_id}&include_no_metadata_assets=false`;
   
   const response = await fetch(url, {
     method: 'GET', 

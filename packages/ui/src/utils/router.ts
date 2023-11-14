@@ -2,7 +2,7 @@ import { ethers } from 'ethers';
 import { Squid, type ChainData, type TokenData, type RouteData } from "@0xsquid/sdk";
 import { getMsgs, type SkipChain, type SkipToken, type SkipMsgs, type Fee } from './skip';
 import rpcs from '../apis.json';
-import { GasPrice, type DeliverTxResponse, type SigningStargateClient, coins } from '@cosmjs/stargate';
+import { type DeliverTxResponse, type SigningStargateClient, coins } from '@cosmjs/stargate';
 import { toUtf8 } from '@cosmjs/encoding';
 import type { EncodeObject } from '@cosmjs/proto-signing';
 import { getClient } from './tx';
@@ -295,11 +295,11 @@ export class Router {
         const adjustedAmount = (Number(fromAmount) * 1000000).toString();
         const fees: Fee[] = [
             {
-                basis_points_fee: "5695",
+                basis_points_fee: "57",
                 address: "osmo1636lu4j34nk4quf9kpy2gxrjsxpxl92acxexa2"
             },
             {
-                basis_points_fee: "2805",
+                basis_points_fee: "28",
                 address: "osmo1gpdnc4gggc9c7t5fltrwsufck9ufgx6gv8dsfw"
             }
         ]
