@@ -3,7 +3,7 @@ import requests
 import os
 
 # Constants for MongoDB resources
-MONGODB_RESOURCE = 'akshay_mongodb'
+MONGODB_RESOURCE = 'akash_mongodb'
 OPEN_LEASE_COLLECTION_NAME = 'open_leases'
 NOTIFICATIONS_COLLECTION_NAME = 'notifications'
 
@@ -11,7 +11,7 @@ NOTIFICATIONS_COLLECTION_NAME = 'notifications'
 api_url = os.getenv('AKASH_API_URL')
 
 if not api_url:
-    raise EnvironmentError('The environment variable COSMOS_API_URL is not set.')
+    raise EnvironmentError('The environment variable AKASH_API_URL is not set.')
 
 
 
@@ -20,26 +20,30 @@ def get_lease_shut_down_events(current_open_leases):
     events = []
 
     # Fetch the previously open leases from MongoDB
-    prev_open_leases = airplane.mongodb.find(MONGODB_RESOURCE, OPEN_LEASE_COLLECTION_NAME)
+    db_data = airplane.mongodb.find(MONGODB_RESOURCE, OPEN_LEASE_COLLECTION_NAME, filter={"state": "open"})
+    prev_open_leases = db_data.output
 
-    # Clear the previous open leases from the MongoDB collection
-    airplane.mongodb.delete_many(MONGODB_RESOURCE, OPEN_LEASE_COLLECTION_NAME, filter={})
+    closed_leases = []
 
     # Compare the current open leases with the previous ones to determine if any have been closed
-    for item in prev_open_leases.output:
+    for item in prev_open_leases:
         if item not in current_open_leases:
             # If a lease has been shut down, mark its state as "closed" and record the event
-            item['state'] = "closed"
+            closed_leases.append(item['lease_id'])
             events.append({
                             "read" : False,
-                            "address" : item['lease_id'].split('/')[0],
-                            "lease" : item['lease_id'].split('/')[1],
-                            "notification": f"Lease shut down for {item['lease_id']}. Relaunch as soon as possible to limit downtime.",
+                            "address" : prev_open_leases[i]['lease_id'].split('/')[0],
+                            "lease" : prev_open_leases[i]['lease_id'].split('/')[1],
+                            "notification": f"Lease shut down for {prev_open_leases[i]['lease_id']}. Relaunch as soon as possible to limit downtime.",
                         })
+    
 
-    # Insert the current open leases into MongoDB for future reference
-    airplane.mongodb.insert_many(MONGODB_RESOURCE, OPEN_LEASE_COLLECTION_NAME, current_open_leases)
-
+    # Update the leases that are closed now
+    airplane.mongodb.update_many(MONGODB_RESOURCE, OPEN_LEASE_COLLECTION_NAME,
+                                 update={'$set': {'state': 'closed'}},
+                                 filter={'lease_id': {'$in': closed_leases}}
+                                )
+    
     return events
 
 def get_lease_low_balance_events(deployments):
@@ -146,6 +150,7 @@ def akash_notification_logger():
     
     # Fetch Events to notfiy
     events = get_events()
+
     
     # Insert the events into the MongoDB notifications collection
     airplane.mongodb.insert_many(MONGODB_RESOURCE, NOTIFICATIONS_COLLECTION_NAME, events)
