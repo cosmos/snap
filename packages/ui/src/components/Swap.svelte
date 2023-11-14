@@ -8,6 +8,7 @@
 	import TruncateString from "./TruncateString.svelte";
 	import type { SkipMsgs } from "../utils/skip";
 	import type { RouteData } from "@0xsquid/sdk";
+	import { state } from "../store/state";
 
     let sourceChain :RouteChain;
     let destinationChain :RouteChain;
@@ -81,19 +82,27 @@
     }
 
     const getRoute = async () => {
-        const fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
-        const toChain = $chains.find(chain => chain.chain_id === destinationChain.chain_id);
-        if (fromChain === undefined || fromChain.address === undefined) {
-            console.log(fromChain);
-            throw new Error("Invalid source chain or source chain address.");
+        try {
+            const fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
+            const toChain = $chains.find(chain => chain.chain_id === destinationChain.chain_id);
+            if (fromChain === undefined || fromChain.address === undefined) {
+                console.log(fromChain);
+                throw new Error("Invalid source chain or source chain address.");
+            }
+            if (toChain === undefined || toChain.address === undefined) {
+                console.log(toChain);
+                throw new Error("Invalid destination chain or destination chain address.");
+            }
+            const res = await router.route(sourceChain, destinationChain, sourceCoin, destinationCoin, amount.toString(), toChain?.address, fromChain?.address, slippage, $chains);
+            
+            return res;
+        } catch (e: any) {
+            console.error(e);
+            $state.alertText = e.message;
+            $state.alertType = "danger";
+            $state.showAlert = true;
+            throw e;
         }
-        if (toChain === undefined || toChain.address === undefined) {
-            console.log(toChain);
-            throw new Error("Invalid destination chain or destination chain address.");
-        }
-        const res = await router.route(sourceChain, destinationChain, sourceCoin, destinationCoin, amount.toString(), toChain?.address, fromChain?.address, slippage, $chains);
-        
-        return res;
     };
 
     const updateRouteState = (multiRoute: SkipMsgs | RouteData) => {
@@ -112,13 +121,20 @@
     }
 
     const executeRoute = async () => {
-        const fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
-        if (fromChain === undefined || fromChain.address === undefined) {
-            console.log(fromChain);
-            throw new Error("Invalid source chain or source chain address.");
+        try {
+            const fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
+            if (fromChain === undefined || fromChain.address === undefined) {
+                console.log(fromChain);
+                throw new Error("Invalid source chain or source chain address.");
+            }
+            const res = await router.execute(sourceChain, destinationChain, route, fromChain?.address, fromChain);
+            console.log(res);
+        } catch (e: any) {
+            console.error(e);
+            $state.alertText = e.message;
+            $state.alertType = "danger";
+            $state.showAlert = true;
         }
-        const res = await router.execute(sourceChain, destinationChain, route, fromChain?.address, fromChain);
-        console.log(res);
     }
 
     const update = async () => {
@@ -323,7 +339,7 @@
                 </div>
             </div>
         </div>
-        <button on:click={getRoute} class="cursor-pointer h-[45px] mt-[20px] w-full flex items-center justify-center bg-[#594bff] rounded-lg overflow-hidden">
+        <button on:click={executeRoute} class="cursor-pointer h-[45px] mt-[20px] w-full flex items-center justify-center bg-[#594bff] rounded-lg overflow-hidden">
             <div class="font-medium text-white text-sm tracking-tight leading-normal">
                 Swap
             </div>

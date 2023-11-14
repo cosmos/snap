@@ -1,7 +1,6 @@
-import { SigningStargateClient, defaultRegistryTypes } from '@cosmjs/stargate';
-import { wasmTypes } from '@cosmjs/cosmwasm-stargate';
+import { SigningStargateClient, defaultRegistryTypes, createDefaultAminoConverters, AminoTypes, GasPrice } from '@cosmjs/stargate';
+import { wasmTypes, createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { Registry } from '@cosmjs/proto-signing';
-import { Decimal } from '@cosmjs/math'
 import type { Chain } from '@cosmsnap/snapper';
 import _ from 'lodash';
 import rpcs from '../apis.json';
@@ -33,8 +32,8 @@ export const getClient = async (chain: Chain) => {
           { url: chainRpc.rpc, headers: { "x-apikey": `${keyRhino}` } },
           signer,
           {
-            gasPrice: { amount: Decimal.fromUserInput(chain.fees.fee_tokens[0].average_gas_price.toString(), 10), denom: chain.fees.fee_tokens[0].denom },
             registry: new Registry([...defaultRegistryTypes, ...wasmTypes]),
+            aminoTypes: new AminoTypes({...createDefaultAminoConverters(), ...createWasmAminoConverters()})
           }
       );
       return signingClient
@@ -44,8 +43,8 @@ export const getClient = async (chain: Chain) => {
         { url: chainRpc.rpc, headers: { "Authorization": `Bearer ${keyNumia}` } },
         signer,
         {
-          gasPrice: { amount: Decimal.fromUserInput(chain.fees.fee_tokens[0].average_gas_price.toString(), 10), denom: chain.fees.fee_tokens[0].denom },
           registry: new Registry([...defaultRegistryTypes, ...wasmTypes]),
+          aminoTypes: new AminoTypes({...createDefaultAminoConverters(), ...createWasmAminoConverters()})
         }
       );
       return signingClient
@@ -56,8 +55,8 @@ export const getClient = async (chain: Chain) => {
       chain.apis.rpc[0].address,
       signer,
       {
-        gasPrice: { amount: Decimal.fromUserInput(chain.fees.fee_tokens[0].average_gas_price.toString(), 10), denom: chain.fees.fee_tokens[0].denom },
         registry: new Registry([...defaultRegistryTypes, ...wasmTypes]),
+        aminoTypes: new AminoTypes({...createDefaultAminoConverters(), ...createWasmAminoConverters()})
       }
   );
 

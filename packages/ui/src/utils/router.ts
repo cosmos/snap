@@ -2,9 +2,11 @@ import { ethers } from 'ethers';
 import { Squid, type ChainData, type TokenData, type RouteData } from "@0xsquid/sdk";
 import { getMsgs, type SkipChain, type SkipToken, type SkipMsgs, type Fee } from './skip';
 import rpcs from '../apis.json';
-import type { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate';
+import { GasPrice, type DeliverTxResponse, type SigningStargateClient, coins } from '@cosmjs/stargate';
+import { toUtf8 } from '@cosmjs/encoding';
+import type { EncodeObject } from '@cosmjs/proto-signing';
 import { getClient } from './tx';
-import type { Chain, Msg } from '@cosmsnap/snapper';
+import type { Chain } from '@cosmsnap/snapper';
 import _ from 'lodash';
 
 export interface RouteChain {
@@ -18,7 +20,7 @@ export interface RouteChain {
 export interface RouteToken {
     denom: string;
     chain_id: string;
-    ibc_denom?: string;
+    ibc_denom: string;
     origin_chain_id?: string;
     display: string;
     logo_uri: string;
@@ -145,7 +147,7 @@ export class Router {
                 return {
                     denom: token.address,
                     chain_id: token.chainId.toString(),
-                    ibc_denom: token.ibcDenom,
+                    ibc_denom: token.ibcDenom ?? token.address,
                     origin_chain_id: "",
                     display: token.symbol,
                     logo_uri: token.logoURI,
@@ -178,10 +180,10 @@ export class Router {
         if (fromChain.chain_type === "cosmos" && toChain.chain_type === "cosmos") {
             return await this.skipRoute(
                 fromChain,
-                fromToken.denom,
+                fromToken.ibc_denom,
                 amount,
                 toChain,
-                toToken.denom,
+                toToken.ibc_denom,
                 toAddress,
                 slippage,
                 chains,
@@ -190,11 +192,11 @@ export class Router {
 
         return await this.squidRoute(
             fromChain.chain_id,
-            fromToken.denom,
+            fromToken.ibc_denom,
             amount,
             fromAddress,
             toChain.chain_id,
-            toToken.denom,
+            toToken.ibc_denom,
             toAddress,
             slippage
         )
@@ -303,7 +305,10 @@ export class Router {
         ]
 
         const msg = await getMsgs(fromChain.chain_id, fromToken, toChain.chain_id, toToken, adjustedAmount, slippage.toString(), chains, toAddress, fees);
-        if (!Array.isArray(msg.msgs)) {
+        if (!('msgs' in msg)) {
+            if ('message' in msg) {
+                throw new Error(msg.message)
+            }
             throw new Error("Invalid message data.");
         }
 
@@ -311,25 +316,41 @@ export class Router {
     }
 
     private async skipExecute(msg: SkipMsgs, fromAddress: string, chain: Chain) {
-        const messages: Msg[] = msg.msgs.map(item => {
+        const messages: EncodeObject[] = msg.msgs.map(item => {
             if (!item.msg || !item.msg_type_url) {
                 throw new Error("Invalid message format.");
             }
 
-            const msgCamel = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
+            let value = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
+            
+            // If cosmwasm turn the json into bytes
+            if (item.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
+                value.msg = toUtf8(JSON.stringify(value.msg))
+            }
 
             console.log({
-                value: JSON.parse(JSON.stringify(msgCamel)),
+                value: value,
                 typeUrl: item.msg_type_url
             });
 
             return {
-                value: JSON.parse(JSON.stringify(msgCamel)),
+                value: value,
                 typeUrl: item.msg_type_url
             };
         });
         const client = await getClient(chain);
-        const tx = await client.signAndBroadcast(fromAddress, messages, 'auto');
+
+        // Simulate the transaction
+        const gasEstimation = await client.simulate(fromAddress, messages, "");
+        console.log(_.round(gasEstimation*1.4, 0).toString());
+
+        // Calculate the fee using 1.4 multiplier to be safe
+        const fee = {
+            amount: coins((_.round(gasEstimation*1.4, 0)).toString(), chain.fees.fee_tokens[0].denom),
+            gas: (_.round(gasEstimation*1.4, 0)).toString(),
+        };
+
+        const tx = await client.signAndBroadcast(fromAddress, messages, fee);
         console.log(tx);
 
         return tx

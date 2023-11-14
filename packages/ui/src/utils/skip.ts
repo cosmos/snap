@@ -95,6 +95,12 @@ interface SwapOperation {
   denom_out: string;
 }
 
+interface SkipError {
+  code: number;
+  message: string;
+  details: [];
+}
+
 interface RecommendationsResponse {
   recommendations: Recommendation[]; 
 }
@@ -240,7 +246,7 @@ export const getMsgs = async (
   chains: Chain[],
   toAddress: string,
   fees: Fee[] | undefined = undefined,
-): Promise<SkipMsgs> => {
+): Promise<SkipMsgs | SkipError> => {
 
   const url = 'https://api.skip.money/v1/fungible/msgs_direct';
 
