@@ -21,21 +21,26 @@ def get_lease_shut_down_events(current_open_leases):
 
     # Fetch the previously open leases from MongoDB
     db_data = airplane.mongodb.find(MONGODB_RESOURCE, OPEN_LEASE_COLLECTION_NAME, filter={"state": "open"})
-    prev_open_leases = db_data.output
+    old_leases = db_data.output
 
-    closed_leases = []
+    closed_leases = [] # stores leases that were logged before and are now closed
+    prev_open_leases = [] # stores leases that were logged before and are still open
+
 
     # Compare the current open leases with the previous ones to determine if any have been closed
-    for item in prev_open_leases:
-        if item not in current_open_leases:
+    for lease in old_leases:
+        if lease not in current_open_leases:
             # If a lease has been shut down, mark its state as "closed" and record the event
-            closed_leases.append(item['lease_id'])
+            closed_leases.append(lease['lease_id'])
             events.append({
                             "read" : False,
-                            "address" : prev_open_leases[i]['lease_id'].split('/')[0],
-                            "lease" : prev_open_leases[i]['lease_id'].split('/')[1],
-                            "notification": f"Lease shut down for {prev_open_leases[i]['lease_id']}. Relaunch as soon as possible to limit downtime.",
+                            "address" : lease['lease_id'].split('/')[0],
+                            "lease" : lease['lease_id'].split('/')[1],
+                            "notification": f"Lease shut down for {lease['lease_id']}. Relaunch as soon as possible to limit downtime.",
                         })
+        else:
+            # record previously logged leases
+            prev_open_leases.append(lease)
     
 
     # Update the leases that are closed now
@@ -43,7 +48,12 @@ def get_lease_shut_down_events(current_open_leases):
                                  update={'$set': {'state': 'closed'}},
                                  filter={'lease_id': {'$in': closed_leases}}
                                 )
+    # Get New Leases
+    new_leases = [lease for lease in current_open_leases if lease not in prev_open_leases]
     
+    # Insert New leases
+    airplane.mongodb.insert_many(MONGODB_RESOURCE, OPEN_LEASE_COLLECTION_NAME, new_leases)
+
     return events
 
 def get_lease_low_balance_events(deployments):
@@ -72,60 +82,65 @@ def get_lease_low_balance_events(deployments):
 
 
 def get_events():
-    # Initialize lists to store notifications
-    events_to_notify = []
-    current_open_leases = []
 
-    # Pagination variables for the API request
-    current_offset = 0
-    page_limit = 1000
+    try:
+        # Initialize lists to store notifications
+        events_to_notify = []
+        current_open_leases = []
 
-    # fetch all open akash leases
-    while True:
+        # Pagination variables for the API request
+        current_offset = 0
+        page_limit = 1000
 
-        # Set parameters for the only open leases
-        params = {
-            "filters.state": "active",
-            "pagination.limit": page_limit,
-            "pagination.count_total": True,
-            "pagination.offset": current_offset
-        }
+        # fetch all open akash leases
+        while True:
 
-        # get current set of open leases
-        response = requests.get(api_url, params=params)
+            # Set parameters for the only open leases
+            params = {
+                "filters.state": "active",
+                "pagination.limit": page_limit,
+                "pagination.count_total": True,
+                "pagination.offset": current_offset
+            }
 
-        # check if API call was successful
-        if response.status_code == 200:
+            # get current set of open leases
+            response = requests.get(api_url, params=params)
+
+            # check if API call was successful
+            if response.status_code == 200:
+
+                # Parse the response data
+                data = response.json()
+
+                '''
+                Retrieve and log low balance leases, maintain a record of
+                current open leases from current page of deploymenst
+                '''
+                events, open_leases = get_lease_low_balance_events(data['deployments'])
+
+                # Accumulate events and open leases
+                events_to_notify += events
+                current_open_leases += open_leases
+
+                #update pagination info
+                pagination_total = data['pagination']['total']
+                current_offset += page_limit
+
+                # Break the loop if we have reached the last page
+                if current_offset >= int(pagination_total):
+                    break
             
-            # Parse the response data
-            data = response.json()
+            else:
+                raise Exception(f"API call to cosmos failed with status code: {response.status_code}")
 
-            '''
-            Retrieve and log low balance leases, maintain a record of
-            current open leases from current page of deploymenst
-            '''
-            events, open_leases = get_lease_low_balance_events(data['deployments'])
 
-            # Accumulate events and open leases
-            events_to_notify += events
-            current_open_leases += open_leases
-
-            #update pagination info
-            pagination_total = data['pagination']['total']
-            current_offset += page_limit
-
-            # Break the loop if we have reached the last page
-            if current_offset >= int(pagination_total):
-                break
+        # Get the lease shutdown events and add them to the notification list
+        events_to_notify += get_lease_shut_down_events(current_open_leases)
         
-        else:
-            print(f"API call to cosmos failed with status code: {response.status_code}")
-            break
-
-    # Get the lease shutdown events and add them to the notification list
-    events_to_notify += get_lease_shut_down_events(current_open_leases)
+        return events_to_notify
     
-    return events_to_notify
+    except Exception as e:
+        print(f"An Error occurred : {str(e)}")
 
 
 # Define Airplane Tasks
@@ -147,13 +162,11 @@ def get_events():
     ]
 )
 def akash_notification_logger():
-    
-    # Fetch Events to notfiy
+
+    # Fetch Events to notify
     events = get_events()
 
-    
     # Insert the events into the MongoDB notifications collection
     airplane.mongodb.insert_many(MONGODB_RESOURCE, NOTIFICATIONS_COLLECTION_NAME, events)
 
     return "notifications uploaded to database successfully!"
-
