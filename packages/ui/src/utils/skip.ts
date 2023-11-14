@@ -117,8 +117,14 @@ export interface SkipMsg {
   msg_type_url: string;
 }
 
+export interface Fee {
+  basis_points_fee: string;
+  address: string;
+}
+
 export interface SkipMsgs {
-  msgs: SkipMsg[]; 
+  msgs: SkipMsg[];
+  route: Route;
 }
 
 export interface CoinIBC extends Coin {
@@ -232,7 +238,8 @@ export const getMsgs = async (
   amount: string,
   slippageTolerance: string,
   chains: Chain[],
-  toAddress: string
+  toAddress: string,
+  fees: Fee[] | undefined = undefined,
 ): Promise<SkipMsgs> => {
 
   const url = 'https://api.skip.money/v1/fungible/msgs_direct';
@@ -255,7 +262,8 @@ export const getMsgs = async (
     dest_asset_chain_id: destChainId,
     source_asset_chain_id: sourceChainId,
     amount_in: amount,
-    slippage_tolerance_percent: slippageTolerance
+    slippage_tolerance_percent: slippageTolerance,
+    affiliates: fees
   };
 
   const res = await fetch(url, {

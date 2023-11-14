@@ -222,7 +222,7 @@
       <div class="percent inter-medium-white-14px">
           Destination Chain
       </div>
-      <div class="hover:z-[500]">
+      <div class="">
           <Info/>
       </div>
     </div>

@@ -1,14 +1,17 @@
 import { ethers } from 'ethers';
-import { Squid, type ChainData, type TokenData } from "@0xsquid/sdk";
-import type { SkipChain, SkipToken } from './skip';
+import { Squid, type ChainData, type TokenData, type RouteData } from "@0xsquid/sdk";
+import { getMsgs, type SkipChain, type SkipToken, type SkipMsgs, type Fee } from './skip';
 import rpcs from '../apis.json';
-import { chain } from 'lodash';
+import type { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate';
+import { getClient } from './tx';
+import type { Chain, Msg } from '@cosmsnap/snapper';
+import _ from 'lodash';
 
 export interface RouteChain {
     chain_name: string;
     chain_id: string;
     logo_uri: string;
-    chain_type: string;
+    chain_type: "cosmos" | "evm";
     rpc: string | undefined;
 }
 
@@ -23,12 +26,42 @@ export interface RouteToken {
 }
 
 export class Router {
-    private signer!: ethers.Signer;
     private squid!: Squid;
   
     constructor() {
-      if (window.ethereum) {
-        (async () => {
+        /////// Squid ////////
+        this.squid = new Squid({
+            baseUrl: "https://api.0xsquid.com"
+        });
+    }
+
+    private async initSquid() {
+        if (!this.squid.initialized) {
+            await this.squid.init();
+        }
+    }
+
+    private async getSigner(type: "cosmos" | "evm", chain: Chain | undefined = undefined) {
+        if (type === "evm") {
+            return await this.getEVMSigner();
+        } else {
+            if (chain === undefined) {
+                throw new Error("Chain ID required for Cosmos signer.");
+            }
+            return await this.getCosmosSigner(chain);
+        }
+    }
+
+    private async getCosmosSigner(chain: Chain): Promise<SigningStargateClient> {
+        if (window.cosmos) {
+            return await getClient(chain)
+        } else {
+            throw new Error('Cosmos signer not found.');
+        }
+    }
+
+    private async getEVMSigner(): Promise<ethers.providers.JsonRpcSigner> {
+        if (window.ethereum) {
             // This will prompt the user to connect their MetaMask wallet
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             
@@ -36,35 +69,32 @@ export class Router {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             
             // We can now get the signer from the MetaMask connected provider
-            this.signer = provider.getSigner();
-
-            /////// Squid ////////
-            this.squid = new Squid({
-                baseUrl: "https://api.0xsquid.com"
-            });
+            const signer = provider.getSigner();
 
             await this.squid.init();
-        })();
-      } else {
-        throw new Error('MetaMask is not installed and no Infura ID provided.');
-      }
+
+            return signer
+        } else {
+            throw new Error('Metamask signer not found.');
+        }
     }
 
     public async getChains(): Promise<RouteChain[]> {
+        await this.initSquid();
         const res = await fetch("https://api.skip.money/v1/info/chains?include_evm=false");
         const skipChainsRaw = await res.json();
         const skipChains: SkipChain[] = skipChainsRaw["chains"];
         const squidChains = this.squid.chains;
-        return [
+        const chains = [
             ...skipChains.map((chain: SkipChain) => {
                 return {
                     chain_name: chain.chain_name.charAt(0).toUpperCase() + chain.chain_name.slice(1),
                     chain_id: chain.chain_id,
                     logo_uri: chain.logo_uri,
-                    chain_type: chain.chain_type,
+                    chain_type: chain.chain_type as "cosmos" | "evm",
                     rpc: rpcs.apis.find(item => item.chain_id == chain.chain_id)?.rpc
                 };
-            }), 
+            }),
             ...squidChains.map((chain: ChainData) => {
                 return {
                     chain_name: chain.chainName.charAt(0).toUpperCase() + chain.chainName.slice(1),
@@ -75,9 +105,11 @@ export class Router {
                 };
             })
         ].sort((chain) => chain.chain_type === "cosmos" ? 1 : -1).filter((chain) => chain.rpc !== undefined);
+        return _.uniqBy(chains, 'chain_id');
     }
 
     public async getTokens(chain_id: string): Promise<RouteToken[]> {
+        await this.initSquid();
         const res = await fetch("https://api.skip.money/v1/fungible/assets?native_only=false&include_no_metadata_assets=false&include_cw20_assets=false&include_evm_assets=false");
         const skipTokensRaw = await res.json();
         const skipTokens = Object.values(skipTokensRaw.chain_to_assets_map)
@@ -97,7 +129,7 @@ export class Router {
             decimals: asset.decimals,
         }));
         const squidTokens = this.squid.tokens;
-        return [
+        let tokens = [
             ...skipTokens.map((token: SkipToken) => {
                 return {
                     denom: token.origin_denom,
@@ -108,7 +140,7 @@ export class Router {
                     logo_uri: token.logo_uri,
                     decimals: token.decimals
                 };
-            }), 
+            }),
             ...squidTokens.map((token: TokenData) => {
                 return {
                     denom: token.address,
@@ -121,17 +153,185 @@ export class Router {
                 };
             })
         ].filter(chain => chain.chain_id === chain_id);
+        return _.uniqBy(_.uniqBy(tokens, 'denom'), "ibc_denom");
     }
 
-    public async route() {
+    public async execute(fromChain: RouteChain, toChain: RouteChain, route: SkipMsgs | RouteData, fromAddress: string, chain: Chain) {
+        if (fromChain.chain_type === "cosmos" && toChain.chain_type === "cosmos") {
+            return await this.skipExecute(
+                route as SkipMsgs,
+                fromAddress,
+                chain
+            );
+        }
+
+        return await this.squidExecute(
+            route as RouteData,
+            fromChain.chain_type,
+            fromChain.chain_id,
+            toChain.chain_id
+        )
+    }
+
+    public async route(fromChain: RouteChain, toChain: RouteChain, fromToken: RouteToken, toToken: RouteToken, amount: string, toAddress: string, fromAddress: string, slippage: number = 1.00, chains: Chain[]) {
         // Simple logic. If the swap is Cosmos -> Cosmos we use Skip. Any EVM involvement we use Squid.
+        if (fromChain.chain_type === "cosmos" && toChain.chain_type === "cosmos") {
+            return await this.skipRoute(
+                fromChain,
+                fromToken.denom,
+                amount,
+                toChain,
+                toToken.denom,
+                toAddress,
+                slippage,
+                chains,
+            );
+        }
+
+        return await this.squidRoute(
+            fromChain.chain_id,
+            fromToken.denom,
+            amount,
+            fromAddress,
+            toChain.chain_id,
+            toToken.denom,
+            toAddress,
+            slippage
+        )
     }
 
-    private async squidRoute() {
+    private async squidRoute(
+        fromChain: string | number, 
+        fromToken: string, 
+        fromAmount: string, 
+        fromAddress: string, 
+        toChain: string | number, 
+        toToken: string,
+        toAddress: string,
+        slippage: number
+    ) {
+        const params = {
+            fromChain,
+            fromToken,
+            fromAmount,
+            toChain,
+            toToken,
+            fromAddress,
+            toAddress,
+            slippage,
+            enableForecall: true,
+            quoteOnly: false,
+            collectFees: { 
+                integratorAddress: "0xb1f26cf439308842A0a266F2a5756ab71Cf971A2", 
+                fee: 85
+            }
+        };
 
+        console.log("params: \n", params);
+
+        const { route } = await this.squid.getRoute(params);
+        if (route.transactionRequest === undefined) {
+            throw new Error("No route found");
+        }
+        
+        return route;
     }
 
-    private async skipRoute() {
+    private async squidExecute(
+        route: RouteData,
+        type: "cosmos" | "evm",
+        fromChain: string | number, 
+        toChain: string | number, 
+    ) {
+        const signer = await this.getSigner(type);
 
+        const tx = await this.squid.executeRoute({ signer, route });
+        console.log("tx: ", tx);
+
+        if ('wait' in tx) {
+            const txReceipt = await tx.wait();
+            console.log("txReciept: ", txReceipt);
+    
+            const getStatusParams = {
+                transactionId: txReceipt.transactionHash,
+                routeType: route.transactionRequest?.routeType
+            };
+    
+            const status = await this.squid.getStatus(getStatusParams);
+            console.log(status);
+
+            return status;
+        }
+        // Its a Cosmos -> EVM route if we get here
+        const cosmosTx = (await this.squid.executeRoute({
+            signer,
+            route,
+        })) as unknown as DeliverTxResponse;
+    
+        const txHash = cosmosTx.transactionHash;
+    
+        const status = await this.squid.getStatus({
+            transactionId: txHash,
+            fromChainId: fromChain,
+            toChainId: toChain,
+        });
+    
+        console.log(status);
+        return status;
+    }
+
+    private async skipRoute(
+        fromChain: RouteChain, 
+        fromToken: string, 
+        fromAmount: string, 
+        toChain: RouteChain, 
+        toToken: string,
+        toAddress: string,
+        slippage: number,
+        chains: Chain[],
+    ) {
+        const adjustedAmount = (Number(fromAmount) * 1000000).toString();
+        const fees: Fee[] = [
+            {
+                basis_points_fee: "5695",
+                address: "osmo1636lu4j34nk4quf9kpy2gxrjsxpxl92acxexa2"
+            },
+            {
+                basis_points_fee: "2805",
+                address: "osmo1gpdnc4gggc9c7t5fltrwsufck9ufgx6gv8dsfw"
+            }
+        ]
+
+        const msg = await getMsgs(fromChain.chain_id, fromToken, toChain.chain_id, toToken, adjustedAmount, slippage.toString(), chains, toAddress, fees);
+        if (!Array.isArray(msg.msgs)) {
+            throw new Error("Invalid message data.");
+        }
+
+        return msg;
+    }
+
+    private async skipExecute(msg: SkipMsgs, fromAddress: string, chain: Chain) {
+        const messages: Msg[] = msg.msgs.map(item => {
+            if (!item.msg || !item.msg_type_url) {
+                throw new Error("Invalid message format.");
+            }
+
+            const msgCamel = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
+
+            console.log({
+                value: JSON.parse(JSON.stringify(msgCamel)),
+                typeUrl: item.msg_type_url
+            });
+
+            return {
+                value: JSON.parse(JSON.stringify(msgCamel)),
+                typeUrl: item.msg_type_url
+            };
+        });
+        const client = await getClient(chain);
+        const tx = await client.signAndBroadcast(fromAddress, messages, 'auto');
+        console.log(tx);
+
+        return tx
     }
 }
