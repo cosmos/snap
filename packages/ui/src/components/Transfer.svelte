@@ -146,20 +146,20 @@
           const adjustedAmount = (amount * 1000000).toString();
 
           const msg = await getMsgs(source, selected.denom, destination, firstRec.denom, adjustedAmount, slippage, $chains, recipient);
-          if (!Array.isArray(msg.msgs)) {
-              throw new Error("Invalid message data.");
+          if (!('msgs' in msg)) {
+              throw new Error("No routes found.");
           }
 
           const messages: Msg[] = msg.msgs.map(item => {
-              if (!item.msg || !item.msg_type_url) {
+              if (!item.multi_chain_msg.msg || !item.multi_chain_msg.msg_type_url) {
                   throw new Error("Invalid message format.");
               }
 
-              const msgCamel = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
+              const msgCamel = _.mapKeys(JSON.parse(item.multi_chain_msg.msg), (value: any, key: any) => _.camelCase(key));
 
               return {
                   value: JSON.parse(JSON.stringify(msgCamel)),
-                  typeUrl: item.msg_type_url
+                  typeUrl: item.multi_chain_msg.msg_type_url
               };
           });
           const tx = await client.signAndBroadcast(fromAddress, messages, fees);
@@ -206,7 +206,7 @@
           Source Chain
       </div>
     </div>
-    <ChainSelector onChange={() => sourceChainChange = true} bind:selectedChain={source}/>
+    <Select on:change={() => sourceChainChange = true} text="Select Chain" items={$chains} bind:selectedItem={source} showKey="pretty_name" imageKey="logo_URIs" nestedImageKey="png"/>
     <div style="width: 100%;">
         <div class="percent inter-medium-white-14px">
             Asset

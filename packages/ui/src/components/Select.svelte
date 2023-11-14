@@ -12,6 +12,7 @@
   export let text = "Select Asset";
   export let showKey = "display";
   export let imageKey: string | undefined = undefined;
+  export let nestedImageKey: string | undefined = undefined;
 
   // Filter items based on search query
   $: filteredItems = items.filter(item =>
@@ -89,7 +90,11 @@
           <!-- svelte-ignore a11y-invalid-attribute -->
           <a href="#" class="flex items-center px-4 py-2 hover:bg-[#ffffff17] hover:rounded-[10px] h-[40px]" on:click={() => selectItem(item)}>
             {#if imageKey}
-              <img src={item[imageKey]} class="w-5 h-5 rounded-full mr-2" alt={item[showKey]} />
+              {#if nestedImageKey}
+                <img src={item[imageKey][nestedImageKey]} class="w-5 h-5 rounded-full mr-2" alt={item[showKey]} />
+              {:else}
+                <img src={item[imageKey]} class="w-5 h-5 rounded-full mr-2" alt={item[showKey]} />
+              {/if}
             {/if}
             {item[showKey]}
           </a>
