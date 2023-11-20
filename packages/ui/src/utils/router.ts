@@ -92,7 +92,7 @@ export class Router {
                 return {
                     chain_name: chain.chain_name.charAt(0).toUpperCase() + chain.chain_name.slice(1),
                     chain_id: chain.chain_id,
-                    logo_uri: chain.logo_URIs!.png ?? "/cosmos-atom-logo.png",
+                    logo_uri: 'logo_URIs' in chain ? chain.logo_URIs!.png : "/cosmos-atom-logo.png",
                     chain_type: "cosmos",
                     rpc: rpcs.apis.find(item => item.chain_id == chain.chain_id)?.rpc
                 };
