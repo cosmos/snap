@@ -209,4 +209,9 @@ export class CosmosSnap implements SnapProvider {
             return signer
         }
     }
+    getOfflineSignerOnlyAmino(chainId): OfflineAminoSigner {
+        let signer = new CosmJSOfflineSigner(chainId, this.snap_id);
+        signer.signDirect = undefined;
+        return signer
+    }
 }
