@@ -27,6 +27,9 @@
 
   onMount(() => {
     window.addEventListener('resize', checkDropdownDirection);
+    if (!selectedItem) {
+      selectedItem = items[0];
+    }
   });
 
   afterUpdate(() => {
@@ -71,7 +74,18 @@
           checkDropdownDirection();
         }}
       >
-        {selectedItem[showKey] || `${text}`}
+        {#if imageKey && selectedItem}
+          {#if nestedImageKey}
+            <img src={selectedItem[imageKey][nestedImageKey]} class="w-5 h-5 rounded-full mr-2" alt={selectedItem[showKey]} />
+          {:else}
+            <img src={selectedItem[imageKey]} class="w-5 h-5 rounded-full mr-2" alt={selectedItem[showKey]} />
+          {/if}
+        {/if} 
+        {#if selectedItem}
+          {selectedItem[showKey] || `${text}`}
+        {:else}
+          {text}
+        {/if}
       </button>
     {/if}
   </div>

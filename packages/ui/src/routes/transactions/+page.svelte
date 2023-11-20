@@ -70,7 +70,8 @@
       'text-align': 'center',
       'font-family': 'var(--font-family-inter)',
       'border': 'none',
-      'vertical-align': 'middle'
+      'vertical-align': 'middle',
+      'overflow': 'hidden'
     },
     tr: {
       'background-color': 'transparent',

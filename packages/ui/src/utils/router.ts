@@ -74,22 +74,31 @@ export class Router {
             // We can now get the signer from the MetaMask connected provider
             const signer = provider.getSigner();
 
-            await this.squid.init();
-
             return signer
         } else {
             throw new Error('Metamask signer not found.');
         }
     }
 
-    public async getChains(): Promise<RouteChain[]> {
+    public async getChains(cosmosChains: Chain[]): Promise<RouteChain[]> {
         await this.initSquid();
         const res = await fetch("https://api.skip.money/v1/info/chains?include_evm=false");
         const skipChainsRaw = await res.json();
         const skipChains: SkipChain[] = skipChainsRaw["chains"];
         const squidChains = this.squid.chains;
-        const chains = [
-            ...skipChains.map((chain: SkipChain) => {
+        let cosmChains: RouteChain[] = [];
+        if (cosmosChains.length > 0) {
+            cosmChains = cosmosChains.map((chain: Chain) => {
+                return {
+                    chain_name: chain.chain_name.charAt(0).toUpperCase() + chain.chain_name.slice(1),
+                    chain_id: chain.chain_id,
+                    logo_uri: chain.logo_URIs!.png ?? chain.logo_URIs!.svg,
+                    chain_type: "cosmos",
+                    rpc: rpcs.apis.find(item => item.chain_id == chain.chain_id)?.rpc
+                };
+            })
+        } else {
+        cosmChains = skipChains.map((chain: SkipChain) => {
                 return {
                     chain_name: chain.chain_name.charAt(0).toUpperCase() + chain.chain_name.slice(1),
                     chain_id: chain.chain_id,
@@ -97,7 +106,10 @@ export class Router {
                     chain_type: chain.chain_type as "cosmos" | "evm",
                     rpc: rpcs.apis.find(item => item.chain_id == chain.chain_id)?.rpc
                 };
-            }),
+            })
+        }
+        const chains = [
+            ...cosmChains,
             ...squidChains.map((chain: ChainData) => {
                 return {
                     chain_name: chain.chainName.charAt(0).toUpperCase() + chain.chainName.slice(1),
@@ -106,9 +118,9 @@ export class Router {
                     chain_type: chain.chainType,
                     rpc: chain.rpc
                 };
-            })
+            }).filter(chain => chain.chain_type === "evm")
         ].sort((chain) => chain.chain_type === "cosmos" ? 1 : -1).filter((chain) => chain.rpc !== undefined);
-        return _.uniqBy(chains, 'chain_id');
+        return chains
     }
 
     public async getEVMAddress() {
@@ -211,6 +223,7 @@ export class Router {
     }
 
     public async getEvmBalance(chain_id: string, denom: string): Promise<TokenBalance | undefined> {
+        await this.initSquid();
         const signer = await this.getEVMSigner();
         const address = await signer.getAddress();
         const chains = [
@@ -308,15 +321,8 @@ export class Router {
         if (type === "evm") {
             const tx = await this.squid.executeRoute({ signer, route }) as ethers.providers.TransactionResponse;
             const txReceipt = await tx.wait();
-    
-            const getStatusParams = {
-                transactionId: txReceipt.transactionHash,
-                routeType: route.transactionRequest?.routeType
-            };
-    
-            const status = await this.squid.getStatus(getStatusParams);
 
-            return status;
+            return txReceipt;
         }
         // Its a Cosmos -> EVM route if we get here
         const tx = await this.squid.executeRoute({
@@ -376,11 +382,6 @@ export class Router {
                 value.msg = toUtf8(JSON.stringify(value.msg))
             }
 
-            console.log({
-                value: value,
-                typeUrl: item.multi_chain_msg.msg_type_url
-            });
-
             return {
                 value: value,
                 typeUrl: item.multi_chain_msg.msg_type_url
@@ -390,7 +391,6 @@ export class Router {
 
         // Simulate the transaction
         const gasEstimation = await client.simulate(fromAddress, messages, "");
-        console.log(_.round(gasEstimation*1.4, 0).toString());
 
         // Calculate the fee using 1.4 multiplier to be safe
         const fee = {
@@ -399,7 +399,6 @@ export class Router {
         };
 
         const tx = await client.signAndBroadcast(fromAddress, messages, fee);
-        console.log(tx);
 
         return tx
     }

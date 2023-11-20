@@ -213,7 +213,7 @@ export const getSkipRecommendation = async (
 
     try {
 
-        const url = 'https://api.skip.money/v2/fungible/recommend_assets';
+        const url = 'https://api.skip.money/v1/fungible/recommend_assets';
 
         const data = {
             source_asset_denom, 

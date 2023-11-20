@@ -24,7 +24,6 @@ export const isMetaMaskInstalled = (): boolean | undefined => !!window.ethereum 
 
 export const isSnapInstalled = async (): Promise<boolean | undefined> => {
   const result = await window.ethereum.request({ method: 'wallet_getSnaps' });
-  console.log(result);
   return Object.keys(result).includes(snapId);
 };
 
@@ -220,6 +219,7 @@ export const chainInfoToChain = (chainInfo: ChainInfo): Chain => {
         provider: chainInfo.nodeProvider?.name  
       }]
     },
+    type: "cosmos",
     address: undefined
   }
 }
