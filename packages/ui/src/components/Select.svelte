@@ -74,14 +74,14 @@
           checkDropdownDirection();
         }}
       >
-        {#if imageKey && selectedItem}
-          {#if nestedImageKey}
+        {#if imageKey && selectedItem && imageKey in selectedItem}
+          {#if nestedImageKey && nestedImageKey in selectedItem[imageKey]}
             <img src={selectedItem[imageKey][nestedImageKey]} class="w-5 h-5 rounded-full mr-2" alt={selectedItem[showKey]} />
           {:else}
             <img src={selectedItem[imageKey]} class="w-5 h-5 rounded-full mr-2" alt={selectedItem[showKey]} />
           {/if}
         {/if} 
-        {#if selectedItem}
+        {#if selectedItem && showKey in selectedItem}
           {selectedItem[showKey] || `${text}`}
         {:else}
           {text}
