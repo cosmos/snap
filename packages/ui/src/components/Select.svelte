@@ -25,6 +25,10 @@
     dispatch('change', selectedItem);
   }
 
+  function opened() {
+    dispatch('open', isOpen);
+  }
+
   onMount(() => {
     window.addEventListener('resize', checkDropdownDirection);
     if (!selectedItem) {
@@ -70,6 +74,7 @@
         aria-haspopup="true"
         aria-expanded="true"
         on:click={() => {
+          opened();
           isOpen = !isOpen;
           checkDropdownDirection();
         }}
@@ -92,7 +97,7 @@
 
   {#if isOpen}
     <div
-      class={`origin-top-right absolute right-0 ${shouldOpenUpwards ? 'bottom-full mb-3' : 'mt-2'} w-full rounded-md shadow-lg custom-bg text-white ring-1 ring-black ring-opacity-5 ${isOpen ? 'z-[500]' : ''} overflow-y-auto max-h-[200px] hide-scrollbar overflow-scroll`}
+      class={`origin-top-right absolute right-0 ${shouldOpenUpwards ? 'bottom-full mb-3' : 'mt-2'} w-full rounded-md shadow-lg custom-bg text-white ring-1 ring-black ring-opacity-5 ${isOpen ? 'z-[2000]' : ''} overflow-y-auto max-h-[200px] hide-scrollbar overflow-scroll`}
     >
       <div
         class="py-1 inter-font"
