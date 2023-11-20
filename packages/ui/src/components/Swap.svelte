@@ -255,7 +255,7 @@
         allChains = await router.getChains($chains);
         sourceChain = allChains.filter(chain => chain.chain_id === "cosmoshub-4")[0];
         destinationChain = allChains.filter(chain => chain.chain_id === "osmosis-1")[0];
-        await update();
+        update();
     })
 </script>
 
