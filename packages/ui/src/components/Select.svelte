@@ -25,6 +25,10 @@
     dispatch('change', selectedItem);
   }
 
+  function opened() {
+    dispatch('open', isOpen);
+  }
+
   onMount(() => {
     window.addEventListener('resize', checkDropdownDirection);
     if (!selectedItem) {
@@ -70,6 +74,7 @@
         aria-haspopup="true"
         aria-expanded="true"
         on:click={() => {
+          opened();
           isOpen = !isOpen;
           checkDropdownDirection();
         }}

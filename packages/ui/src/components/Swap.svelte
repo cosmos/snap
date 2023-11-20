@@ -42,6 +42,7 @@
     let estimatedTime = 1;
     let loading = false;
     let showAlert = false;
+    let inputShown: "from" | "to" = "from";
 
     const copy = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -268,7 +269,7 @@
         </div>
         <div class="w-full mt-4">
             <div class="flex flex-col">
-                <div class="w-full mb-[10px] relative z-[100]">
+                <div class="w-full mb-[10px] relative {inputShown === "to" ? "z-1000" : "z-50"}">
                     <div class="w-full rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-4">
                         <div class="flex flex-between">
                             <div class="w-1/2 font-medium text-white text-lg tracking-tight leading-normal">
@@ -290,10 +291,10 @@
                         </div>
                         <div class="flex justify-center items-center gap-2">
                             <div class="w-1/2">
-                                <Select on:change={update} text="Select Chain" items={allChains} bind:selectedItem={sourceChain} showKey="chain_name" imageKey="logo_uri"/>
+                                <Select on:open={() => inputShown = "from"} on:change={update} text="Select Chain" items={allChains} bind:selectedItem={sourceChain} showKey="chain_name" imageKey="logo_uri"/>
                             </div>
                             <div class="w-1/2">
-                                <Select on:change={update} text="Select Token" items={sourceTokens} bind:selectedItem={sourceCoin} showKey="display" imageKey="logo_uri"/>
+                                <Select on:open={() => inputShown = "from"} on:change={update} text="Select Token" items={sourceTokens} bind:selectedItem={sourceCoin} showKey="display" imageKey="logo_uri"/>
                             </div>
                         </div>
                         <div>
@@ -313,10 +314,10 @@
                     </div>
                 </div>
                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                <div on:click={swapRoute} class="w-10 h-10 left-1/2 cursor-pointer z-[75] relative">
+                <div on:click={swapRoute} class="w-10 h-10 left-1/2 cursor-pointer z-[40] relative">
                     <img class="" src="/change-swap.svg" alt="change_positions"/>
                 </div>
-                <div class="w-full mt-[10px] relative z-50">
+                <div class="w-full mt-[10px] relative  {inputShown === "from" ? "z-1000" : "z-50"}">
                     <div class="w-full rounded-lg border border-solid border-[#ffffff1a] backdrop-blur-lg backdrop-brightness-100 p-4">
                         <div class="flex flex-between items-center">
                             <div class="w-1/2 font-medium text-white text-lg tracking-tight leading-normal">
@@ -363,10 +364,10 @@
                         </div>
                         <div class="flex justify-between items-center gap-2">
                             <div class="w-1/2">
-                                <Select on:change={update} text="Select Chain" items={allChains} bind:selectedItem={destinationChain} showKey="chain_name" imageKey="logo_uri"/>
+                                <Select on:open={() => inputShown = "to"} on:change={update} text="Select Chain" items={allChains} bind:selectedItem={destinationChain} showKey="chain_name" imageKey="logo_uri"/>
                             </div>
                             <div class="w-1/2">
-                                <Select on:change={update} text="Select Token" items={destTokens} bind:selectedItem={destinationCoin} showKey="display" imageKey="logo_uri"/>
+                                <Select on:open={() => inputShown = "to"} on:change={update} text="Select Token" items={destTokens} bind:selectedItem={destinationCoin} showKey="display" imageKey="logo_uri"/>
                             </div>
                         </div>
                         <div class="relative flex justify-center items-center">
