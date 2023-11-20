@@ -1,7 +1,7 @@
 import { writable, derived, type Writable, type Readable } from 'svelte/store';
 import type { Chain } from '../../../snap/src/types/chains';
 import { chains } from './chains'; 
-import type { CoinIBC } from '../utils/ibc';
+import type { CoinIBC } from '../utils/skip';
 
 if (!import.meta.env.VITE_DENO_SERVERLESS_URL) {
     throw new Error("VITE_DENO_SERVERLESS_URL not set...");

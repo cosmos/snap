@@ -2,21 +2,22 @@
   import { chains } from "../store/chains";
 	import Info from "./Info.svelte";
 	import { balances, forceUpdate } from "../store/balances";
-  import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/ibc';
+  import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/skip';
 	import { state } from "../store/state";
 	import type { Chain, Msg } from "@cosmsnap/snapper";
   import _ from 'lodash';
 	import { getClient } from "../utils/tx";
 	import { addTransaction } from "../store/transactions";
 	import Button from "./Button.svelte";
-	import ChainSelector from "./ChainSelector.svelte";
   import { sendTxAlert } from "@cosmsnap/snapper";
   import Select from "./Select.svelte";
 	import { snapId } from "../utils/snap";
+	import { onMount } from "svelte";
+	import { coins } from "@cosmjs/stargate";
   
   let loading = false;
-  let source = "cosmoshub-4";
-  let destination = "cosmoshub-4";
+  let source: Chain | undefined;
+  let destination: Chain | undefined;
   let selected: any;
   let sourceChainChange = false;
   let amount = 0;
@@ -24,18 +25,7 @@
   let recipient = "";
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
-  let feesAmount = 0.05;
-  let gas = 0.10;
   let feesOpen = false;
-  let fees = {
-      amount: [
-          {
-              amount: feesAmount.toString(),
-              denom: ""
-          }
-      ],
-      gas: gas.toString(),
-  };
   let fromAddress: string | undefined = "";
   let fromChain: Chain = {
 	  chain_name: "",
@@ -53,24 +43,11 @@
   };
 
   $: {
-    if (feesAmount) {
-      fees = {
-          amount: [
-              {
-                  amount: (feesAmount * 1000000).toString(),
-                  denom: ""
-              }
-          ],
-          gas: (gas * 1000000).toString(),
-      }
-    }
-    let foundChain = $chains.find(item => item.chain_id === source);
-    if (foundChain) {
-      fromChain = foundChain;
-      fees.amount[0].denom = fromChain.fees.fee_tokens[0].denom;
+    if (source) {
+      fromChain = source;
       
       if ($balances) {
-        let source_chain = $balances.filter(item => item.chain_id == source)[0];
+        let source_chain = $balances.filter(item => item.chain_id == source?.chain_id)[0];
         if (source_chain) {
           sourceBalances = source_chain.balances;
           if(sourceChainChange) {
@@ -97,7 +74,7 @@
           }
 
           if (source === destination) {
-            const coins = [
+            const sendAmt = [
               {
                 denom: selected.denom,
                 amount: (amount * 1000000).toString(),  
@@ -108,14 +85,22 @@
               value: {
                 fromAddress,
                 toAddress: recipient, 
-                amount: coins
+                amount: sendAmt
               }
             }
-            const tx = await client.signAndBroadcast(fromAddress, [msg], fees);
+            // Simulate the transaction
+            const gasEstimation = await client.simulate(fromAddress, [msg], "");
+
+            // Calculate the fee using 1.4 multiplier to be safe
+            const fee = {
+                amount: coins((_.round(gasEstimation*1.4, 0)).toString(), source!.fees.fee_tokens[0].denom),
+                gas: (_.round(gasEstimation*1.4, 0)).toString(),
+            };
+            const tx = await client.signAndBroadcast(fromAddress, [msg], fee);
             
             if (tx.code == 0) {
-              await addTransaction({address: fromAddress, chain: source, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
-              await sendTxAlert(source, tx.transactionHash, snapId);
+              await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
+              await sendTxAlert(source!.chain_id, tx.transactionHash, snapId);
               forceUpdate();
             } else {
               if (tx.rawLog) {
@@ -132,7 +117,7 @@
             return tx
           }
 
-          const skipRec = await getSkipRecommendation(selected.denom, source, destination);
+          const skipRec = await getSkipRecommendation(selected.denom, source!.chain_id, destination!.chain_id);
 
           if (!Array.isArray(skipRec.recommendations) || skipRec.recommendations.length === 0) {
               throw new Error("No recommended asset found.");
@@ -145,28 +130,36 @@
 
           const adjustedAmount = (amount * 1000000).toString();
 
-          const msg = await getMsgs(source, selected.denom, destination, firstRec.denom, adjustedAmount, slippage, $chains, recipient);
-          if (!Array.isArray(msg.msgs)) {
-              throw new Error("Invalid message data.");
+          const msg = await getMsgs(source!.chain_id, selected.denom, destination!.chain_id, firstRec.denom, adjustedAmount, slippage, $chains, recipient);
+          if (!('msgs' in msg)) {
+              throw new Error("No routes found.");
           }
 
           const messages: Msg[] = msg.msgs.map(item => {
-              if (!item.msg || !item.msg_type_url) {
+              if (!item.multi_chain_msg.msg || !item.multi_chain_msg.msg_type_url) {
                   throw new Error("Invalid message format.");
               }
 
-              const msgCamel = _.mapKeys(JSON.parse(item.msg), (value: any, key: any) => _.camelCase(key));
+              const msgCamel = _.mapKeys(JSON.parse(item.multi_chain_msg.msg), (value: any, key: any) => _.camelCase(key));
 
               return {
                   value: JSON.parse(JSON.stringify(msgCamel)),
-                  typeUrl: item.msg_type_url
+                  typeUrl: item.multi_chain_msg.msg_type_url
               };
           });
-          const tx = await client.signAndBroadcast(fromAddress, messages, fees);
+          // Simulate the transaction
+          const gasEstimation = await client.simulate(fromAddress, messages, "");
+
+          // Calculate the fee using 1.4 multiplier to be safe
+          const fee = {
+              amount: coins((_.round(gasEstimation*1.4, 0)).toString(), source!.fees.fee_tokens[0].denom),
+              gas: (_.round(gasEstimation*1.4, 0)).toString(),
+          };
+          const tx = await client.signAndBroadcast(fromAddress, messages, fee);
 
           if (tx.code == 0) {
-            await addTransaction({address: fromAddress, chain: source, when: new Date().toDateString(), tx_hash: tx.transactionHash});
-            await sendTxAlert(source, tx.transactionHash, snapId);
+            await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
+            await sendTxAlert(source!.chain_id, tx.transactionHash, snapId);
             forceUpdate();
           } else {
             if (tx.rawLog) {
@@ -190,6 +183,16 @@
           $state.alertText = `${error.message}`;
       }
   };
+  onMount(() => {
+    source = $chains.find(item => item.chain_id === "cosmoshub-4");
+    if (source == undefined) {
+      source = $chains[0];
+    }
+    destination = $chains.find(item => item.chain_id === "cosmoshub-4");
+    if (destination == undefined) {
+      destination = $chains[0];
+    }
+  })
 </script>
 
 <div class="overlap-group1">
@@ -197,16 +200,13 @@
       <div class="ibc-transfer inter-medium-white-16px">
           {source == destination ? "Transfer" : "IBC Transfer"}
       </div>
-      <svg on:click={() => feesOpen = !feesOpen} class="w-4 h-4 text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 1h4m0 0v4m0-4-5 5.243M5 15H1m0 0v-4m0 4 5.243-5"/>
-      </svg>  
     </div>
     <div class="flex w-full items-start">
       <div class="percent inter-medium-white-14px">
           Source Chain
       </div>
     </div>
-    <ChainSelector onChange={() => sourceChainChange = true} bind:selectedChain={source}/>
+    <Select on:change={() => sourceChainChange = true} text="Select Chain" items={$chains} bind:selectedItem={source} showKey="pretty_name" imageKey="logo_URIs" nestedImageKey="png"/>
     <div style="width: 100%;">
         <div class="percent inter-medium-white-14px">
             Asset
@@ -222,35 +222,15 @@
       <div class="percent inter-medium-white-14px">
           Destination Chain
       </div>
-      <div class="hover:z-[500]">
+      <div class="">
           <Info/>
       </div>
     </div>
-    <ChainSelector bind:selectedChain={destination}/>
+    <Select text="Select Chain" items={$chains} bind:selectedItem={destination} showKey="pretty_name" imageKey="logo_URIs" nestedImageKey="png"/>
     <div hidden={!noRoute} class="text-align-left w-full mt-4 inter-medium-red-14px">
         Route Not Found
     </div>
     <input bind:value={recipient} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
-    <div class="w-full" hidden={!feesOpen}>
-      <div id="fees-container w-full" class="flex">
-        <div class="w-[50%] mr-2">
-          <div class="percent inter-medium-white-14px">
-            Gas
-          </div>
-          <div class="w-full">
-            <input bind:value={gas} type="number" placeholder="Enter amount" class="w-full enter-amount inter-medium-white-14px overlap-group-7"/>
-          </div>
-        </div>
-        <div class="w-[50%] ml-2">
-          <div class="percent inter-medium-white-14px">
-            Fees
-          </div>
-          <div class="">
-            <input bind:value={feesAmount} type="number" placeholder="Enter amount" class="w-full enter-amount inter-medium-white-14px overlap-group-7"/>
-          </div>
-        </div>
-      </div>
-    </div>
     <Button onClick={computeIBCRoute} bind:loading={loading}/>
 </div>
 
