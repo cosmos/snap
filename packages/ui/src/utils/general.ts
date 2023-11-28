@@ -156,14 +156,19 @@ export async function getERC20Balance(tokenAddress: string, walletAddress: strin
   // Connect to an Ethereum node
   const provider = new ethers.providers.JsonRpcProvider(providerUrl);
 
-  // ERC20 Token ABI with only the balanceOf function
-  const erc20Abi = ["function balanceOf(address owner) view returns (uint256)"];
-
-  // Create a contract instance
-  const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, provider);
-
-  // Get the balance
-  const balance = await tokenContract.balanceOf(walletAddress);
+  let balance: BigInt = BigInt(0);
+  if (tokenAddress === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+    // native eth balance
+    const raw = await provider.getBalance(walletAddress);
+    balance = raw.toBigInt();
+  } else {
+    // ERC20 Token ABI with only the balanceOf function
+    const erc20Abi = ["function balanceOf(address owner) view returns (uint256)"];
+    // Create a contract instance
+    const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, provider);
+    // Get the balance
+    balance = await tokenContract.balanceOf(walletAddress);
+  }
 
   // The balance is a BigNumber; format it as a string
   return balance.toString();
