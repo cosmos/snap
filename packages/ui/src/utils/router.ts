@@ -112,7 +112,7 @@ export class Router {
             ...cosmChains,
             ...squidChains.map((chain: ChainData) => {
                 return {
-                    chain_name: chain.chainName.charAt(0).toUpperCase() + chain.chainName.slice(1),
+                    chain_name: chain.networkName.charAt(0).toUpperCase() + chain.networkName.slice(1),
                     chain_id: chain.chainId.toString(),
                     logo_uri: chain.chainIconURI,
                     chain_type: chain.chainType,
