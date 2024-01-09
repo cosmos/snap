@@ -4,13 +4,7 @@ from appwrite.client import Client
 from appwrite.services import databases
 from appwrite.services import functions
 from appwrite.query import Query
-from pydantic import BaseModel
-
-
-class DB_DATA(BaseModel):
-    total: int
-    documents: list
-
+from type import DB_LEASE_RETURN, AKASH_NOTIFICATION, AKASH_LEASE
 
 client = Client()
 db = databases.Databases(client)
@@ -34,15 +28,18 @@ if not api_url:
 
 def get_lease_shut_down_events(current_open_leases):
     # Initialize an empty list to store shutdown events
-    events = []
+    events: list[AKASH_NOTIFICATION] = []
 
     # Fetch the previously open leases from database
-    data = db.list_documents(RESOURCE, OPEN_LEASE_COLLECTION_NAME, Query.equal('state', 'open'))
-    db_data = DB_DATA(data['total'], data['documents'])
-    old_leases = db_data.documents
-
-    closed_leases = [] # stores leases that were logged before and are now closed
-    prev_open_leases = [] # stores leases that were logged before and are still open
+    data: DB_LEASE_RETURN = db.list_documents(RESOURCE, OPEN_LEASE_COLLECTION_NAME, Query.equal('state', 'open')) # type: ignore
+    
+    if data is not None and 'total' in data and 'documents' in data:
+        old_leases: list[AKASH_LEASE] = data['documents']
+    else:
+        old_leases: list[AKASH_LEASE] = []
+    
+    closed_leases: list[str] = [] # stores leases that were logged before and are now closed
+    prev_open_leases: list[str] = [] # stores leases that were logged before and are still open
 
 
     # Compare the current open leases with the previous ones to determine if any have been closed
@@ -50,12 +47,13 @@ def get_lease_shut_down_events(current_open_leases):
         if current_open_leases.get(lease['lease_id']) is None:
             # If a lease has been shut down, mark its state as "closed" and record the event
             closed_leases.append(lease['lease_id'])
-            events.append({
-                            "read" : False,
-                            "address" : lease['lease_id'].split('/')[0],
-                            "lease" : lease['lease_id'].split('/')[1],
-                            "notification": f"Lease shut down for {lease['lease_id']}. Relaunch as soon as possible to limit downtime.",
-                        })
+            add: AKASH_NOTIFICATION = {
+                "read" : False,
+                "address" : lease['lease_id'].split('/')[0],
+                "lease" : lease['lease_id'].split('/')[1],
+                "notification": f"Lease shut down for {lease['lease_id']}. Relaunch as soon as possible to limit downtime.",
+            }
+            events.append(add)
         else:
             # record previously logged leases
             prev_open_leases.append(lease['lease_id'])
@@ -69,7 +67,7 @@ def get_lease_shut_down_events(current_open_leases):
         })
 
     # Get New Leases
-    new_leases = [lease for lease in list(current_open_leases.keys()) if lease not in prev_open_leases]
+    new_leases: list[AKASH_LEASE] = [lease for lease in list(current_open_leases.keys()) if lease not in prev_open_leases]
     
     # Insert New leases
     for lease in new_leases:
@@ -82,35 +80,36 @@ def get_lease_shut_down_events(current_open_leases):
 
 def get_lease_low_balance_events(deployments):
     # Initialize lists to store low balance events and current open leases
-    events = []
-    current_open_leases = dict()
+    events: list[AKASH_NOTIFICATION] = []
+    current_open_leases: dict[str, AKASH_LEASE] = dict()
 
     # Process each deployment item
     for item in deployments:
         # Record all the current open leases
-        current_open_leases[item['escrow_account']['id']['xid']] = {
-                                    "lease_id": item['escrow_account']['id']['xid'],
-                                    "state": item['deployment']['state']
-                                    }
+        add: AKASH_LEASE = {
+        "lease_id": item['escrow_account']['id']['xid'],
+        "state": item['deployment']['state']
+        }
+        current_open_leases[item['escrow_account']['id']['xid']] = add
         # check for low balance
         if float(item['escrow_account']['balance']['amount']) < 1:
-            events.append({
-                            "read" : False,
-                            "address" : item['escrow_account']['owner'],
-                            "lease" : item['deployment']['deployment_id']['dseq'],
-                            "notification": f"Lease balance is below $1 for lease {item['escrow_account']['id']['xid']}. Refill as soon as possible.",
-                        })
-                       
+            notif_add: AKASH_NOTIFICATION = {
+                "read" : False,
+                "address" : item['escrow_account']['owner'],
+                "lease" : item['deployment']['deployment_id']['dseq'],
+                "notification": f"Lease balance is below $1 for lease {item['escrow_account']['id']['xid']}. Refill as soon as possible.",
+            }
+            events.append(notif_add)            
 
     return events, current_open_leases
 
 
-def get_events():
+def get_events() -> list[AKASH_NOTIFICATION]:
 
     try:
         # Initialize lists to store notifications
-        events_to_notify = []
-        current_open_leases = dict()
+        events_to_notify: list[AKASH_NOTIFICATION] = []
+        current_open_leases: dict[str, AKASH_LEASE] = dict()
 
         # Pagination variables for the API request
         current_offset = 0
@@ -157,7 +156,6 @@ def get_events():
             else:
                 raise Exception(f"API call to cosmos failed with status code: {response.status_code}")
 
-
         # Get the lease shutdown events and add them to the notification list
         events_to_notify += get_lease_shut_down_events(current_open_leases)
         
@@ -165,6 +163,7 @@ def get_events():
     
     except Exception as e:
         print(f"An Error occurred : {str(e)}")
+        raise e
 
 def akash_notification_logger():
 
