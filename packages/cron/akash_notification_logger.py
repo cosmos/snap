@@ -5,7 +5,7 @@ import asyncio
 from appwrite.client import Client
 from appwrite.services import databases
 from appwrite.query import Query
-from typing import TypedDict
+from typing import TypedDict, Union
 from enum import Enum
 
 class Status(Enum):
@@ -52,7 +52,7 @@ if not api_url:
     raise EnvironmentError('The environment variable AKASH_API_URL is not set.')
 
 # Async wrapper around add document
-async def add_document_async(collection_name: str, doc_id: str, doc: AKASH_LEASE | AKASH_NOTIFICATION):
+async def add_document_async(collection_name: str, doc_id: str, doc: Union[AKASH_LEASE, AKASH_NOTIFICATION]):
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as pool:
         result = await loop.run_in_executor(pool, lambda: db.create_document(RESOURCE, collection_name, doc_id, doc))
@@ -60,7 +60,7 @@ async def add_document_async(collection_name: str, doc_id: str, doc: AKASH_LEASE
     return result
 
 # Async wrapper around update document
-async def update_document_async(collection_name: str, doc_id: str, doc: AKASH_LEASE | AKASH_NOTIFICATION):
+async def update_document_async(collection_name: str, doc_id: str, doc: Union[AKASH_LEASE, AKASH_NOTIFICATION]):
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as pool:
         result = await loop.run_in_executor(pool, lambda: db.update_document(RESOURCE, collection_name, doc_id, doc))
