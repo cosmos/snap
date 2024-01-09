@@ -1,6 +1,16 @@
-import airplane
 import requests
 import os
+from appwrite.client import Client
+from appwrite.services import databases
+from appwrite.services import functions
+
+client = Client()
+db = databases.Databases(client)
+funcs = functions.Functions(client)
+
+if os.environ.get("APPWRITE_ENDPOINT") is None:
+    raise EnvironmentError('The environment variable APPWRITE_ENDPOINT is not set.')
+client.set_endpoint('https://cloud.appwrite.io/v1').set_project('659832bdd99000571f19').set_key(os.environ.get("APPWRITE_KEY")).set_self_signed()
 
 # Constants for MongoDB resources
 MONGODB_RESOURCE = 'akash_mongodb'
@@ -12,8 +22,6 @@ api_url = os.getenv('AKASH_API_URL')
 
 if not api_url:
     raise EnvironmentError('The environment variable AKASH_API_URL is not set.')
-
-
 
 def get_lease_shut_down_events(current_open_leases):
     # Initialize an empty list to store shutdown events
@@ -142,25 +150,6 @@ def get_events():
     except Exception as e:
         print(f"An Error occurred : {str(e)}")
 
-
-# Define Airplane Tasks
-@airplane.task(
-    slug="akash_notification_logger",
-    name="Akash Notification Logger",
-    description="Scrapes and logs script that takes Akash Network events we are looking for and adds them as unread notifications to the MongoDB DB to use in the MetaMask Snap UI later.",
-    resources = [
-        airplane.Resource(
-            slug=MONGODB_RESOURCE,
-        )
-    ],
-    schedules = [
-        airplane.Schedule(
-            slug="akash_notification_logger_cron_job",
-            cron="*/15 * * * *",
-            description="checks for notifications every 15 minutes",
-        )
-    ]
-)
 def akash_notification_logger():
 
     # Fetch Events to notify

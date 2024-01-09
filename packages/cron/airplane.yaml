@@ -1,3 +1,0 @@
-python:
-  version: "3.11"
-  createVenv: true
