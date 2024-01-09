@@ -42,7 +42,7 @@ client.set_endpoint('https://cloud.appwrite.io/v1').set_project('659832bdd990005
 
 # Constants for resources
 RESOURCE = 'akash'
-OPEN_LEASE_COLLECTION_NAME = 'open_leases'
+OPEN_LEASE_COLLECTION_NAME = 'openleases'
 NOTIFICATIONS_COLLECTION_NAME = 'notifications'
 
 # Environment variable for Akash DB API endpoint
