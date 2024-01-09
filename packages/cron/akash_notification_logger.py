@@ -4,9 +4,31 @@ import os
 import asyncio
 from appwrite.client import Client
 from appwrite.services import databases
-from appwrite.services import functions
 from appwrite.query import Query
-from type import DB_LEASE_RETURN, AKASH_NOTIFICATION, AKASH_LEASE, Status
+from typing import TypedDict
+from enum import Enum
+
+class Status(Enum):
+    OPEN = 'open'
+    CLOSED = 'closed'
+
+class AKASH_LEASE(TypedDict):
+    lease_id: str
+    state: Status
+
+class AKASH_NOTIFICATION(TypedDict):
+    read: bool
+    address: str
+    lease: str
+    notification: str
+
+class DB_NOTIFICATION_RETURN(TypedDict):
+    total: int
+    documents: list[AKASH_NOTIFICATION]
+
+class DB_LEASE_RETURN(TypedDict):
+    total: int
+    documents: list[AKASH_LEASE]
 
 def main():
 
