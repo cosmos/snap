@@ -47,7 +47,7 @@ def get_lease_shut_down_events(current_open_leases):
 
     # Compare the current open leases with the previous ones to determine if any have been closed
     for lease in old_leases:
-        if current_open_leases.get(lease['lease_id']):
+        if current_open_leases.get(lease['lease_id']) is None:
             # If a lease has been shut down, mark its state as "closed" and record the event
             closed_leases.append(lease['lease_id'])
             events.append({
