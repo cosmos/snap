@@ -40,8 +40,8 @@ if os.environ.get("APPWRITE_KEY") is None:
 
 client.set_endpoint('https://cloud.appwrite.io/v1').set_project('659832bdd99000571f19').set_key(os.environ.get("APPWRITE_KEY")).set_self_signed()
 
-# Constants for MongoDB resources
-RESOURCE = 'akash_mongodb'
+# Constants for resources
+RESOURCE = 'akash'
 OPEN_LEASE_COLLECTION_NAME = 'open_leases'
 NOTIFICATIONS_COLLECTION_NAME = 'notifications'
 
