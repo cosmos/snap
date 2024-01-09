@@ -207,19 +207,22 @@ def get_events() -> list[AKASH_NOTIFICATION]:
         return events_to_notify
     
     except Exception as e:
-        print(f"An Error occurred : {str(e)}")
         raise e
 
 def runner(context):
 
-    # Fetch Events to notify
-    events = get_events()
+    try:
+        # Fetch Events to notify
+        events = get_events()
 
-    # Insert the events into the MongoDB notifications collection
-    for event in events:
-        task = add_document_async(NOTIFICATIONS_COLLECTION_NAME, event['lease'], event)
-        tasks.append(task)
-    
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(asyncio.gather(*tasks))
-    loop.close()
+        # Insert the events into the MongoDB notifications collection
+        for event in events:
+            task = add_document_async(NOTIFICATIONS_COLLECTION_NAME, event['lease'], event)
+            tasks.append(task)
+        
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.gather(*tasks))
+        loop.close()
+
+    except Exception as e:
+        context.error(e)
