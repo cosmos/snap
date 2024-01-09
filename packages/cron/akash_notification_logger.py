@@ -35,8 +35,8 @@ db = databases.Databases(client)
 # hold all asyncio tasks
 tasks = []
 
-if os.environ.get("APPWRITE_ENDPOINT") is None:
-    raise EnvironmentError('The environment variable APPWRITE_ENDPOINT is not set.')
+if os.environ.get("APPWRITE_KEY") is None:
+    raise EnvironmentError('The environment variable APPWRITE_KEY is not set.')
 
 client.set_endpoint('https://cloud.appwrite.io/v1').set_project('659832bdd99000571f19').set_key(os.environ.get("APPWRITE_KEY")).set_self_signed()
 
