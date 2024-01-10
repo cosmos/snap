@@ -209,7 +209,7 @@ def get_events() -> list[AKASH_NOTIFICATION]:
     except Exception as e:
         raise e
 
-def runner(context):
+def main(context):
 
     try:
         # Fetch Events to notify

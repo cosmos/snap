@@ -1,0 +1,23 @@
+{
+    "projectId": "659832bdd99000571f19",
+    "projectName": "MetaMask Snaps",
+    "functions": [
+        {
+            "$id": "659e1d905dde5ef4504f",
+            "name": "akash_notifications",
+            "runtime": "python-3.9",
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.py",
+            "commands": "pip install -r requirements.txt",
+            "ignore": [
+                "__pypackages__"
+            ],
+            "path": "functions/akash_notifications"
+        }
+    ]
+}
