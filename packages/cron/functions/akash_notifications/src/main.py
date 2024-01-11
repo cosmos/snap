@@ -14,7 +14,7 @@ class Status(Enum):
 
 class AKASH_LEASE(TypedDict):
     lease_id: str
-    state: Status
+    state: str
 
 class AKASH_NOTIFICATION(TypedDict):
     read: bool
@@ -42,7 +42,7 @@ client.set_endpoint('https://cloud.appwrite.io/v1').set_project('659832bdd990005
 
 # Constants for resources
 RESOURCE = 'akash'
-OPEN_LEASE_COLLECTION_NAME = 'openleases'
+OPEN_LEASE_COLLECTION_NAME = 'open_leases'
 NOTIFICATIONS_COLLECTION_NAME = 'notifications'
 
 # Environment variable for Akash DB API endpoint
@@ -72,7 +72,7 @@ def get_lease_shut_down_events(current_open_leases):
     events: list[AKASH_NOTIFICATION] = []
 
     # Fetch the previously open leases from database
-    data: DB_LEASE_RETURN = db.list_documents(RESOURCE, OPEN_LEASE_COLLECTION_NAME, Query.equal('state', 'open')) # type: ignore
+    data: DB_LEASE_RETURN = db.list_documents(RESOURCE, OPEN_LEASE_COLLECTION_NAME, [Query.equal('state', 'open')]) # type: ignore
     
     if data is not None and 'total' in data and 'documents' in data:
         old_leases: list[AKASH_LEASE] = data['documents']
@@ -103,22 +103,22 @@ def get_lease_shut_down_events(current_open_leases):
     # Update the leases that are closed now
     for lease in closed_leases:
         doc: AKASH_LEASE = {
-            'state' : Status.CLOSED,
+            'state' : Status.CLOSED.value,
             'lease_id' : lease,
         }
         event = update_document_async(OPEN_LEASE_COLLECTION_NAME, lease, doc)
         tasks.append(event)
 
     # Get New Leases
-    new_leases: list[AKASH_LEASE] = [lease for lease in list(current_open_leases.keys()) if lease not in prev_open_leases]
+    new_leases: list[str] = [lease for lease in list(current_open_leases.keys()) if lease not in prev_open_leases]
     
     # Insert New leases
     for lease in new_leases:
         doc: AKASH_LEASE = {
-            'state' : Status.OPEN,
-            'lease_id' : lease['lease_id'],
+            'state' : Status.OPEN.value,
+            'lease_id' : lease,
         }
-        event = add_document_async(OPEN_LEASE_COLLECTION_NAME, lease['lease_id'], doc)
+        event = add_document_async(OPEN_LEASE_COLLECTION_NAME, lease, doc)
         tasks.append(event)
 
     return events
@@ -224,5 +224,7 @@ def main(context):
         loop.run_until_complete(asyncio.gather(*tasks))
         loop.close()
 
+        return context.res.empty()
+
     except Exception as e:
-        context.error(e)
+        raise e

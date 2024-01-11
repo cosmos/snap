@@ -9,7 +9,7 @@
             "execute": [],
             "events": [],
             "schedule": "",
-            "timeout": 15,
+            "timeout": 600,
             "enabled": true,
             "logging": true,
             "entrypoint": "src/main.py",
