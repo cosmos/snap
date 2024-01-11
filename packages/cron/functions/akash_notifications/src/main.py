@@ -58,9 +58,12 @@ NOTIFICATIONS_COLLECTION_NAME = 'notifications'
 
 # Environment variable for Akash DB API endpoint
 api_url = os.getenv('AKASH_API_URL')
-
 if not api_url:
     raise EnvironmentError('The environment variable AKASH_API_URL is not set.')
+
+akash_balance_threshold = os.getenv('AKASH_BALANCE_THRESHOLD')
+if not akash_balance_threshold:
+    raise EnvironmentError('The environment variable AKASH_BALANCE_THRESHOLD is not set.')
 
 # Async wrapper around add document
 async def add_document_async(collection_name: str, doc_id: str, doc: Union[AKASH_LEASE, AKASH_NOTIFICATION]):
@@ -144,17 +147,17 @@ def get_lease_low_balance_events(deployments):
     for item in deployments:
         # Record all the current open leases
         add: AKASH_LEASE = {
-        "lease_id": item['escrow_account']['id']['xid'],
+        "lease_id": item['deployment']['deployment_id']['dseq'],
         "state": item['deployment']['state']
         }
-        current_open_leases[item['escrow_account']['id']['xid']] = add
+        current_open_leases[item['deployment']['deployment_id']['dseq']] = add
         # check for low balance
-        if float(item['escrow_account']['balance']['amount']) < 1:
+        if (float(item['escrow_account']['balance']['amount'])/1000000) < float(akash_balance_threshold):
             notif_add: AKASH_NOTIFICATION = {
                 "read" : False,
                 "address" : item['escrow_account']['owner'],
                 "lease" : item['deployment']['deployment_id']['dseq'],
-                "notification": f"Lease balance is below $1 for lease {item['escrow_account']['id']['xid']}. Refill as soon as possible.",
+                "notification": f"Lease balance is below $1 for lease {item['deployment']['deployment_id']['dseq']}. Refill as soon as possible.",
                 "timestamp": get_current_utc_timestamp()
             }
             events.append(notif_add)            
@@ -222,7 +225,7 @@ def get_events() -> list[AKASH_NOTIFICATION]:
     except Exception as e:
         raise e
 
-def main(context):
+def main():
 
     try:
         # Fetch Events to notify
@@ -236,7 +239,6 @@ def main(context):
         for notifications in past_notifications:
             past_notifications_dict[notifications['lease']] = notifications
 
-
         # Insert the events into the database notifications collection
         for event in events:
             if (past_notifications_dict.get(event['lease']) != None and 
@@ -249,7 +251,7 @@ def main(context):
         loop.run_until_complete(asyncio.gather(*tasks))
         loop.close()
 
-        return context.res.empty()
-
     except Exception as e:
-        raise context.res.json({'error': str(e)})
+        raise e
+    
+main()
