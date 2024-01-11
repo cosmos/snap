@@ -7,6 +7,16 @@ from appwrite.services import databases
 from appwrite.query import Query
 from typing import TypedDict, Union
 from enum import Enum
+from datetime import datetime
+
+def get_current_utc_timestamp():
+    return datetime.utcnow().timestamp()
+
+def get_no_of_days(timestamp1, timestamp2):
+    t1 = datetime.fromtimestamp(timestamp1 / 1000)
+    t2 = datetime.fromtimestamp(timestamp2 / 1000)
+
+    return (t2 - t1).days
 
 class Status(Enum):
     OPEN = 'open'
@@ -21,6 +31,7 @@ class AKASH_NOTIFICATION(TypedDict):
     address: str
     lease: str
     notification: str
+    timestamp: float
 
 class DB_NOTIFICATION_RETURN(TypedDict):
     total: int
@@ -93,6 +104,7 @@ def get_lease_shut_down_events(current_open_leases):
                 "address" : lease['lease_id'].split('/')[0],
                 "lease" : lease['lease_id'].split('/')[1],
                 "notification": f"Lease shut down for {lease['lease_id']}. Relaunch as soon as possible to limit downtime.",
+                "timestamp": get_current_utc_timestamp(),
             }
             events.append(add)
         else:
@@ -143,6 +155,7 @@ def get_lease_low_balance_events(deployments):
                 "address" : item['escrow_account']['owner'],
                 "lease" : item['deployment']['deployment_id']['dseq'],
                 "notification": f"Lease balance is below $1 for lease {item['escrow_account']['id']['xid']}. Refill as soon as possible.",
+                "timestamp": get_current_utc_timestamp()
             }
             events.append(notif_add)            
 
@@ -215,8 +228,15 @@ def main(context):
         # Fetch Events to notify
         events = get_events()
 
+        data: DB_NOTIFICATION_RETURN = db.list_documents(RESOURCE, NOTIFICATIONS_COLLECTION_NAME) # type: ignore
+        current_notifications = data['documents']
+
+
+
         # Insert the events into the MongoDB notifications collection
         for event in events:
+            if event in current_notifications and get_no_of_days(event['timestamp'], get_current_utc_timestamp()) < 1:
+                continue
             task = add_document_async(NOTIFICATIONS_COLLECTION_NAME, event['lease'], event)
             tasks.append(task)
         
