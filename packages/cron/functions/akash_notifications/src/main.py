@@ -229,13 +229,18 @@ def main(context):
         events = get_events()
 
         data: DB_NOTIFICATION_RETURN = db.list_documents(RESOURCE, NOTIFICATIONS_COLLECTION_NAME) # type: ignore
-        current_notifications = data['documents']
+        past_notifications = data['documents']
+
+        past_notifications_dict: dict[str, AKASH_NOTIFICATION] = dict()
+
+        for notifications in past_notifications:
+            past_notifications_dict[notifications['lease']] = notifications
 
 
-
-        # Insert the events into the MongoDB notifications collection
+        # Insert the events into the database notifications collection
         for event in events:
-            if event in current_notifications and get_no_of_days(event['timestamp'], get_current_utc_timestamp()) < 1:
+            if (past_notifications_dict.get(event['lease']) != None and 
+                get_no_of_days(past_notifications_dict[event['lease']]['timestamp'], get_current_utc_timestamp()) < 1):
                 continue
             task = add_document_async(NOTIFICATIONS_COLLECTION_NAME, event['lease'], event)
             tasks.append(task)
@@ -247,4 +252,4 @@ def main(context):
         return context.res.empty()
 
     except Exception as e:
-        raise e
+        raise context.res.json({'error': str(e)})
