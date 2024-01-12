@@ -67,6 +67,7 @@ if not akash_balance_threshold:
 
 # Async wrapper around add document
 async def add_document_async(collection_name: str, doc_id: str, doc: Union[AKASH_LEASE, AKASH_NOTIFICATION]):
+    print(f"Adding {doc_id} into {collection_name}.")
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as pool:
         result = await loop.run_in_executor(pool, lambda: db.create_document(RESOURCE, collection_name, doc_id, doc))
@@ -75,6 +76,7 @@ async def add_document_async(collection_name: str, doc_id: str, doc: Union[AKASH
 
 # Async wrapper around update document
 async def update_document_async(collection_name: str, doc_id: str, doc: Union[AKASH_LEASE, AKASH_NOTIFICATION]):
+    print(f"Updating {doc_id} in {collection_name}.")
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as pool:
         result = await loop.run_in_executor(pool, lambda: db.update_document(RESOURCE, collection_name, doc_id, doc))
