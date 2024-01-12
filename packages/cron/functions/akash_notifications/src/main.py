@@ -250,7 +250,7 @@ def main():
             tasks.append(task)
         
         loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.gather(*tasks))
+        loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
         loop.close()
 
     except Exception as e:
