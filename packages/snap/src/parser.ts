@@ -67,15 +67,6 @@ export const decodeProtoMessage = async (typeUrl: string, value: Uint8Array) => 
 
 export const decodeTxBodyIntoMessages = async (typeUrl: string, value: Uint8Array) => {
 
-  const protoRegistry: ReadonlyArray<[string, GeneratedType]> = [
-      ...cosmosProtoRegistry,
-      ...cosmwasmProtoRegistry,
-      ...ibcProtoRegistry,
-      ...osmosisProtoRegistry
-  ];
-
-  const registry = new Registry(protoRegistry);
-
   if (!isTxBodyEncodeObject({typeUrl, value})) {
     throw new Error("Not a TxBody type URL");
   }
