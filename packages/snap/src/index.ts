@@ -14,6 +14,7 @@ import { bigintReplacer, decodeProtoMessage } from "./parser";
 import Long from "long";
 import { Key } from '@keplr-wallet/types';
 import { fromBech32 } from '@cosmjs/encoding';
+import { isTxBodyEncodeObject } from "@cosmjs/proto-signing";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -328,9 +329,16 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
       let txBody = TxBody.decode(signDocNew.bodyBytes);
       const msgs = [];
+      
       for (const msg of txBody.messages) {
-        let decMsg = await decodeProtoMessage(msg.typeUrl, msg.value);
-        msgs.push(decMsg);
+        if (isTxBodyEncodeObject(msg)){
+          let decMsg = await decodeProtoMessage(msg.typeUrl, msg.value);
+
+          if (msg.typeUrl == "/cosmos.tx.v1beta1.TxBody"){
+             decMsg.value = msg.value['messages']
+          } 
+            msgs.push(decMsg);
+        }
       }
 
       // create all msg prompts
@@ -348,6 +356,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         ui.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
         ui.push(divider())
       });
+
+      ui.push(text("Memo"))
+      ui.push(text(txBody.memo));
 
       // Ensure user confirms transaction
       let confirmationDirect = await snap.request({
