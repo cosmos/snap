@@ -41,8 +41,7 @@ export class ChainState {
     let node = await snap.request({
       method: "snap_getBip44Entropy",
       params: {
-        coinType:
-          typeof chain.slip44 == "number" ? chain.slip44 : DEFAULT_SLIP44,
+        coinType: Number(chain.slip44),
       },
     });
 
@@ -87,7 +86,7 @@ export class ChainState {
     let node = await snap.request({
       method: "snap_getBip44Entropy",
       params: {
-        coinType: DEFAULT_SLIP44,
+        coinType: Number(chain.slip44),
       },
     });
 
