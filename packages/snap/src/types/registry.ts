@@ -103,4 +103,8 @@ export let registry = [
     chain_id: "umee",
     url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/umee/chain.json",
   },
+  {
+    chain_id: "union-testnet-6",
+    url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/testnets/uniontestnet/chain.json",
+  }
 ];
