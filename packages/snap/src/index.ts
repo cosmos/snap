@@ -10,10 +10,11 @@ import { sendTx, signAmino, signDirect, submitTransaction } from "./transaction"
 import { COIN_TYPES, DEFAULT_FEES } from "./constants";
 import { SignDoc, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { StdSignDoc } from "@cosmjs/amino";
-import { bigintReplacer, decodeProtoMessage } from "./parser";
+import { bigintReplacer, decodeProtoMessage, decodeTxBodyIntoMessages } from "./parser";
 import Long from "long";
 import { Key } from '@keplr-wallet/types';
 import { fromBech32 } from '@cosmjs/encoding';
+import { isTxBodyEncodeObject } from "@cosmjs/proto-signing";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -328,7 +329,16 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       }
       let txBody = TxBody.decode(signDocNew.bodyBytes);
       const msgs = [];
+      
       for (const msg of txBody.messages) {
+        if (isTxBodyEncodeObject(msg)) {
+          const messages = await decodeTxBodyIntoMessages(msg.typeUrl, msg.value);
+          for (const message of messages) {
+            let decMsgTxBody = await decodeProtoMessage(message.typeUrl, message.value);
+            msgs.push(decMsgTxBody);
+          }
+          continue;
+        }
         let decMsg = await decodeProtoMessage(msg.typeUrl, msg.value);
         msgs.push(decMsg);
       }
@@ -336,18 +346,28 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       // create all msg prompts
       let ui = [
         heading("Confirm Transaction"),
+        divider(),
         heading("Chain"),
         text(`${request.params.chain_id}`),
         divider(),
         heading("Transactions"),
-        divider(),
       ]
 
       msgs.map(item => {
-        ui.push(heading(item.typeUrl)),
-        ui.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
         ui.push(divider())
+        ui.push(heading(item.typeUrl))
+        if (item.value == null) {
+          ui.push(text('Blind signing. ***Proceed with caution!***'))
+        } else {
+          ui.push(text(JSON.stringify(bigintReplacer(item.value), null, 2)))
+        }
       });
+
+      if (txBody.memo) {
+        ui.push(divider())
+        ui.push(heading("Memo"))
+        ui.push(text(txBody.memo))
+      }
 
       // Ensure user confirms transaction
       let confirmationDirect = await snap.request({

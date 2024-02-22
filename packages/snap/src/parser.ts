@@ -1,4 +1,5 @@
-import { GeneratedType, Registry } from "@cosmjs/proto-signing";
+import { GeneratedType, Registry, isTxBodyEncodeObject } from "@cosmjs/proto-signing";
+import { TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 
 import {
     cosmosProtoRegistry,
@@ -47,18 +48,31 @@ export const decodeProtoMessage = async (typeUrl: string, value: Uint8Array) => 
     // Get the proto type from the registry
     let protoType = registry.lookupType(typeUrl);
 
-    if (protoType == undefined) {
+    // We return null to indicate blind signing event if the type is not found or its not txbody
+    if ((protoType == undefined) && (!isTxBodyEncodeObject({typeUrl, value}))) {
         return {
-            value,
+            value: null,
             typeUrl
         }
     }
 
     // Decode the binary data
-    const decoded = protoType.decode(value);
+    const decoded = registry.decode({ typeUrl, value });
 
     return {
         typeUrl,
         value: decoded
     }
+}
+
+export const decodeTxBodyIntoMessages = async (typeUrl: string, value: Uint8Array) => {
+
+  if (!isTxBodyEncodeObject({typeUrl, value})) {
+    throw new Error("Not a TxBody type URL");
+  }
+
+  const body = TxBody.decode(value);
+
+  return body.messages;
+
 }
