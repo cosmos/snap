@@ -25,6 +25,7 @@ class Status(Enum):
 class AKASH_LEASE(TypedDict):
     lease_id: str
     state: str
+    address: str
 
 class AKASH_NOTIFICATION(TypedDict):
     read: bool
@@ -95,15 +96,15 @@ def get_lease_shut_down_events(current_open_leases):
     else:
         old_leases: list[AKASH_LEASE] = []
     
-    closed_leases: list[str] = [] # stores leases that were logged before and are now closed
-    prev_open_leases: list[str] = [] # stores leases that were logged before and are still open
+    closed_leases: list[AKASH_LEASE] = [] # stores leases that were logged before and are now closed
+    prev_open_leases: list[AKASH_LEASE] = [] # stores leases that were logged before and are still open
 
 
     # Compare the current open leases with the previous ones to determine if any have been closed
     for lease in old_leases:
         if current_open_leases.get(lease['lease_id']) is None:
             # If a lease has been shut down, mark its state as "closed" and record the event
-            closed_leases.append(lease['lease_id'])
+            closed_leases.append(lease)
             add: AKASH_NOTIFICATION = {
                 "read" : False,
                 "address" : lease['lease_id'].split('/')[0],
@@ -114,28 +115,30 @@ def get_lease_shut_down_events(current_open_leases):
             events.append(add)
         else:
             # record previously logged leases
-            prev_open_leases.append(lease['lease_id'])
+            prev_open_leases.append(lease)
     
 
     # Update the leases that are closed now
     for lease in closed_leases:
         doc: AKASH_LEASE = {
             'state' : Status.CLOSED.value,
-            'lease_id' : lease,
+            'lease_id' : lease['lease_id'],
+            'address': lease['address']
         }
-        event = update_document_async(OPEN_LEASE_COLLECTION_NAME, lease, doc)
+        event = update_document_async(OPEN_LEASE_COLLECTION_NAME, lease['lease_id'], doc)
         tasks.append(event)
 
     # Get New Leases
-    new_leases: list[str] = [lease for lease in list(current_open_leases.keys()) if lease not in prev_open_leases]
+    new_leases: list[AKASH_LEASE] = [lease for lease in list(current_open_leases.values()) if lease not in prev_open_leases]
     
     # Insert New leases
     for lease in new_leases:
         doc: AKASH_LEASE = {
             'state' : Status.OPEN.value,
-            'lease_id' : lease,
+            'lease_id' : lease['lease_id'],
+            'address': lease['address']
         }
-        event = add_document_async(OPEN_LEASE_COLLECTION_NAME, lease, doc)
+        event = add_document_async(OPEN_LEASE_COLLECTION_NAME, lease['lease_id'], doc)
         tasks.append(event)
 
     return events
@@ -149,8 +152,9 @@ def get_lease_low_balance_events(deployments):
     for item in deployments:
         # Record all the current open leases
         add: AKASH_LEASE = {
-        "lease_id": item['deployment']['deployment_id']['dseq'],
-        "state": item['deployment']['state']
+            "lease_id": item['deployment']['deployment_id']['dseq'],
+            "state": item['deployment']['state'],
+            "address": item['deployment']['deployment_id']['owner']
         }
         current_open_leases[item['deployment']['deployment_id']['dseq']] = add
         # check for low balance
@@ -159,7 +163,7 @@ def get_lease_low_balance_events(deployments):
                 "read" : False,
                 "address" : item['escrow_account']['owner'],
                 "lease" : item['deployment']['deployment_id']['dseq'],
-                "notification": f"Lease balance is below $1 for lease {item['deployment']['deployment_id']['dseq']}. Refill as soon as possible.",
+                "notification": f"Lease balance is below 1 for lease {item['deployment']['deployment_id']['dseq']}. Refill as soon as possible.",
                 "timestamp": get_current_utc_timestamp()
             }
             events.append(notif_add)            
