@@ -61,7 +61,7 @@ def main(context):
         context.error(f"Missing address in request body")
         raise Exception("Missing address in request body")
     
-    address: str = body.address
+    address: str = body['address']
     print(f"Updating Akash leases for {address}")
 
     client = (
