@@ -62,7 +62,7 @@ def main(context):
         raise Exception("Missing address in request body")
     
     address: str = body['address']
-    print(f"Updating Akash leases for {address}")
+    context.log(f"Updating Akash leases for {address}")
 
     client = (
         Client()
@@ -79,6 +79,7 @@ def main(context):
     page_limit = 1000
 
     # fetch all open akash leases
+    leases: list[AKASH_LEASE] = []
     while True:
 
         # Set parameters for the only open leases
@@ -99,20 +100,22 @@ def main(context):
             data = response.json()
             deployments = data['deployments']
 
-            leases: list[AKASH_LEASE] = [{ "lease_id": deployment["deployment"]["deployment_id"]["dseq"], "state": deployment["deployment"]["state"], "address": deployment["deployment"]["deployment_id"]["owner"] } for deployment in deployments]
+            leases = [{ "lease_id": deployment["deployment"]["deployment_id"]["dseq"], "state": deployment["deployment"]["state"], "address": deployment["deployment"]["deployment_id"]["owner"] } for deployment in deployments]
 
             lease_return: DB_LEASE_RETURN = db.list_documents(RESOURCE, OPEN_LEASE_COLLECTION_NAME) # type: ignore
             current_leases = lease_return["documents"]
 
-            # Check which leases have there status changed and add notifications to it
+            # Check which leases have there status changed and add notifications to it if changed
             for lease in leases:
                 if lease in current_leases:
-                    found: list[AKASH_LEASE] = list(filter(lambda d: d['lease_id'] == lease["lease_id"], current_leases))
+                    found_lease: list[AKASH_LEASE] = list(filter(lambda d: d['lease_id'] == lease["lease_id"], current_leases))
                     # If we have not found any lease with the same id, continue through loop but log it
-                    if len(found) != 0:
+                    if len(found_lease) != 0:
                         context.log(f"Lease {lease['lease_id']} not found in current leases. Continuing.")
                         continue
-                    if found[0]['state'] != lease['state']:
+                    # If we get here we have found the lease
+                    found = True
+                    if found_lease[0]['state'] != lease['state']:
                         notif_add: AKASH_NOTIFICATION = {
                             "read" : False,
                             "address" : lease["address"],
@@ -122,6 +125,11 @@ def main(context):
                         }
                         res = db.create_document(RESOURCE, NOTIFICATIONS_COLLECTION_NAME, uuid.uuid4(), notif_add)
                         docs_added.append(res)
+                    # Since we already have the lease in the database, we can update it
+                    db.update_document(RESOURCE, OPEN_LEASE_COLLECTION_NAME, lease["lease_id"], lease)
+                else:
+                    # If we have not found the lease, we add it to the database
+                    db.create_document(RESOURCE, OPEN_LEASE_COLLECTION_NAME, lease["lease_id"], lease)
 
             #update pagination info
             pagination_total = data['pagination']['total']
