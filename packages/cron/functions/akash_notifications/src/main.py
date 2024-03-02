@@ -12,10 +12,13 @@ import uuid
 def main(context):
 
     class Status(Enum):
+        ACTIVE = 'active'
         OPEN = 'open'
         CLOSED = 'closed'
         PAUSED = 'paused'
         OVERDRAWN = 'overdrawn'
+        INSUFFIENCT = 'insufficient_funds'
+        INVALID = 'invalid'
 
     class AKASH_LEASE(TypedDict):
         lease_id: str
@@ -138,6 +141,7 @@ def main(context):
                     # Since we already have the lease in the database, we can update it
                     db.update_document(RESOURCE, OPEN_LEASE_COLLECTION_NAME, lease["lease_id"], lease)
                 else:
+                    context.log(f"Adding lease {lease} to the database.")
                     # If we have not found the lease, we add it to the database
                     db.create_document(RESOURCE, OPEN_LEASE_COLLECTION_NAME, lease["lease_id"], lease)
 
