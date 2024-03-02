@@ -2,6 +2,7 @@ from datetime import datetime
 from enum import Enum
 import json
 from typing import TypedDict
+from appwrite.query import Query
 from appwrite.client import Client
 from appwrite.services import databases
 import os
@@ -13,6 +14,8 @@ def main(context):
     class Status(Enum):
         OPEN = 'open'
         CLOSED = 'closed'
+        PAUSED = 'paused'
+        OVERDRAWN = 'overdrawn'
 
     class AKASH_LEASE(TypedDict):
         lease_id: str
@@ -25,6 +28,7 @@ def main(context):
         lease: str
         notification: str
         timestamp: float
+        type: Status
 
     class DB_NOTIFICATION_RETURN(TypedDict):
         total: int
@@ -113,18 +117,24 @@ def main(context):
                     if len(found_lease) != 0:
                         context.log(f"Lease {lease['lease_id']} not found in current leases. Continuing.")
                         continue
-                    # If we get here we have found the lease
-                    found = True
                     if found_lease[0]['state'] != lease['state']:
                         notif_add: AKASH_NOTIFICATION = {
                             "read" : False,
                             "address" : lease["address"],
                             "lease" : lease["lease_id"],
                             "notification": f"Lease {lease['lease_id']} status has changed to {lease['state']}.",
-                            "timestamp": datetime.utcnow().timestamp()
+                            "timestamp": datetime.utcnow().timestamp(),
+                            "type": lease['state']
                         }
-                        res = db.create_document(RESOURCE, NOTIFICATIONS_COLLECTION_NAME, uuid.uuid4(), notif_add)
-                        docs_added.append(res)
+                        # Check if we have sent this notification already, (do not compare timestamp or read)
+                        notif_return: DB_NOTIFICATION_RETURN = db.list_documents(RESOURCE, NOTIFICATIONS_COLLECTION_NAME, [Query.equal("address", lease["address"]), Query.equal("lease_id", lease["lease_id"]), Query.equal("notification", f"Lease {lease['lease_id']} status has changed to {lease['state']}."), Query.equal("type", lease['state'])]) # type: ignore
+                        # Add the notification if it does not exist # type: ignore
+                        if len(notif_return["documents"]) == 0:
+                            context.log(f"Adding notification for lease {lease['lease_id']}.")
+                            res = db.create_document(RESOURCE, NOTIFICATIONS_COLLECTION_NAME, uuid.uuid4(), notif_add)
+                            docs_added.append(res)
+                        else:
+                            context.log(f"Notification for lease {lease['lease_id']} already exists.")
                     # Since we already have the lease in the database, we can update it
                     db.update_document(RESOURCE, OPEN_LEASE_COLLECTION_NAME, lease["lease_id"], lease)
                 else:
