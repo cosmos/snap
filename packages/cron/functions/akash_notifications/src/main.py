@@ -108,18 +108,17 @@ def main(context):
             deployments = data['deployments']
 
             leases = [{ "lease_id": deployment["deployment"]["deployment_id"]["dseq"], "state": deployment["deployment"]["state"], "address": deployment["deployment"]["deployment_id"]["owner"] } for deployment in deployments]
+            context.log(f"Leases: {leases}")
 
-            lease_return: DB_LEASE_RETURN = db.list_documents(RESOURCE, OPEN_LEASE_COLLECTION_NAME) # type: ignore
+            lease_return: DB_LEASE_RETURN = db.list_documents(RESOURCE, OPEN_LEASE_COLLECTION_NAME, [Query.equal("address", address)]) # type: ignore
             current_leases = lease_return["documents"]
+            context.log(f"Current leases: {current_leases}")
 
             # Check which leases have there status changed and add notifications to it if changed
             for lease in leases:
-                if lease["lease_id"] in [c_lease["lease_id"] for c_lease in current_leases]:
-                    found_lease: list[AKASH_LEASE] = list(filter(lambda d: d['lease_id'] == lease["lease_id"], current_leases))
-                    # If we have not found any lease with the same id, continue through loop but log it
-                    if len(found_lease) != 0:
-                        context.log(f"Lease {lease['lease_id']} not found in current leases. Continuing.")
-                        continue
+                found_lease = list(filter(lambda d: d.get('lease_id') == lease["lease_id"], current_leases))
+                context.log(f"Found leases: {found_lease}")
+                if len(found_lease) > 0:
                     if found_lease[0]['state'] != lease['state']:
                         notif_add: AKASH_NOTIFICATION = {
                             "read" : False,
@@ -130,11 +129,11 @@ def main(context):
                             "type": lease['state']
                         }
                         # Check if we have sent this notification already, (do not compare timestamp or read)
-                        notif_return: DB_NOTIFICATION_RETURN = db.list_documents(RESOURCE, NOTIFICATIONS_COLLECTION_NAME, [Query.equal("address", lease["address"]), Query.equal("lease_id", lease["lease_id"]), Query.equal("notification", f"Lease {lease['lease_id']} status has changed to {lease['state']}."), Query.equal("type", lease['state'])]) # type: ignore
+                        notif_return: DB_NOTIFICATION_RETURN = db.list_documents(RESOURCE, NOTIFICATIONS_COLLECTION_NAME, [Query.equal("address", lease["address"]), Query.equal("lease", lease["lease_id"]), Query.equal("notification", f"Lease {lease['lease_id']} status has changed to {lease['state']}."), Query.equal("type", lease['state'])]) # type: ignore
                         # Add the notification if it does not exist # type: ignore
                         if len(notif_return["documents"]) == 0:
                             context.log(f"Adding notification for lease {lease['lease_id']}.")
-                            res = db.create_document(RESOURCE, NOTIFICATIONS_COLLECTION_NAME, uuid.uuid4(), notif_add)
+                            res = db.create_document(RESOURCE, NOTIFICATIONS_COLLECTION_NAME, str(uuid.uuid4()), notif_add)
                             docs_added.append(res)
                         else:
                             context.log(f"Notification for lease {lease['lease_id']} already exists.")
