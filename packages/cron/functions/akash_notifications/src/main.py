@@ -111,7 +111,7 @@ def main(context):
 
             # Check which leases have there status changed and add notifications to it if changed
             for lease in leases:
-                if lease in current_leases:
+                if lease["lease_id"] in [c_lease["lease_id"] for c_lease in current_leases]:
                     found_lease: list[AKASH_LEASE] = list(filter(lambda d: d['lease_id'] == lease["lease_id"], current_leases))
                     # If we have not found any lease with the same id, continue through loop but log it
                     if len(found_lease) != 0:
