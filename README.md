@@ -2,7 +2,7 @@
 Cosmos Metamask Snap aims to add full support of Metamask, a highly popular Ethereum wallet, to all Cosmos SDK blockchains, potentially opening the door to over 30 million Ethereum users and stimulating growth for every project in the Cosmos ecosystem.
 
 ## Developer Preview Software
-Please note, to develop this Metamask Snap you need to use Metamask Flask, a canary distribution for developers that provides access to upcoming features wihtin Metamask.
+Please note, to develop this Metamask Snap you need to use Metamask Flask, a canary distribution for developers that provides access to upcoming features within Metamask.
 
 ## Contribution
 Your contributions are always welcome! Please have a look at the [contribution guidelines](CONTRIBUTING.md) first.
@@ -66,7 +66,7 @@ const initialized = await ethereum.request({
 ```
 
 ## Suggest Chain
-This Snap has default support for coin types `118, 564, 60, 459, 529, 330, 494, 639, 483, 4444, 701, 990, 394, 852, 7777777, 880, 931, 371, 370, 505, 234, 5555`. All the coin types within the chain registry. If you need any other please add an issue to the repo [here](https://github.com/cosmos/snap/issues) and we will gladly add it.
+This Snap has default support for coin types `118, 564, 459, 529, 330, 494, 639, 483, 4444, 701, 990, 394, 852, 7777777, 880, 931, 371, 370, 505, 234, 5555`. All the coin types within the chain registry except for coin type 60 (Ethermint, which is already supported in standard MetaMask). If you need any other please add an issue to the repo [here](https://github.com/cosmos/snap/issues) and we will gladly add it.
 
 Chain info is structured like in the chain registry (i.e [Agoric](https://github.com/cosmos/chain-registry/tree/master/agoric))
 ```javascript
