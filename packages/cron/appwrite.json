@@ -22,34 +22,34 @@
         {
             "$id": "create_multisig",
             "name": "create_multisig",
-            "runtime": "python-3.9",
+            "runtime": "node-18.0",
             "execute": [],
             "events": [],
             "schedule": "",
-            "timeout": 15,
+            "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "src/main.py",
-            "commands": "pip install -r requirements.txt",
+            "entrypoint": "src/index.js",
+            "commands": "npm install",
             "ignore": [
-                "__pypackages__"
+                "node_modules"
             ],
             "path": "functions/create_multisig"
         },
         {
             "$id": "sign_multisig_tx",
             "name": "sign_multisig_tx",
-            "runtime": "python-3.9",
+            "runtime": "node-18.0",
             "execute": [],
             "events": [],
             "schedule": "",
-            "timeout": 15,
+            "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "src/main.py",
-            "commands": "pip install -r requirements.txt",
+            "entrypoint": "src/index.js",
+            "commands": "npm install",
             "ignore": [
-                "__pypackages__"
+                "node_modules"
             ],
             "path": "functions/sign_multisig_tx"
         }

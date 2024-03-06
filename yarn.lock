@@ -4647,6 +4647,17 @@ autoprefixer@latest:
   languageName: node
   linkType: hard
 
+"axios@npm:^1.4.0":
+  version: 1.6.7
+  resolution: "axios@npm:1.6.7"
+  dependencies:
+    follow-redirects: ^1.15.4
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: 87d4d429927d09942771f3b3a6c13580c183e31d7be0ee12f09be6d5655304996bb033d85e54be81606f4e89684df43be7bf52d14becb73a12727bf33298a082
+  languageName: node
+  linkType: hard
+
 "axobject-query@npm:^3.2.1":
   version: 3.2.1
   resolution: "axobject-query@npm:3.2.1"
@@ -5715,6 +5726,14 @@ autoprefixer@latest:
   checksum: a9a1503d4390d8b59ad86f4607de7870b39cad43d929813599a23714831e81c520bddf61bcdd1f8e30f05fd3a2b71ae8538e946eb2786dc65c2bbc520f692eff
   languageName: node
   linkType: hard
+
+"create_multisig@workspace:packages/cron/functions/create_multisig":
+  version: 0.0.0-use.local
+  resolution: "create_multisig@workspace:packages/cron/functions/create_multisig"
+  dependencies:
+    node-appwrite: ^11.1.1
+  languageName: unknown
+  linkType: soft
 
 "crelt@npm:^1.0.5":
   version: 1.0.6
@@ -7105,6 +7124,16 @@ autoprefixer@latest:
     debug:
       optional: true
   checksum: 584da22ec5420c837bd096559ebfb8fe69d82512d5585004e36a3b4a6ef6d5905780e0c74508c7b72f907d1fa2b7bd339e613859e9c304d0dc96af2027fd0231
+  languageName: node
+  linkType: hard
+
+"follow-redirects@npm:^1.15.4":
+  version: 1.15.5
+  resolution: "follow-redirects@npm:1.15.5"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: 5ca49b5ce6f44338cbfc3546823357e7a70813cecc9b7b768158a1d32c1e62e7407c944402a918ea8c38ae2e78266312d617dc68783fac502cbb55e1047b34ec
   languageName: node
   linkType: hard
 
@@ -9232,6 +9261,16 @@ autoprefixer@latest:
   languageName: node
   linkType: hard
 
+"node-appwrite@npm:^11.1.1":
+  version: 11.1.1
+  resolution: "node-appwrite@npm:11.1.1"
+  dependencies:
+    axios: ^1.4.0
+    form-data: ^4.0.0
+  checksum: 519c6da496f54323ec2f29cd3cf149bc7a0318c45512f9e1175b88edf64f28014bad27fc1525dcd3f7084a6ea506cccf6a832089f6b221ffdf4eea9ae4fa1ba2
+  languageName: node
+  linkType: hard
+
 "node-fetch@npm:2, node-fetch@npm:^2.6.7":
   version: 2.7.0
   resolution: "node-fetch@npm:2.7.0"
@@ -10045,6 +10084,13 @@ autoprefixer@latest:
   languageName: node
   linkType: hard
 
+"proxy-from-env@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "proxy-from-env@npm:1.1.0"
+  checksum: ed7fcc2ba0a33404958e34d95d18638249a68c430e30fcb6c478497d72739ba64ce9810a24f53a7d921d0c065e5b78e3822759800698167256b04659366ca4d4
+  languageName: node
+  linkType: hard
+
 "public-encrypt@npm:^4.0.0":
   version: 4.0.3
   resolution: "public-encrypt@npm:4.0.3"
@@ -10734,6 +10780,14 @@ autoprefixer@latest:
   checksum: 8aa5a98640ca09fe00d74416eca97551b3e42991614a3d1b824b115fc1401543650914f651ab1311518177e4d297e80b953f4cd4cd7ea1eabe824e8f2091de01
   languageName: node
   linkType: hard
+
+"sign_multisig_tx@workspace:packages/cron/functions/sign_multisig_tx":
+  version: 0.0.0-use.local
+  resolution: "sign_multisig_tx@workspace:packages/cron/functions/sign_multisig_tx"
+  dependencies:
+    node-appwrite: ^11.1.1
+  languageName: unknown
+  linkType: soft
 
 "signal-exit@npm:^3.0.0, signal-exit@npm:^3.0.3, signal-exit@npm:^3.0.7":
   version: 3.0.7

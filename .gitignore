@@ -132,3 +132,5 @@ dist
 
 # Airplane local deployment config file
 **/airplane.dev.yaml
+
+package-lock.json
