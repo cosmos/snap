@@ -1,8 +1,6 @@
-import { Client, Databases, ID } from 'node-appwrite';
+import { Client, Databases } from 'node-appwrite';
 import { createMultisigThresholdPubkey, pubkeyToAddress } from '@cosmjs/amino';
 
-// This is your Appwrite function
-// It's executed each time we get a request
 export default async ({ req, res, log, error }) => {
 
   try {
@@ -35,7 +33,6 @@ export default async ({ req, res, log, error }) => {
 
     log(`Added Multisig ${address} to database. (${JSON.stringify(response)})`)
 
-    // `res.json()` is a handy helper for sending JSON
     return res.json({
       data: response,
       success: true
