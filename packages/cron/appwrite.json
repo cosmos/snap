@@ -29,7 +29,7 @@
             "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "src/index.js",
+            "entrypoint": "dist/index.js",
             "commands": "npm install",
             "ignore": [
                 "node_modules"
@@ -46,12 +46,29 @@
             "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "src/index.js",
+            "entrypoint": "dist/index.js",
             "commands": "npm install",
             "ignore": [
                 "node_modules"
             ],
             "path": "functions/sign_multisig_tx"
+        },
+        {
+            "$id": "create_multisig_tx",
+            "name": "create_multisig_tx",
+            "runtime": "node-18.0",
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 600,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "dist/index.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules"
+            ],
+            "path": "functions/create_multisig_tx"
         }
     ]
 }
