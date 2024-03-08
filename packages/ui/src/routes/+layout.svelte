@@ -85,6 +85,7 @@
       --white: #ffffff;
       --licorice: #14141473;
       --blueberry: #594bff;
+      --akash: #FF414C;
       --eerie-black: #1b1721;
       --font-size-xl: 20px;
       --font-size-m: 14px;
