@@ -97,7 +97,7 @@
           </div>
           <div class="group-4450">
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <svg on:click={addCelestia} class="w-5 h-5 text-[#594bff] cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+            <svg on:click={addCelestia} class="w-5 h-5 text-[#FF414C] cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
             </svg>
           </div>
@@ -153,7 +153,7 @@
 
 .add-chain-button {
   align-items: center;
-  background-color: var(--blueberry);
+  background-color: var(--akash);
   border-radius: 10px;
   display: flex;
   gap: 10px;
@@ -164,7 +164,7 @@
 }
 
 .add-chain-button:hover {
-  background-color: var(--blueberry);
+  background-color: var(--akash);
   filter: brightness(1.1);
 }
 

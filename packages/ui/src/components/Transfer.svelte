@@ -307,7 +307,7 @@
 }
 
 .inter-medium-blueberry-14px {
-  color: var(--blueberry);
+  color: var(--akash);
   font-family: var(--font-family-inter);
   font-size: var(--font-size-m);
   font-style: normal;

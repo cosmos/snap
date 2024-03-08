@@ -36,7 +36,7 @@
 
 <style>
 .rectangle-12 {
-  background-color: var(--blueberry);
+  background-color: var(--akash);
   height: 29px;
   width: 5px;
 }

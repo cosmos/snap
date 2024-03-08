@@ -86,7 +86,7 @@
     .connect-button {
         padding: 10px 20px;
         color: var(--white);
-        background-color: var(--blueberry);
+        background-color: var(--akash);
         border-radius: 10px;
         letter-spacing: -0.24px;
         cursor: pointer;
@@ -96,7 +96,7 @@
     }
 
     .connect-button:hover {
-        background-color: var(--blueberry);
+        background-color: var(--akash);
         filter: brightness(1.1);
     }
 

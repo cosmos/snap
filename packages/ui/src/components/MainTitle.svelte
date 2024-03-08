@@ -13,6 +13,7 @@
     :root {
         --white: #ffffff;
         --blueberry: #594bff;
+        --akash: #FF414C;
         --font-size-xxl: 56px;
         --font-family-inter: "Inter", Helvetica;
     }
@@ -31,7 +32,7 @@
     }
 
     .span1 {
-        color: var(--blueberry);
+        color: var(--akash);
     }
 
     .inter-extra-bold-white-56px {

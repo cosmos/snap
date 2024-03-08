@@ -30,7 +30,7 @@
 
 .frame-1-4 {
   align-items: center;
-  background-color: var(--blueberry);
+  background-color: var(--akash);
   border-radius: 10px;
   display: flex;
   gap: 10px;
@@ -68,7 +68,7 @@
 }
 
 .button-send:hover {
-  background-color: var(--blueberry);
+  background-color: var(--akash);
   filter: brightness(1.1);
 }
 

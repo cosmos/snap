@@ -280,7 +280,7 @@
                                     <TruncateString cursor="default" str={chainAddress}/>
                                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                                     {#if copied}
-                                        <svg class="text-[#594bff] ml-2 w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
+                                        <svg class="text-[#FF414C] ml-2 w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 1v4a1 1 0 0 1-1 1H1m4 6 2 2 4-4m4-8v16a.97.97 0 0 1-.933 1H1.933A.97.97 0 0 1 1 18V5.828a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 1 5.828 1h8.239A.97.97 0 0 1 15 2Z"/>
                                         </svg>
                                     {:else}
@@ -302,7 +302,7 @@
                                 <div class="relative justify-center items-center w-full">
                                     <input on:change={update} bind:value={amount} type="number" class="remove-arrow mt-3 custom-bg outline-none inter-font inline-flex w-full rounded-[10px] shadow-sm px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 border-opacity-35 border border-gray-600 focus:border-none focus:outline-none" placeholder="Enter amount" required>
                                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                    <div on:click={() => { amount = Number(available); update(); }} class="cursor-pointer absolute top-5 right-4 font-semibold text-[#594bff] text-sm text-right">
+                                    <div on:click={() => { amount = Number(available); update(); }} class="cursor-pointer absolute top-5 right-4 font-semibold text-[#FF414C] text-sm text-right">
                                         MAX
                                     </div>
                                 </div>
@@ -332,7 +332,7 @@
                                             <div on:mouseover={() => showEditButton = true} on:click={() => editReceiver = !editReceiver}><TruncateString str={receiver}/></div>
                                             <!-- svelte-ignore a11y-click-events-have-key-events -->
                                             {#if copiedReciever}
-                                                <svg class="text-[#594bff] ml-2 w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
+                                                <svg class="text-[#FF414C] ml-2 w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
                                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 1v4a1 1 0 0 1-1 1H1m4 6 2 2 4-4m4-8v16a.97.97 0 0 1-.933 1H1.933A.97.97 0 0 1 1 18V5.828a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 1 5.828 1h8.239A.97.97 0 0 1 15 2Z"/>
                                                 </svg>
                                             {:else}
@@ -345,7 +345,7 @@
                                             <span class="w-full flex justify-end cursor-pointer text-white font-inter">
                                                 Edit address
                                             </span>
-                                            <svg class="w-5 h-full ml-2 cursor-pointer text-[#594bff]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                            <svg class="w-5 h-full ml-2 cursor-pointer text-[#FF414C]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                                 <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
                                                   <path d="M19 11V9a1 1 0 0 0-1-1h-.757l-.707-1.707.535-.536a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0l-.536.535L12 2.757V2a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v.757l-1.707.707-.536-.535a1 1 0 0 0-1.414 0L2.929 4.343a1 1 0 0 0 0 1.414l.536.536L2.757 8H2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h.757l.707 1.707-.535.536a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l.536-.535L8 17.243V18a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-.757l1.707-.708.536.536a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-.535-.536.707-1.707H18a1 1 0 0 0 1-1Z"/>
                                                   <path d="M10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
@@ -356,7 +356,7 @@
                                 {:else}
                                     <input on:change={update} class="flex justify-end items-end w-1/2 tracking-tight leading-normal bg-transparent focus:outline-none custom-bg inter-font rounded-[10px] border border-gray-600 shadow-sm px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 border-opacity-35" bind:value={receiver}/>
                                     <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                    <svg on:click={() => editReceiver = !editReceiver} class="w-5 h-full ml-2 cursor-pointer text-[#594bff]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                    <svg on:click={() => editReceiver = !editReceiver} class="w-5 h-full ml-2 cursor-pointer text-[#FF414C]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
                                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
                                     </svg>
                                 {/if}
@@ -455,7 +455,7 @@
         text-align: right;
     }
     .inter-medium-blueberry-14px {
-        color: var(--blueberry);
+        color: var(--akash);
         font-family: var(--font-family-inter);
         font-size: var(--font-size-m);
         font-style: normal;

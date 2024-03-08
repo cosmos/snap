@@ -67,7 +67,7 @@
 .overlap-group-3 {
   -webkit-backdrop-filter: blur(15px) brightness(100%);
   backdrop-filter: blur(15px) brightness(100%);
-  background-color: var(--blueberry);
+  background-color: var(--akash);
   background-image: url(/cosmos-atom-logo.png);
   background-size: 100% 100%;
   border: 1px solid;
