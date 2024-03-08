@@ -1,36 +1,34 @@
 {
-    "projectId": "659832bdd99000571f19",
-    "projectName": "MetaMask Snaps",
+    "projectId": "65eaa8ee99e1f7134773",
+    "projectName": "Metamask Snap",
     "functions": [
         {
             "$id": "659e1d905dde5ef4504f",
             "name": "akash_notifications",
-            "runtime": "python-3.9",
+            "runtime": "deno-1.35",
             "execute": [],
             "events": [],
             "schedule": "",
             "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "src/main.py",
-            "commands": "pip install -r requirements.txt",
-            "ignore": [
-                "__pypackages__"
-            ],
+            "entrypoint": "src/index.ts",
+            "commands": "deno cache src/main.ts",
+            "ignore": [],
             "path": "functions/akash_notifications"
         },
         {
             "$id": "create_multisig",
             "name": "create_multisig",
-            "runtime": "node-18.0",
+            "runtime": "deno-1.35",
             "execute": [],
             "events": [],
             "schedule": "",
             "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "dist/index.js",
-            "commands": "npm install",
+            "entrypoint": "src/index.ts",
+            "commands": "deno cache src/main.ts",
             "ignore": [
                 "node_modules"
             ],
@@ -39,35 +37,31 @@
         {
             "$id": "sign_multisig_tx",
             "name": "sign_multisig_tx",
-            "runtime": "node-18.0",
+            "runtime": "deno-1.35",
             "execute": [],
             "events": [],
             "schedule": "",
             "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "dist/index.js",
-            "commands": "npm install",
-            "ignore": [
-                "node_modules"
-            ],
+            "entrypoint": "src/index.ts",
+            "commands": "deno cache src/main.ts",
+            "ignore": [],
             "path": "functions/sign_multisig_tx"
         },
         {
             "$id": "create_multisig_tx",
             "name": "create_multisig_tx",
-            "runtime": "node-18.0",
+            "runtime": "deno-1.35",
             "execute": [],
             "events": [],
             "schedule": "",
             "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "dist/index.js",
-            "commands": "npm install",
-            "ignore": [
-                "node_modules"
-            ],
+            "entrypoint": "src/index.ts",
+            "commands": "deno cache src/main.ts",
+            "ignore": [],
             "path": "functions/create_multisig_tx"
         }
     ]

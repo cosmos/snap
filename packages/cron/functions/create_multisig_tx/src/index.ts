@@ -1,13 +1,17 @@
-import { Client, Databases, ID } from 'node-appwrite';
-import { Multisig, RequestBody } from './types';
-import { SigningStargateClient } from '@cosmjs/stargate'
-import { pubkeyToAddress } from '@cosmjs/launchpad';
-import { createMultisigThresholdPubkey } from '@cosmjs/amino';
+import { Client, Databases, ID } from 'npm:node-appwrite';
+import { Multisig, RequestBody } from './types.ts';
+import { SigningStargateClient } from 'npm:@cosmjs/stargate'
+import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';
+import { createMultisigThresholdPubkey } from 'npm:@cosmjs/amino';
 
 type Context = {
+  // deno-lint-ignore no-explicit-any
   req: any;
+  // deno-lint-ignore no-explicit-any
   res: any;
+  // deno-lint-ignore no-explicit-any
   log: (msg: any) => void;
+  // deno-lint-ignore no-explicit-any
   error: (msg: any) => void;
 };
 
@@ -18,12 +22,14 @@ export default async ({ req, res, log, error }: Context) => {
     if (req.method != "POST") {
       throw new Error(`Invalid request method: ${req.method}`);
     }
-    if (!process.env.APPWRITE_FUNCTION_PROJECT_ID) {
+    if (!Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID")) {
       throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
     }
-    if (!process.env.APPWRITE_API_KEY) {
+    const project_id = Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID");
+    if (!Deno.env.get("APPWRITE_API_KEY")) {
       throw new Error("APPWRITE_API_KEY is not defined");
     }
+    const api_key_appwrite = Deno.env.get("APPWRITE_API_KEY");
 
     const { multisig_id, chain_id, type_url, message, signature, address, rpc, prefix } = JSON.parse(req.bodyRaw) as RequestBody;
 
@@ -54,8 +60,8 @@ export default async ({ req, res, log, error }: Context) => {
 
     const client = new Client()
       .setEndpoint('https://cloud.appwrite.io/v1')
-      .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
-      .setKey(process.env.APPWRITE_API_KEY);
+      .setProject(project_id!)
+      .setKey(api_key_appwrite!);
     
     const database = new Databases(client);
 
