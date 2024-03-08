@@ -21,14 +21,19 @@ export default async ({ req, res, error }: Context) => {
     if (req.method != "POST") {
       throw new Error(`Invalid request method: ${req.method}`);
     }
-    if (!Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID")) {
-      throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
+
+    const appwriteKey = Deno.env.get("APPWRITE_KEY");
+    if (!appwriteKey) {
+      throw new Error("The environment variable APPWRITE_KEY is not set.");
+    }
+    const appwrite_url = Deno.env.get("APPWRITE_URL");
+    if (!appwrite_url) {
+      throw new Error("APPWRITE_URL is not defined");
     }
     const project_id = Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID");
-    if (!Deno.env.get("APPWRITE_API_KEY")) {
-      throw new Error("APPWRITE_API_KEY is not defined");
+    if (!project_id) {
+      throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
     }
-    const api_key_appwrite = Deno.env.get("APPWRITE_API_KEY");
 
     const { id, password, multisig_id, rpc, fee, prefix, signature } = JSON.parse(req.bodyRaw) as RequestBody;
 
@@ -55,9 +60,9 @@ export default async ({ req, res, error }: Context) => {
     }
 
     const client = new Client()
-      .setEndpoint('https://cloud.appwrite.io/v1')
-      .setProject(project_id!)
-      .setKey(api_key_appwrite!);
+      .setEndpoint(appwrite_url)
+      .setProject(project_id)
+      .setKey(appwriteKey);
     
     const database = new Databases(client);
 

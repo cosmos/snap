@@ -48,10 +48,18 @@ const appwriteKey = Deno.env.get("APPWRITE_KEY");
 if (!appwriteKey) {
   throw new Error("The environment variable APPWRITE_KEY is not set.");
 }
+const appwrite_url = Deno.env.get("APPWRITE_URL");
+if (!appwrite_url) {
+  throw new Error("APPWRITE_URL is not defined");
+}
+const project_id = Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID");
+if (!project_id) {
+  throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
+}
 
 const client = new Client()
-  .setEndpoint("https://cloud.appwrite.io/v1")
-  .setProject("659832bdd99000571f19")
+  .setEndpoint(appwrite_url)
+  .setProject(project_id)
   .setKey(appwriteKey);
 
 const db = new Databases(client);
