@@ -65,7 +65,6 @@ export default async ({ req, res, log, error }: Context) => {
       name: name,
       threshold: threshold,
       members: pubKeys.map((pubKey) => JSON.stringify(pubKey)),
-      pubkey: multiSigPubKey
     });
 
     log(`Added Multisig ${address} to database. (${JSON.stringify(response)})`)
