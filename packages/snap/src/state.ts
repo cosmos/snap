@@ -2,6 +2,7 @@ import { Chains, Chain, CosmosAddress } from "./types/chains";
 import { Addresses, Address } from "./types/address";
 import { AccountData, DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
 import { DEFAULT_SLIP44, WALLET_URL } from "./constants";
+import { getWallet } from "./wallet";
 
 /**
  * ChainState is the class to manage all Chain state within Metamask.

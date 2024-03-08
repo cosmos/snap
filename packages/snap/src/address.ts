@@ -1,5 +1,5 @@
-import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
 import { Chain } from "./types/chains";
+import { getWallet } from "./wallet";
 
 /**
  * getAddress Gets the address for the chain specified.

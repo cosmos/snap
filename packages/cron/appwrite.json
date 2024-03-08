@@ -1,0 +1,74 @@
+{
+    "projectId": "659832bdd99000571f19",
+    "projectName": "MetaMask Snaps",
+    "functions": [
+        {
+            "$id": "659e1d905dde5ef4504f",
+            "name": "akash_notifications",
+            "runtime": "python-3.9",
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 600,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/main.py",
+            "commands": "pip install -r requirements.txt",
+            "ignore": [
+                "__pypackages__"
+            ],
+            "path": "functions/akash_notifications"
+        },
+        {
+            "$id": "create_multisig",
+            "name": "create_multisig",
+            "runtime": "node-18.0",
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 600,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "dist/index.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules"
+            ],
+            "path": "functions/create_multisig"
+        },
+        {
+            "$id": "sign_multisig_tx",
+            "name": "sign_multisig_tx",
+            "runtime": "node-18.0",
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 600,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "dist/index.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules"
+            ],
+            "path": "functions/sign_multisig_tx"
+        },
+        {
+            "$id": "create_multisig_tx",
+            "name": "create_multisig_tx",
+            "runtime": "node-18.0",
+            "execute": [],
+            "events": [],
+            "schedule": "",
+            "timeout": 600,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "dist/index.js",
+            "commands": "npm install",
+            "ignore": [
+                "node_modules"
+            ],
+            "path": "functions/create_multisig_tx"
+        }
+    ]
+}
