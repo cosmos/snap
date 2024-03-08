@@ -6,7 +6,9 @@
             "$id": "659e1d905dde5ef4504f",
             "name": "akash_notifications",
             "runtime": "deno-1.35",
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 600,
@@ -21,7 +23,9 @@
             "$id": "create_multisig",
             "name": "create_multisig",
             "runtime": "deno-1.35",
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 600,
@@ -38,7 +42,9 @@
             "$id": "sign_multisig_tx",
             "name": "sign_multisig_tx",
             "runtime": "deno-1.35",
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 600,
@@ -53,7 +59,9 @@
             "$id": "create_multisig_tx",
             "name": "create_multisig_tx",
             "runtime": "deno-1.35",
-            "execute": [],
+            "execute": [
+                "any"
+            ],
             "events": [],
             "schedule": "",
             "timeout": 600,

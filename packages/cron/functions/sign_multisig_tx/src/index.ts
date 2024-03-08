@@ -1,4 +1,4 @@
-import { Client, Databases } from 'npm:node-appwrite';
+import { Client, Databases } from 'https://deno.land/x/appwrite@7.0.0/mod.ts';
 import { Multisig, RequestBody, Signature, MultisigTx } from './types.ts';
 import { fromBase64 } from "npm:@cosmjs/encoding";
 import { makeMultisignedTxBytes, SigningStargateClient } from "npm:@cosmjs/stargate";

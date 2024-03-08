@@ -1,4 +1,4 @@
-import { Client, Databases, ID } from 'npm:node-appwrite';
+import { Client, Databases, ID } from 'https://deno.land/x/appwrite@7.0.0/mod.ts';
 import { createMultisigThresholdPubkey, pubkeyToAddress } from 'npm:@cosmjs/amino';
 import { RequestBody } from './types.ts';
 
