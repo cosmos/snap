@@ -1,5 +1,5 @@
-import { StdFee, StdSignature } from '@cosmjs/launchpad';
-import { HttpEndpoint } from '@cosmjs/stargate';
+import { StdFee, StdSignature } from 'npm:@cosmjs/launchpad';
+import { HttpEndpoint } from 'npm:@cosmjs/stargate';
 
 export interface RequestBody {
   id: string;
@@ -21,7 +21,7 @@ enum MultisigTxStatus {
 }
 
 export interface Multisig {
-    threshold: Number;
+    threshold: number;
     members: string[];
     name: string;
     akash_address: string;

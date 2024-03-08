@@ -1,4 +1,4 @@
-import { HttpEndpoint } from '@cosmjs/stargate';
+import { HttpEndpoint } from 'npm:@cosmjs/stargate';
 
 export interface RequestBody {
   message: string;
@@ -12,7 +12,7 @@ export interface RequestBody {
 }
 
 export interface Multisig {
-  threshold: Number;
+  threshold: number;
   members: string[];
   name: string;
   akash_address: string;

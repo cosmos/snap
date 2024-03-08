@@ -1,4 +1,4 @@
-import { SinglePubkey } from "@cosmjs/amino";
+import { SinglePubkey } from "npm:@cosmjs/amino";
 
 export interface RequestBody {
   pubKeys: SinglePubkey[];

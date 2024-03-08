@@ -13,7 +13,7 @@
             "enabled": true,
             "logging": true,
             "entrypoint": "src/index.ts",
-            "commands": "deno cache src/main.ts",
+            "commands": "deno cache src/index.ts",
             "ignore": [],
             "path": "functions/akash_notifications"
         },
@@ -28,7 +28,7 @@
             "enabled": true,
             "logging": true,
             "entrypoint": "src/index.ts",
-            "commands": "deno cache src/main.ts",
+            "commands": "deno cache src/index.ts",
             "ignore": [
                 "node_modules"
             ],
@@ -45,7 +45,7 @@
             "enabled": true,
             "logging": true,
             "entrypoint": "src/index.ts",
-            "commands": "deno cache src/main.ts",
+            "commands": "deno cache src/index.ts",
             "ignore": [],
             "path": "functions/sign_multisig_tx"
         },
@@ -60,7 +60,7 @@
             "enabled": true,
             "logging": true,
             "entrypoint": "src/index.ts",
-            "commands": "deno cache src/main.ts",
+            "commands": "deno cache src/index.ts",
             "ignore": [],
             "path": "functions/create_multisig_tx"
         }
