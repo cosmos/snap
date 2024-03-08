@@ -2,7 +2,14 @@
 module.exports = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
   theme: {
-    extend: {},
+    extend: {
+      borderColor: ({ theme }) => ({
+        DEFAULT: theme('colors.gray.500', 'currentColor'),
+      }),
+      outlineColor: {
+        DEFAULT: 'rgb(75 85 99 / var(--tw-border-opacity))',
+      },
+    },
     screens: {
       'sm': '900px',
       // => @media (min-width: 640px) { ... }
@@ -18,7 +25,10 @@ module.exports = {
 
       '2xl': '1536px',
       // => @media (min-width: 1536px) { ... }
-    }
+    },
+    fontFamily: {
+      inter: 'var(--font-family-inter)',
+    },
   },
   plugins: [],
 }

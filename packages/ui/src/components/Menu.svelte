@@ -21,7 +21,7 @@
     <div class="frame-47 frame-2">
         {#each menu_items as tab}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div on:click={() => goto(tab.path)} class="w-full flex justify-between h-[40px] items-center cursor-pointer">
+          <div on:click={() => tab.route != "/staking" ? goto(tab.path) : window.open(tab.path, "_blank")} class="w-full flex justify-between h-[40px] items-center cursor-pointer">
             <div class="frame">
                 <svg class="item w-6 h-6 text-white flex items-center justify-center" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={tab.icon}/>
@@ -44,7 +44,6 @@
 .frame-47 {
   align-items: flex-start;
   flex-direction: column;
-  margin-top: 40px;
 }
 
 .frame-2 {

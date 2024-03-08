@@ -1,4 +1,4 @@
-import { AccountData, ChainInfo, Key, OfflineAminoSigner, OfflineDirectSigner } from '@keplr-wallet/types';
+import { AccountData, ChainInfo, Key, OfflineAminoSigner, OfflineDirectSigner, StdSignature } from '@keplr-wallet/types';
 import { DirectSignResponse } from "@cosmjs/proto-signing";
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { Long } from 'long';
@@ -39,11 +39,16 @@ export interface SnapProvider {
       accountNumber?: Long | null;
     },
   ): Promise<DirectSignResponse>;
+  signArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array
+  ): Promise<StdSignature>;
   sendTx(
     chainId: string,
     tx: Uint8Array,
   ): Promise<DeliverTxResponse>;
-  getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner;
+  getOfflineSigner(chainId: string, mode: string): OfflineAminoSigner & OfflineDirectSigner;
   getKey(chainId: string): Promise<Key>
   enable(): Promise<boolean>;
   getChains(): Promise<Chain[]>;
@@ -165,11 +170,48 @@ export class CosmosSnap implements SnapProvider {
         let res = await signDirect(chainId, signer, signDoc, this.snap_id);
         return res;
     }
+    async signArbitrary(chainId: string, signer: string, data: string | Uint8Array): Promise<StdSignature> {
+        let dataBase64: string = typeof data != "string" ? Buffer.from(signer).toString('base64') : data;
+        let signDoc: StdSignDoc = {
+            chain_id: '',
+            account_number: '0',
+            sequence: '0',
+            fee: {
+                "gas": "0",
+                amount: []
+            },
+            msgs: [
+                {
+                    type: 'sign/MsgSignData',
+                    value: {
+                        signer,
+                        data: dataBase64
+                    }
+                }
+            ],
+            memo: ''
+        }
+        let res = await signAmino(chainId, signer, signDoc);
+        return res.signature
+    }
     async sendTx(chainId: string, tx: Uint8Array): Promise<DeliverTxResponse> {
         let res = await sendTx(chainId, tx, this.snap_id);
         return res
     }
-    getOfflineSigner(chainId: string): OfflineAminoSigner & OfflineDirectSigner {
-        return new CosmJSOfflineSigner(chainId, this.snap_id);
+    getOfflineSigner(chainId: string, mode = 'direct'): OfflineAminoSigner & OfflineDirectSigner {
+        if (mode == 'amino') {
+            let signer = new CosmJSOfflineSigner(chainId, this.snap_id);
+            signer.signDirect = undefined;
+            return signer
+        } else {
+            let signer = new CosmJSOfflineSigner(chainId, this.snap_id);
+            signer.signAmino = undefined;
+            return signer
+        }
+    }
+    getOfflineSignerOnlyAmino(chainId): OfflineAminoSigner {
+        let signer = new CosmJSOfflineSigner(chainId, this.snap_id);
+        signer.signDirect = undefined;
+        return signer
     }
 }

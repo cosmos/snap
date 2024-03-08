@@ -1,6 +1,7 @@
 import _ from "lodash";
-import type { CoinIBC } from "./ibc";
+import type { CoinIBC } from "./skip";
 import type { ChainInfo } from "@keplr-wallet/types";
+import { ethers } from "ethers";
 
 export const LOCAL_STORAGE_CHAINS = "cosmsnap:chains";
 export const LOCAL_STORAGE_INIT = "cosmsnap:initialized";
@@ -149,4 +150,26 @@ export function validateChainInfo(chainInfo: ChainInfo): boolean {
   }
 
   return true;
+}
+
+export async function getERC20Balance(tokenAddress: string, walletAddress: string, providerUrl: string) {
+  // Connect to an Ethereum node
+  const provider = new ethers.providers.JsonRpcProvider(providerUrl);
+
+  let balance: BigInt = BigInt(0);
+  if (tokenAddress === "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE") {
+    // native eth balance
+    const raw = await provider.getBalance(walletAddress);
+    balance = raw.toBigInt();
+  } else {
+    // ERC20 Token ABI with only the balanceOf function
+    const erc20Abi = ["function balanceOf(address owner) view returns (uint256)"];
+    // Create a contract instance
+    const tokenContract = new ethers.Contract(tokenAddress, erc20Abi, provider);
+    // Get the balance
+    balance = await tokenContract.balanceOf(walletAddress);
+  }
+
+  // The balance is a BigNumber; format it as a string
+  return balance.toString();
 }

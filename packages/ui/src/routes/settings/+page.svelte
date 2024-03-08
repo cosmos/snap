@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { chains } from '../../store/chains';
+  import { chains, fetchChains } from '../../store/chains';
   import AddChain from '../../components/AddChain.svelte';
 	import { state } from "../../store/state";
-	import { deleteChain } from '../../utils/snap';
+	import { addCelestia, deleteChain } from '../../utils/snap';
   import lunr from 'lunr';
-	import { getChains, type Chain } from '@cosmsnap/snapper';
+	import type { Chain } from '@cosmsnap/snapper';
 
   let searchResults: lunr.Index.Result[] = [];
   let currentChains: Chain[] = $chains;
   let term = "";
+  let celestia = true;
 
   const idx = lunr(function () {
     // Use this ref function to get the id that will refer to each document
@@ -36,11 +37,12 @@
     if (currentChains.length === 0) {
       currentChains = $chains
     }
+    celestia = $chains.some((chain: Chain) => chain.chain_id === 'celestia');
   }
 
   const deleteChainFromSnap = async (chain_id: string) => {
     await deleteChain(chain_id);
-    await getChains();
+    await fetchChains();
   }
 </script>
 
@@ -81,6 +83,27 @@
         </div>
       </div>
     {/each}
+    {#if !celestia}
+      <div class="col-span-2 lg:col-span-1">
+        <div class="group-85">
+          <div class="group-84">
+            <div class="group-28">
+              <!-- svelte-ignore a11y-missing-attribute -->
+              <img class="group-46" src="/TIA_icon.svg"/>
+            </div>
+            <div class="osmosis inter-bold-white-20px">
+              Celestia
+            </div>
+          </div>
+          <div class="group-4450">
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <svg on:click={addCelestia} class="w-5 h-5 text-[#594bff] cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    {/if}
   </div>
 </div>
 

@@ -70,7 +70,8 @@
       'text-align': 'center',
       'font-family': 'var(--font-family-inter)',
       'border': 'none',
-      'vertical-align': 'middle'
+      'vertical-align': 'middle',
+      'overflow': 'hidden'
     },
     tr: {
       'background-color': 'transparent',
@@ -137,15 +138,6 @@
     display: flex;
     gap: 20px;
     justify-content: center;
-  }
-
-  .page-button {
-    background-color: transparent;
-    font-size: var(--font-size-m);
-    border: 1px solid;
-    border-color: #ffffff1a;
-    border-radius: 14px;
-    color: white;
   }
 
   @media (min-width: 772px) {

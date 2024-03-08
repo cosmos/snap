@@ -51,7 +51,7 @@
 .inter-medium-white-12px {
   color: var(--white);
   font-family: var(--font-family-inter);
-  font-size: var(--font-size-s);
+  font-size: var(--font-size-m);
   font-style: normal;
   font-weight: 500;
 }
@@ -62,7 +62,7 @@
   margin-top: 15px;
   position: relative;
   width: fit-content;
-  height: 40px;
+  height: 45px;
   min-width: 100px;
   width: 100%;
 }
@@ -70,5 +70,11 @@
 .button-send:hover {
   background-color: var(--blueberry);
   filter: brightness(1.1);
+}
+
+button:active {
+    transform: scale(0.95);
+    transition: all 0.3s;
+    cursor: pointer;
 }
 </style>

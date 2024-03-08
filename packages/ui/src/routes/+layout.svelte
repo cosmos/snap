@@ -10,13 +10,6 @@
 	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "@cosmsnap/snapper";
 	import { isMetaMaskInstalled, isSnapLatestVersion, snapId } from "../utils/snap";
 
-	$: {
-    if ($state.isMetaMaskInstalledValue && $state.isSnapInitValue && $state.isSnapLatestVersion && $state.isSnapInstalledValue) {
-		  $state.connected = true;
-		  goto("/balances");
-	  }
-  }
-
 	const initializeData = async () => {
     try {
       $state.loading = true;

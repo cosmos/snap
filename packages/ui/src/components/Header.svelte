@@ -48,7 +48,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 24px 60px;
+        padding: 24px;
         width: 100%;
         z-index: 100;
         height: 75px;

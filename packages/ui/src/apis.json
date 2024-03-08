@@ -1,9 +1,16 @@
 {
     "apis": [
         {
+            "provider": "rhino",
             "chain_id": "cosmoshub-4",
-            "rest": "https://cosmos-lcd.numia.xyz",
-            "rpc": "https://cosmos-rpc.numia.xyz"
+            "rest": "https://cosmos-rest.cosmos-apis.com",
+            "rpc": "https://cosmos-rpc.cosmos-apis.com"
+        },
+        {
+            "provider": "rhino",
+            "chain_id": "celestia",
+            "rest": "https://celestia-rest.cosmos-apis.com",
+            "rpc": "https://celestia-rpc.cosmos-apis.com"
         },
         {
             "chain_id": "juno-1",
@@ -11,9 +18,10 @@
             "rpc": "https://juno-rpc.numia.xyz"
         },
         {
+            "provider": "rhino",
             "chain_id": "osmosis-1",
-            "rest": "https://osmosis-lcd.numia.xyz",
-            "rpc": "https://osmosis-rpc.numia.xyz"
+            "rest": "https://osmosis-rest.cosmos-apis.com",
+            "rpc": "https://osmosis-rpc.cosmos-apis.com"
         },
         {
             "chain_id": "evmos_9001-2",
@@ -31,9 +39,10 @@
             "rpc": "https://stargaze-rpc.numia.xyz"
         },
         {
+            "provider": "rhino",
             "chain_id": "umee-1",
-            "rest": "https://umee-lcd.numia.xyz",
-            "rpc": "https://umee-rpc.numia.xyz"
+            "rest": "https://umee-rest.cosmos-apis.com",
+            "rpc": "https://umee-rpc.cosmos-apis.com"
         },
         {
             "chain_id": "phoenix-1",
@@ -41,9 +50,10 @@
             "rpc": "https://terra2-rpc.numia.xyz"
         },
         {
+            "provider": "rhino",
             "chain_id": "stride-1",
-            "rest": "https://stride-lcd.numia.xyz",
-            "rpc": "https://stride-rpc.numia.xyz"
+            "rest": "https://stride-rest.cosmos-apis.com",
+            "rpc": "https://stride-rpc.cosmos-apis.com"
         },
         {
             "chain_id": "kava_2222-10",

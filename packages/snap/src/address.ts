@@ -9,7 +9,29 @@ import { getWallet } from "./wallet";
  * @throws If an error occurs.
  */
 export const getAddress = async (chain: Chain): Promise<string> => {
-  let wallet = await getWallet(chain)
+  // get signer info
+  let node = await snap.request({
+    method: "snap_getBip44Entropy",
+    params: {
+      coinType: Number(chain.slip44),
+    },
+  });
+
+  if (typeof node.privateKey === "undefined") {
+    throw Error("Private key from node is undefined");
+  }
+
+  // Create bytes key
+  let pk = node.privateKey;
+  if (pk.startsWith("0x")) {
+    pk = pk.substring(2);
+  }
+
+  // create the wallet
+  let wallet = await DirectSecp256k1Wallet.fromKey(
+    Uint8Array.from(Buffer.from(pk, "hex")),
+    chain.bech32_prefix
+  );
   let address = (await wallet.getAccounts())[0].address;
 
   return address;

@@ -1,6 +1,54 @@
 import type { Coin, HttpEndpoint } from "@cosmjs/stargate";
 import type { Chain } from "@cosmsnap/snapper";
 
+export type SkipToken = {
+  denom: string;
+  chain_id: string;
+  origin_denom: string;
+  origin_chain_id: string;
+  trace: string;
+  is_cw20: boolean;
+  is_evm: boolean;
+  symbol: string;
+  name: string;
+  logo_uri: string;
+  decimals: number;
+}
+
+export type CosmosModuleSupport = {
+  authz: boolean;
+  feegrant: boolean;
+};
+
+export type GasPrice = {
+  low?: string;
+  average?: string;
+  high?: string;
+} | null;
+
+export type FeeAsset = {
+  denom: string;
+  gas_price?: GasPrice;
+};
+
+export type SkipChain = {
+  chain_name: string;
+  chain_id: string;
+  pfm_enabled: boolean;
+  cosmos_sdk_version: string;
+  modules: Record<string, unknown>;
+  cosmos_module_support: CosmosModuleSupport;
+  supports_memo: boolean;
+  logo_uri: string;
+  bech32_prefix: string;
+  fee_assets: FeeAsset[];
+  chain_type: string;
+};
+
+export type ChainsList = {
+  chains: Chain[];
+};
+
 export interface Route {
   source_asset_denom: string;
   source_asset_chain_id: string;
@@ -47,6 +95,12 @@ interface SwapOperation {
   denom_out: string;
 }
 
+interface SkipError {
+  code: number;
+  message: string;
+  details: [];
+}
+
 interface RecommendationsResponse {
   recommendations: Recommendation[]; 
 }
@@ -62,6 +116,10 @@ interface Recommendation {
   reason: string;
 }
 
+export interface MultiChainMsg {
+  multi_chain_msg: SkipMsg;
+}
+
 export interface SkipMsg {
   chain_id: string;
   path: string[];
@@ -69,8 +127,14 @@ export interface SkipMsg {
   msg_type_url: string;
 }
 
+export interface Fee {
+  basis_points_fee: string;
+  address: string;
+}
+
 export interface SkipMsgs {
-  msgs: SkipMsg[]; 
+  msgs: MultiChainMsg[];
+  route: Route;
 }
 
 export interface CoinIBC extends Coin {
@@ -111,7 +175,7 @@ export const getRoute = async (
 
     try {
 
-        const url = 'https://api.skip.money/v1/fungible/route';
+        const url = 'https://api.skip.money/v2/fungible/route';
 
         const data = {
             amount_in,
@@ -184,10 +248,11 @@ export const getMsgs = async (
   amount: string,
   slippageTolerance: string,
   chains: Chain[],
-  toAddress: string
-): Promise<SkipMsgs> => {
+  toAddress: string,
+  fees: Fee[] | undefined = undefined,
+): Promise<SkipMsgs | SkipError> => {
 
-  const url = 'https://api.skip.money/v1/fungible/msgs_direct';
+  const url = 'https://api.skip.money/v2/fungible/msgs_direct';
 
   let chain_ids_to_addresses: Record<string, string> = {};
   chains.map(item => {
@@ -207,7 +272,8 @@ export const getMsgs = async (
     dest_asset_chain_id: destChainId,
     source_asset_chain_id: sourceChainId,
     amount_in: amount,
-    slippage_tolerance_percent: slippageTolerance
+    slippage_tolerance_percent: slippageTolerance,
+    affiliates: fees
   };
 
   const res = await fetch(url, {
@@ -228,7 +294,7 @@ export const getDenomFromIBC = async (url: string | HttpEndpoint, ibc_coin: Coin
   let splits = ibc_coin.denom.toUpperCase().split("IBC/");
   if (splits.length > 1) {
     let hash = splits[1];
-    let res = await fetch(`${url}/ibc/apps/transfer/v1/denom_traces/${hash}`);
+    let res = await fetch(`${url}/ibc/apps/transfer/v2/denom_traces/${hash}`);
     let data = await res.json();
     return {
       denom: data.denom_trace.base_denom,
@@ -239,7 +305,7 @@ export const getDenomFromIBC = async (url: string | HttpEndpoint, ibc_coin: Coin
 }
 
 export const getAssets = async (chain_id: string): Promise<AllAssets> => {
-  const url = `https://api.skip.money/v1/fungible/assets?chain_id=${chain_id}&include_no_metadata_assets=false`;
+  const url = `https://api.skip.money/v2/fungible/assets?chain_id=${chain_id}&include_no_metadata_assets=false`;
   
   const response = await fetch(url, {
     method: 'GET', 
