@@ -1,7 +1,8 @@
-import { Chains, Chain, CosmosAddress } from "./types/chains";
+import { Chains, Chain, CosmosAddress, UpdateChainParams } from "./types/chains";
 import { Addresses, Address } from "./types/address";
 import { AccountData, DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
 import { DEFAULT_SLIP44, WALLET_URL } from "./constants";
+import { getWallet } from "./wallet";
 
 /**
  * ChainState is the class to manage all Chain state within Metamask.
@@ -37,30 +38,7 @@ export class ChainState {
       throw new Error(`Chain with Chain Id ${chain_id} does not exist.`);
     }
 
-    // get signer info
-    let node = await snap.request({
-      method: "snap_getBip44Entropy",
-      params: {
-        coinType:
-          typeof chain.slip44 == "number" ? chain.slip44 : DEFAULT_SLIP44,
-      },
-    });
-
-    if (typeof node.privateKey === "undefined") {
-      throw Error("Private key from node is undefined");
-    }
-
-    // Create bytes key
-    let pk = node.privateKey;
-    if (pk.startsWith("0x")) {
-      pk = pk.substring(2);
-    }
-
-    // create the wallet
-    let wallet = await DirectSecp256k1Wallet.fromKey(
-      Uint8Array.from(Buffer.from(pk, "hex")),
-      chain.bech32_prefix
-    );
+    let wallet = await getWallet(chain);
 
     let address = (await wallet.getAccounts())[0].address;
 
@@ -83,29 +61,7 @@ export class ChainState {
       throw new Error(`Chain with Chain Id ${chain_id} does not exist.`);
     }
 
-    // get signer info
-    let node = await snap.request({
-      method: "snap_getBip44Entropy",
-      params: {
-        coinType: DEFAULT_SLIP44,
-      },
-    });
-
-    if (typeof node.privateKey === "undefined") {
-      throw Error("Private key from node is undefined");
-    }
-
-    // Create bytes key
-    let pk = node.privateKey;
-    if (pk.startsWith("0x")) {
-      pk = pk.substring(2);
-    }
-
-    // create the wallet
-    let wallet = await DirectSecp256k1Wallet.fromKey(
-      Uint8Array.from(Buffer.from(pk, "hex")),
-      chain.bech32_prefix
-    );
+    let wallet = await getWallet(chain);
 
     let account = (await wallet.getAccounts())[0];
 
@@ -178,6 +134,40 @@ export class ChainState {
     });
 
     return chains;
+  }
+  /**
+   * Adds a new Cosmos chain into the current Metamask snap state.
+   *
+   * @param chain Chain object to add into state.
+   * @returns The current state of Chains.
+   * @throws If an error occurs.
+   */
+  public static async updateChain(chain_id: string, updates: UpdateChainParams): Promise<Chain> {
+    // get the current state of chains in Metamask we will add chain into
+    const data = await snap.request({
+      method: "snap_manageState",
+      params: { operation: "get" },
+    });
+
+    // parse the JSON data into a plain object
+    let parsedData = JSON.parse(data?.chains?.toString()!);
+
+    // create a new Chains object and populate it with the parsed data
+    let chains = new Chains(parsedData);
+
+    // update the chain in the chain class
+    const updatedChain = chains.updateChain(chain_id, updates);
+
+    // update Metamask state with new chain state
+    await snap.request({
+      method: "snap_manageState",
+      params: {
+        operation: "update",
+        newState: { ...data, chains: chains.string() },
+      },
+    });
+
+    return updatedChain;
   }
   /**
    * Adds a list of Chains as state into Metamask snap.

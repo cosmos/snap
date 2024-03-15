@@ -23,6 +23,7 @@ export interface Chain {
   };
   explorers?: Explorer[];
   address: string | undefined;
+  type: 'cosmos' | 'evm';
 }
 
 export interface Explorer {
@@ -70,6 +71,11 @@ export interface CosmosAddress {
   address: string;
 }
 
+export interface UpdateChainParams {
+  slip44?: string;
+  rpc?: string;
+}
+
 export class Chains {
   constructor(chains: Chain[]) {
     this.chains = chains;
@@ -79,6 +85,20 @@ export class Chains {
 
   addChain(chain: Chain) {
     this.chains.push(chain);
+  }
+
+  updateChain(chain_id: string, updates: UpdateChainParams) {
+    let chain = this.getChain(chain_id);
+    if (!chain) {
+      throw new Error(`Chain with chain id of ${chain_id} not found`);
+    }
+    if (updates.slip44) {
+      chain.slip44 = parseInt(updates.slip44);
+    }
+    if (updates.rpc) {
+      chain.apis.rpc[0] = { address: updates.rpc };
+    }
+    return chain;
   }
 
   getChain(chain_id: string) {
