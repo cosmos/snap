@@ -4,7 +4,7 @@
   "description": "The Cosmos extension for your Metamask wallet.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cosmos/snap.git"
+    "url": "git+https://github.com/cosmos/snap.git"
   },
   "license": "MIT",
   "author": "Mystic Labs, Inc",
