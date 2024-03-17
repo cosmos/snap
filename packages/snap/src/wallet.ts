@@ -1,6 +1,7 @@
 import { DirectSecp256k1Wallet } from "@cosmjs/proto-signing";
 import { Secp256k1Wallet } from "@cosmjs/amino";
 import { Chain } from "./types/chains";
+import { Buffer } from "buffer";
 
 export const getWallet = async (chain: Chain) => {
     // get signer info

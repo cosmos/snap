@@ -9,6 +9,9 @@ const config: SnapConfig = {
   stats: {
     buffer: false,
   },
+  environment: {
+    DENO_SERVERLESS_URL: process.env.DENO_SERVERLESS_URL,
+  },
 };
 
 export default config;

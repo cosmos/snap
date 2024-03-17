@@ -1,4 +1,4 @@
-import { OnRpcRequestHandler } from "@metamask/snaps-sdk";
+import { OnHomePageHandler, OnRpcRequestHandler, address, image, row } from "@metamask/snaps-sdk";
 import { AccountData } from '@cosmjs/amino';
 import { panel, text, heading, divider, copyable } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
@@ -14,6 +14,8 @@ import Long from "long";
 import { Key } from '@keplr-wallet/types';
 import { fromBech32 } from '@cosmjs/encoding';
 import { isTxBodyEncodeObject } from "@cosmjs/proto-signing";
+import { getBalances } from "./utils";
+import _ from "lodash";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -956,4 +958,41 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
     default:
       throw new Error("Method not found.");
   }
+};
+
+export const onHomePage: OnHomePageHandler = async () => {
+  const main: any[] = [
+    heading('Metamask Extension'),
+    text('Manage everything across the Cosmos!'),
+    divider(),
+    heading('Accounts'),
+    divider(),
+  ]
+  const addressesP = ChainState.getChainAddresses();
+  const chainsP = ChainState.getChains();
+  const [addresses, chainsInWallet] = await Promise.all([addressesP, chainsP]);
+  const chains = _.values(_.merge(_.keyBy(addresses, 'chain_id'), _.keyBy(chainsInWallet.chains, 'chain_id')))
+  const balances = await getBalances(chains);
+  addresses.forEach((address) => {
+    const chain = balances.find((balance) => balance.chain_id === address.chain_id);
+    if (!chain) {
+      throw new Error(`No chain found for ${address.chain_id}`);
+    }
+    main.push(heading(chain ? chain.pretty_name : address.chain_id))
+    main.push(text("**Balances**"))
+    chain.balances.forEach((balance) => {
+      main.push(copyable(`${_.round((Number(balance.amount) / 1_000_000), 2)} ${balance.display}`))
+    })
+    main.push(text("**Address**"))
+    main.push(copyable(address.address))
+    main.push(divider())
+  })
+
+  // Direct them to the dashboard for more advanced things
+  main.push(
+    text('[Manage My Assets](https://metamask.mysticlabs.xyz/)')
+  );
+  return {
+    content: panel(main),
+  };
 };

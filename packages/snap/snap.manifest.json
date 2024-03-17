@@ -4,10 +4,10 @@
   "proposedName": "Cosmos Extension",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cosmos/snap.git"
+    "url": "git+https://github.com/cosmos/snap.git"
   },
   "source": {
-    "shasum": "70Y16tDS8kL5RMQhR1coQlID5bwKy0TeCmYgqwTIWlk=",
+    "shasum": "f6e8RsKUURq4joa44SVbSIIwH8SdkhwOiulSa1bWqpA=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -89,7 +89,8 @@
     "endowment:rpc": {
       "snaps": false,
       "dapps": true
-    }
+    },
+    "endowment:page-home": {}
   },
   "manifestVersion": "0.1"
 }
