@@ -218,7 +218,8 @@ export const chainInfoToChain = (chainInfo: ChainInfo): Chain => {
         provider: chainInfo.nodeProvider?.name  
       }]
     },
-    address: undefined
+    address: undefined,
+    type: "cosmos"
   }
 }
 

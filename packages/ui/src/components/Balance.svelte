@@ -49,8 +49,8 @@
           <p class="price inter-medium-white-12px">
             ${_.round(dollarAmount, 2)}
           </p>
-          <p class="percent inter-medium-white-14px w-[100%]">
-            {_.round(tokenAmount, 2) + " " + tokenDenom}
+          <p class="percent inter-medium-white-14px w-full ellipsis-wrap">
+            {new Intl.NumberFormat('en-US').format(_.round(tokenAmount, 2)) + " " + tokenDenom}
           </p>
       </div>
   </div>
@@ -73,6 +73,13 @@
 </div>
 
 <style>
+.ellipsis-wrap {
+  white-space: nowrap; /* Prevents the text from wrapping */
+  overflow: hidden; /* Hides overflowed content */
+  text-overflow: ellipsis; /* Adds ellipsis to overflowed content */
+  width: 100%; /* Ensures the container's width is used */
+  max-width: 250px; /* Set a max-width to trigger ellipsis */
+}
 .group-55 {
   align-items: flex-start;
   backdrop-filter: blur(15px) brightness(100%);
@@ -83,10 +90,8 @@
   display: flex;
   flex-direction: column;
   gap: 17px;
-  left: 264px;
   min-height: 110px;
   padding: 20px 17px;
-  top: 405px;
   width: 100%;
 }
 
@@ -177,7 +182,6 @@
   letter-spacing: -0.28px;
   line-height: normal;
   min-height: 17px;
-  min-width: 46px;
   opacity: 0.45;
   text-align: right;
   overflow: hidden; 
