@@ -32,6 +32,10 @@ export let registry = [
     url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/crescent/chain.json",
   },
   {
+    chain_id: "doravota",
+    url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/doravota/chain.json",
+  },
+  {
     chain_id: "gitopia",
     url: "https://raw.githubusercontent.com/cosmos/chain-registry/master/gitopia/chain.json",
   },
