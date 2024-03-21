@@ -13,10 +13,12 @@
   let copied = false;
 
   $: {
-    let chainDir = $directory.filter(chain => chain.chain_id == chain_id);
-    const tokenKey = tokenDenom.toLowerCase();
-    const price = chainDir[0]?.prices?.coingecko?.[tokenKey];
-    dollarAmount = price ? tokenAmount * price.usd : dollarAmount;
+    if (tokenDenom) {
+      let chainDir = $directory.filter(chain => chain.chain_id == chain_id);
+      const tokenKey = tokenDenom.toLowerCase();
+      const price = chainDir[0]?.prices?.coingecko?.[tokenKey];
+      dollarAmount = price ? tokenAmount * price.usd : dollarAmount;
+    }
   };
 
   const copyAddress = async () => {
