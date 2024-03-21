@@ -1,12 +1,9 @@
-import { Models } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
+import { Query, Models } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
+import { AKASH_LEASE, AKASH_NOTIFICATION, DB_LEASE_RETURN, DB_NOTIFICATION_RETURN, NOTIFICATIONS_COLLECTION_NAME, OPEN_LEASE_COLLECTION_NAME, RESOURCE, apiUrl } from "./types.ts";
+import { db } from "./index.ts";
 
 // deno-lint-ignore no-explicit-any
 export const postNotification = async (context: any) => {
-  if (context.req.method !== "POST") {
-    context.error(`Invalid HTTP method ${context.req.method}`);
-    throw new Error("Invalid HTTP method");
-  }
-
   const body = await context.req.json();
   context.log(`Request body: ${JSON.stringify(body)}`);
 
@@ -144,4 +141,10 @@ export const postNotification = async (context: any) => {
       );
     }
   }
+  context.log(`Documents Added: ${JSON.stringify(docsAdded)}`);
+  return context.res.json({
+    total: docsAdded.length,
+    data: docsAdded,
+    success: false
+  });
 };

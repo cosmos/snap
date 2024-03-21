@@ -112,7 +112,7 @@ export default async ({ req, res, error }: Context) => {
       // If not successful we just return the result
       return res.json({
         data: result,
-        success: true
+        success: false
       });
     }
 
