@@ -1,18 +1,15 @@
 import { Query, Models } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
-import { AKASH_LEASE, AKASH_NOTIFICATION, DB_LEASE_RETURN, DB_NOTIFICATION_RETURN, NOTIFICATIONS_COLLECTION_NAME, OPEN_LEASE_COLLECTION_NAME, RESOURCE, apiUrl } from "./types.ts";
-import { db } from "./index.ts";
+import { AKASH_LEASE, AKASH_NOTIFICATION, DB_LEASE_RETURN, DB_NOTIFICATION_RETURN, NOTIFICATIONS_COLLECTION_NAME, OPEN_LEASE_COLLECTION_NAME, RESOURCE, RequestBody, apiUrl } from "./types.ts";
+import { db } from "./types.ts";
 
 // deno-lint-ignore no-explicit-any
 export const postNotification = async (context: any) => {
-  const body = await context.req.json();
-  context.log(`Request body: ${JSON.stringify(body)}`);
+  const { address } = JSON.parse(context.req.bodyRaw) as RequestBody;
 
-  if (!body.address) {
-    context.error("Missing address in request body");
+  if (!address) {
     throw new Error("Missing address in request body");
   }
 
-  const address: string = body.address;
   context.log(`Updating Akash leases for ${address}`);
 
   // Keep track of docs added
@@ -142,9 +139,10 @@ export const postNotification = async (context: any) => {
     }
   }
   context.log(`Documents Added: ${JSON.stringify(docsAdded)}`);
-  return context.res.json({
+  const res = {
     total: docsAdded.length,
     data: docsAdded,
-    success: false
-  });
+    success: true
+  };
+  return res;
 };

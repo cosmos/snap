@@ -1,3 +1,5 @@
+import { Client, Databases } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
+
 export enum Status {
   ACTIVE = "active",
   OPEN = "open",
@@ -54,3 +56,14 @@ export const project_id = Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID");
 if (!project_id) {
   throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
 }
+
+export const client = new Client()
+  .setEndpoint(appwrite_url)
+  .setProject(project_id)
+  .setKey(appwriteKey);
+
+export const db = new Databases(client);
+
+export interface RequestBody {
+  address: string;
+};
