@@ -134,12 +134,6 @@
   font-weight: 700;
 }
 
-.clear {
-  height: 24px;
-  width: 24px;
-  cursor: pointer;
-}
-
 .line-5 {
   width: 100%;
 }
