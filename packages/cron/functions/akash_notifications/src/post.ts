@@ -21,18 +21,8 @@ export const postNotification = async (context: any) => {
 
   // fetch all open akash leases
   while (true) {
-    // Set parameters for the only open leases
-    const params = {
-      "filters.owner": address,
-      "pagination.limit": pageLimit,
-      "pagination.count_total": true,
-      "pagination.offset": currentOffset,
-    };
-
-    // get current set of open leases
-    const response = await fetch(apiUrl!, {
-      body: JSON.stringify(params),
-    });
+    // Set parameters for the only open leases & get current set of open leases
+    const response = await fetch(`${apiUrl!}?filters.owner=${address}&pagination.limit=${pageLimit}&pagination.count_total=true&pagination.offset=${currentOffset}`);
 
     // check if API call was successful
     if (response.status === 200) {
