@@ -58,7 +58,7 @@
                   <div class="group-4447">
                     <div class="group-4445">
                       <div class="overlap-group jse-theme-dark">
-                        <JSONEditor onChange="{handleChange}" content={content} mainMenuBar={false} navigationBar={false} statusBar={false} mode={Mode.tree}/>
+                        <JSONEditor onChange="{handleChange}" content={content} mainMenuBar={false} navigationBar={false} statusBar={false} mode={Mode.text}/>
                       </div>
                   </div>
                   <Button onClick={addChain} text="Add chain" bind:loading={loading}/>
