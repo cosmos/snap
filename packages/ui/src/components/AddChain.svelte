@@ -49,9 +49,10 @@
                       <div class="add-new-chain-1 inter-bold-white-20px">
                         Add new chain
                       </div>
-                      <!-- svelte-ignore a11y-click-events-have-key-events -->
-                      <img on:click={() => $state.openAddChainPopup = false} class="clear" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/clear@2x.png" alt="clear">
-                  </div>
+                      <svg on:click={() => $state.openAddChainPopup = false} class="w-6 h-6 text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                      </svg>                      
+                    </div>
                   <img class="line-5 line" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64ef9c2985c1bf1a9cb5beba/img/line-5.png" alt="Line 5">
               </div>
                   <div class="group-4447">
@@ -133,12 +134,6 @@
     font-size: var(--font-size-xl);
     font-style: normal;
     font-weight: 700;
-  }
-  
-  .clear {
-    height: 24px;
-    width: 24px;
-    cursor: pointer;
   }
   
   .line-5 {

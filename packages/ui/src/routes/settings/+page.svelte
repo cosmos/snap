@@ -77,8 +77,9 @@
             </div>
           </div>
           <div class="group-4450">
-            <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <img on:click={() => deleteChainFromSnap(chain.chain_id)} class="delete_outline cursor-pointer" src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64a710c1420c7281d1d60ffb/img/delete-outline.svg" alt="delete_outline">
+            <svg on:click={() => deleteChainFromSnap(chain.chain_id)} class="w-6 h-6 text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+            </svg>            
           </div>
         </div>
       </div>
