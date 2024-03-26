@@ -1,4 +1,4 @@
-import { Client, Databases, ID } from 'https://deno.land/x/appwrite@7.0.0/mod.ts';
+import { Client, Databases, ID, Permission, Role } from 'https://deno.land/x/appwrite@7.0.0/mod.ts';
 import { Multisig, RequestBody } from './types.ts';
 import { SigningStargateClient } from 'npm:@cosmjs/stargate'
 import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';
@@ -91,7 +91,10 @@ export default async ({ req, res, log, error }: Context) => {
       type_url,
       message,
       sequence
-    });
+    },
+    [
+      Permission.read(Role.any())
+    ]);
 
     log(`Created Multisig Transaction ${id}. (${JSON.stringify(response)})`);
 

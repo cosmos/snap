@@ -1,4 +1,4 @@
-import { Query, Models } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
+import { Query, Models, Permission, Role } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
 import { AKASH_LEASE, AKASH_NOTIFICATION, DB_LEASE_RETURN, DB_NOTIFICATION_RETURN, NOTIFICATIONS_COLLECTION_NAME, OPEN_LEASE_COLLECTION_NAME, RESOURCE, RequestBody, apiUrl } from "./types.ts";
 import { db } from "./types.ts";
 
@@ -87,6 +87,9 @@ export const postNotification = async (context: any) => {
                 NOTIFICATIONS_COLLECTION_NAME,
                 crypto.randomUUID(),
                 notifAdd,
+                [
+                  Permission.read(Role.any())
+                ],
               );
               docsAdded.push(res);
             } else {
@@ -105,12 +108,16 @@ export const postNotification = async (context: any) => {
         } else {
           context.log(`Adding lease ${JSON.stringify(lease)} to the database.`);
           // If we have not found the lease, we add it to the database
-          await db.createDocument(
+          const res = await db.createDocument(
             RESOURCE,
             OPEN_LEASE_COLLECTION_NAME,
             lease.lease_id,
             lease,
+            [
+              Permission.read(Role.any())
+            ],
           );
+          docsAdded.push(res);
         }
       }
 

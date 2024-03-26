@@ -1,4 +1,4 @@
-import { Client, Databases, ID } from 'https://deno.land/x/appwrite@7.0.0/mod.ts';
+import { Client, Databases, ID, Permission, Role } from 'https://deno.land/x/appwrite@7.0.0/mod.ts';
 import { createMultisigThresholdPubkey, pubkeyToAddress } from 'npm:@cosmjs/amino';
 import { RequestBody } from './types.ts';
 
@@ -64,8 +64,11 @@ export default async ({ req, res, log, error }: Context) => {
     const response = await database.createDocument("multisig", "multisigs", ID.unique(), {
       name: name,
       threshold: threshold,
-      members: pubKeys.map((pubKey) => JSON.stringify(pubKey)),
-    });
+      members: pubKeys.map((pubKey) => JSON.stringify(pubKey))
+    }, 
+    [
+      Permission.read(Role.any())
+    ]);
 
     log(`Added Multisig ${address} to database. (${JSON.stringify(response)})`)
 
