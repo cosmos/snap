@@ -3,6 +3,7 @@
   import TxMobile from "../../components/TxMobile.svelte";
   import { transactions } from "../../store/transactions";
 	import { onMount } from "svelte";
+	import { html } from "gridjs";
 
   let data: any[] = [];
 
@@ -31,6 +32,11 @@
     {
       id: 'when',
       name: 'When'
+    },
+    {
+      id: 'notes',
+      name: 'Notes',
+      formatter: (cell: any) => html(`<textarea class="bg-transparent border-none outline-none text-white ring-none focus:border-none focus:ring-none" type="text" value=""/>`)
     }
   ]
 

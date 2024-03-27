@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { notifications, forceUpdateNotifications } from "../../store/notifications";
+  import { chains } from "../../store/chains";
 
-  const markAsRead = async () => {
+  const getImgURI = (chain_id: string) => {
+    const akash = $chains.find((chain) => chain.chain_id === chain_id);
+    if (!akash) return "";
+    return akash.logo_URIs?.png || "";
+  };
+
+  const markAsRead = async (lease_id: string) => {
     // force update notifications store since its updated
     forceUpdateNotifications();
   };
@@ -19,29 +26,33 @@
             <div class="group-45-1">
               <img
                 class="mask-group"
-                src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64e665d9e1c2a81b98b3cc49/img/mask-group@2x.png"
+                src={getImgURI(notification.chain_id)}
                 alt="Mask group"
               />
               <div class="group-4405">
-                <div class="name-2 name-3 inter-bold-white-16px">
-                  {notification.name}
-                </div>
                 <div class="group-4400">
                   <div class="group-4537">
-                    <div class="cosmos1vhw82tqftrg inter-medium-white-12px">
-                      {notification.address}
-                    </div>
+                      {#if notification.read}
+                        <div class="opacity-40 text-white font-inter leading-5">
+                          {notification.notification}
+                        </div>
+                      {:else}
+                        <div class="text-white font-inter leading-5">
+                          {notification.notification}
+                        </div>
+                      {/if}
                       <!-- svelte-ignore a11y-click-events-have-key-events -->
-                      <div class="cursor-pointer" on:click={() => markAsRead(address.address)}>
-                        {#if copied}
-                          <svg class="text-[#FF414C] w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 1v4a1 1 0 0 1-1 1H1m4 6 2 2 4-4m4-8v16a.97.97 0 0 1-.933 1H1.933A.97.97 0 0 1 1 18V5.828a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 1 5.828 1h8.239A.97.97 0 0 1 15 2Z"/>
+                      <div class="cursor-pointer" on:click={() => markAsRead(notification.lease)}>
+                        {#if notification.read}
+                          <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v5m0 0 2-2m-2 2-2-2M3 6v1a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1Zm2 2v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8H5Z"/>
                           </svg>
                         {:else}
-                          <svg class="text-[#FF414C] w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 5a1 1 0 0 0-1 1v12a.969.969 0 0 0 .933 1h8.1a1 1 0 0 0 1-1.033M10 1v4a1 1 0 0 1-1 1H5m10-4v12a.97.97 0 0 1-.933 1H5.933A.97.97 0 0 1 5 14V5.828a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 1 9.828 1h4.239A.97.97 0 0 1 15 2Z"/>
-                          </svg>
-                        {/if}
+                          <svg class="w-6 h-6 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path fill-rule="evenodd" d="M20 10H4v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8ZM9 13v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1Z" clip-rule="evenodd"/>
+                            <path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 1 1 0 4H4a2 2 0 0 1-2-2Z"/>
+                          </svg>                        
+                        {/if}        
                       </div>
                   </div>
                 </div>
@@ -61,21 +72,6 @@
 
 #items-div::-webkit-scrollbar {
   display: none;
-}
-
-.inter-medium-white-12px {
-  color: var(--white);
-  font-family: var(--font-family-inter);
-  font-size: var(--font-size-s2);
-  font-style: normal;
-}
-
-.inter-bold-white-16px {
-  color: var(--white);
-  font-family: var(--font-family-inter);
-  font-size: var(--font-size-l2);
-  font-style: normal;
-  font-weight: 700;
 }
 
 .group-4407 {
@@ -126,18 +122,6 @@
   gap: 10px;
   width: 100%;
   align-items: center;
-}
-
-.cosmos1vhw82tqftrg {
-  line-height: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden; 
-  max-width: 300px;
-}
-
-.name-2 {
-  width: 100%;
 }
 
 .rectangle-13 {

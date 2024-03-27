@@ -77,7 +77,7 @@ export default async ({ req, res, error }: Context) => {
     }
 
     // Get the multisig info
-    const doc = await database.getDocument("multisig", "multisigs", multisig_id);
+    const doc = await database.getDocument("multisig", "multisig", multisig_id);
     const multisig = doc as unknown as Multisig;
 
     // If we have met the threshold then we can construct & broadcast the tx

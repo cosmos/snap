@@ -1,6 +1,7 @@
 import { writable, derived, type Writable, type Readable } from 'svelte/store';
 import type { Chain } from '../../../snap/src/types/chains';
 import { chains } from './chains'; 
+import { getAkashNotifications, updateAkashNotifications } from '../utils/appwrite';
 
 enum NotifType {
     CLOSED = "closed",
@@ -12,22 +13,14 @@ enum NotifType {
     ACTIVE = "active"
 }
 
-export interface Notif {
+export interface Notification {
     address: string;
     read: boolean;
     lease: string;
     notification: string;
     type: NotifType;
     timestamp: Number;
-}
-
-if (!import.meta.env.VITE_APPWRITE_URL) {
-    throw new Error("VITE_APPWRITE_URL not set...");
-}
-export const appwriteURL = import.meta.env.VITE_APPWRITE_URL;
-
-export interface ChainBalances extends Chain {
-    notifications: Notif[];
+    chain_id: string;
 }
 
 // Store to hold a loading state
@@ -36,29 +29,32 @@ export const isLoading: Writable<boolean> = writable(false);
 export let forceUpdateNotifications: () => void;
 
 // The derived notifications store
-export const notifications: Readable<ChainBalances[]> = derived(
+export const notifications: Readable<Notification[]> = derived(
     chains,
-    ($chains, set: (value: ChainBalances[]) => void) => {
+    ($chains, set: (value: Notification[]) => void) => {
         forceUpdateNotifications = () => {
             getNotifications($chains, set);
         }
         getNotifications($chains, set);
     },
-    [] as ChainBalances[]
+    [] as Notification[]
 );
 
-export const getNotifications = async ($chains: Chain[], set: (value: ChainBalances[]) => void): Promise<void> => {
+export const getNotifications = async ($chains: Chain[], set: (value: Notification[]) => void): Promise<void> => {
     isLoading.set(true);
     try {
-        const addresses = $chains.map((chain) => chain.address);
-        const res = await fetch(`${appwriteURL}/akash_notifications?addresses=${JSON.stringify(addresses)}`);
-
-        if (!res.ok) {
-            throw new Error(`HTTP error ${res.status}`);
+        const akash = $chains.find(chain => chain.chain_id == "akashnet-2");
+        if (!akash) {
+            throw new Error("Akash chain not found. No notifications to be loaded.");
+        }
+        // Update the akash notifications for this address
+        await updateAkashNotifications(akash.address!);
+        const { success, data } = await getAkashNotifications(akash.address!);
+        if (!success) {
+            throw new Error("There was a problem fetching the notifications.");
         }
 
-        const data = await res.json();
-        set(data.notifications);
+        set(data);
     } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
     } finally {

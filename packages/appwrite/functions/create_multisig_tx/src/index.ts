@@ -73,7 +73,7 @@ export default async ({ req, res, log, error }: Context) => {
     const id = ID.unique();
 
     // Get the multisig info
-    const doc = await database.getDocument("multisig", "multisigs", multisig_id);
+    const doc = await database.getDocument("multisig", "multisig", multisig_id);
     const multisig = doc as unknown as Multisig;
 
     const cosmClient = await SigningStargateClient.connect(rpc);
@@ -85,7 +85,7 @@ export default async ({ req, res, log, error }: Context) => {
     const response = await database.createDocument("multisig", "transactions", id, {
       signatures: [JSON.stringify([address, signature])],
       signed: [],
-      multisigs: multisig,
+      multisig,
       tx_id: ID.unique(),
       chain_id,
       type_url,

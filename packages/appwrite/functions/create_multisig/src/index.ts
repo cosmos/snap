@@ -61,7 +61,7 @@ export default async ({ req, res, log, error }: Context) => {
     const address = pubkeyToAddress(multiSigPubKey, "akash");
 
     // Add the multisig into the database.
-    const response = await database.createDocument("multisig", "multisigs", ID.unique(), {
+    const response = await database.createDocument("multisig", "multisig", ID.unique(), {
       name: name,
       threshold: threshold,
       members: pubKeys.map((pubKey) => JSON.stringify(pubKey))
