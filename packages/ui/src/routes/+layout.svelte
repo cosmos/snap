@@ -28,12 +28,18 @@
   connectWalletTxt="Connect wallet"
 />
   {#if $state.connected}
+    {#if !$state.currentMultiSig}
+      <div class="h-full w-full mt-[75px]">
+        <slot/>
+      </div>
+    {:else}
       <div hidden={!$state.showMenu} class="left-content">
         <Menu />
       </div>
       <div class="right-content">
         <slot/>
       </div>
+    {/if}
   {:else}
     <Connect /> 
   {/if}

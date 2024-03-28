@@ -11,5 +11,6 @@ export const state = writable({
     alertType: "success" || "warning" || "danger",
     isSnapInstalled: false,
     isSnapLatestVersion: false,
-    loading: false
+    loading: false,
+    currentMultiSig: null
 });

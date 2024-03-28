@@ -1,12 +1,12 @@
 <script lang="ts">
   import { beforeUpdate, onMount } from "svelte";
-  import Balance from "../../components/Balance.svelte";
-  import Transfer from "../../components/Transfer.svelte";
-  import { balances } from "../../store/balances";
-  import { chains, fetchChains } from "../../store/chains";
-  import { updateDirectory } from "../../store/directory";
-  import BalanceLoader from "../../components/BalanceLoader.svelte";
-	import { state } from "../../store/state";
+  import Balance from "../../../components/Balance.svelte";
+  import Transfer from "../../../components/Transfer.svelte";
+  import { balances } from "../../../store/balances";
+  import { chains, fetchChains } from "../../../store/chains";
+  import { updateDirectory } from "../../../store/directory";
+  import BalanceLoader from "../../../components/BalanceLoader.svelte";
+	import { state } from "../../../store/state";
 
   $: {
     if (!$chains) {

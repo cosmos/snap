@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { notifications, forceUpdateNotifications } from "../../store/notifications";
-  import { chains } from "../../store/chains";
+	import { notifications, forceUpdateNotifications } from "../../../store/notifications";
+  import { chains } from "../../../store/chains";
 
   const getImgURI = (chain_id: string) => {
     const akash = $chains.find((chain) => chain.chain_id === chain_id);
