@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Button from "./Button.svelte";
 
-    export let stepNumber: string;
     export let stepTitle: string;
     export let stepLongTitle: string;
     export let stepImage: string;
@@ -9,28 +8,10 @@
     export let stepLongDescription: string;
     export let actionText: string = '';
     export let action: () => any
-    export let complete: boolean = false;
-    export let disabled: boolean = true;
     export let loading = false;
 </script>
 
 <div class="overlap-group1">
-    <div class="flex-row-1 flex-row-3">
-    <div class="step-2 step inter-bold-blueberry-14px">STEP {stepNumber}</div>
-    {#if complete}
-      <img
-        class="done-1"
-        src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/done-1.svg"
-        alt="complete"
-      />
-    {:else}
-    <img
-        class="done-1"
-        src="https://anima-uploads.s3.amazonaws.com/projects/64863aebc1255e7dd4fb600b/releases/64863c03ac0993f6e77c817f/img/clear.svg"
-        alt="uncomplete"
-      />
-    {/if}
-    </div>
     <div class="group-9-1 group-9-3">
     <!-- svelte-ignore a11y-img-redundant-alt -->
     <img
@@ -46,7 +27,7 @@
         {stepDescription}
         </p>
     </div>
-        <Button bind:loading={loading} disabled={disabled} onClick={action} text={actionText}/>
+        <Button bind:loading={loading} onClick={action} text={actionText}/>
     </div>
     <div class="group-10-1 s-y_bCXRrkrYfP">
       <div class="install-metamask inter-bold-white-20px s-y_bCXRrkrYfP">
@@ -59,14 +40,6 @@
 </div>
 
 <style>
-  .inter-bold-blueberry-14px {
-    color: var(--akash);
-    font-family: var(--font-family-inter);
-    font-size: var(--font-size-m);
-    font-style: normal;
-    font-weight: 700;
-  }
-
   .inter-bold-white-16px {
     color: var(--white);
     font-family: var(--font-family-inter);
@@ -83,24 +56,6 @@
     font-weight: 400;
   }
 
-  .step {
-      letter-spacing: 2.1px;
-      line-height: normal;
-      margin-bottom: 1px;
-      min-height: 17px;
-  }
-
-  .flex-row-1 {
-      gap: 179px;
-  }
-
-  .flex-row-3 {
-      align-items: center;
-      display: flex;
-      margin-left: 2px;
-      min-width: 262px;
-  }
-
   .overlap-group1 {
       -webkit-backdrop-filter: blur(15px) brightness(100%);
       align-items: center;
@@ -113,22 +68,6 @@
       flex-direction: column;
       padding: 24px 0;
       width: 310px;
-  }
-
-  .step-2 {
-    min-width: 59px;
-  }
-
-  .step {
-    letter-spacing: 2.1px;
-    line-height: normal;
-    margin-bottom: 1px;
-    min-height: 17px;
-  }
-
-  .done-1 {
-    height: 24px;
-    width: 24px;
   }
 
   .group-9-1 {
@@ -245,24 +184,8 @@
       --responsive-margin: 10px;
     }
 
-    .inter-bold-blueberry-14px {
-      font-size: var(--responsive-font-size);
-    }
-
-    .flex-row-1 {
-      gap: 100px; /* reduced gap for smaller screens */
-    }
-
     .group-9-3 {
       width: 240px; /* reduced width */
-    }
-
-    .flex-row-3 {
-      align-items: center;
-      display: flex;
-      margin-left: 2px;
-      min-width: 262px;
-      justify-content: space-between;
     }
   }
 
@@ -272,14 +195,6 @@
       --responsive-font-size: 11px;
       --responsive-padding: 3px 6px;
       --responsive-margin: 7px;
-    }
-
-    .inter-bold-blueberry-14px {
-      font-size: var(--responsive-font-size);
-    }
-
-    .flex-row-1 {
-      gap: 50px; /* further reduced gap for mobile screens */
     }
   }
 </style>

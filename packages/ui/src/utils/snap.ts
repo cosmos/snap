@@ -22,6 +22,59 @@ installParams[snapId] = { version: snapVersion };
 
 export const isMetaMaskInstalled = (): boolean | undefined => !!window.ethereum && window.ethereum.isMetaMask;
 
+export const requestSnapPermissions = async () => {
+  let res = await window.ethereum.request({
+    "method": "wallet_getPermissions",
+    "params": []
+  });
+  let snapPerm = res.find((perm: any) => perm.parentCapability === "wallet_snap");
+  if (!snapPerm) {
+    await window.ethereum.request({
+      "method": "wallet_requestPermissions",
+      "params": [
+        {
+          "wallet_snap": {
+            "caveats": [
+              {
+                "type": "snapIds",
+                "value": {
+                  [snapId]: {},
+                }
+              }
+            ]
+          }
+        }
+      ]
+    });
+  }
+  res = await window.ethereum.request({
+    "method": "wallet_getPermissions",
+    "params": []
+  });
+  snapPerm = res.find((perm: any) => perm.parentCapability === "wallet_snap");
+  const snap = snapPerm.caveats.find((cav: any) => cav.value[snapId] != undefined);
+
+  if (!snap) {
+    await window.ethereum.request({
+      "method": "wallet_requestPermissions",
+      "params": [
+        {
+          "wallet_snap": {
+            "caveats": [
+              {
+                "type": "snapIds",
+                "value": {
+                  [snapId]: {},
+                }
+              }
+            ]
+          }
+        }
+      ]
+    })
+  };
+}
+
 export const isSnapInstalled = async (): Promise<boolean | undefined> => {
   const result = await window.ethereum.request({ method: 'wallet_getSnaps' });
   return Object.keys(result).includes(snapId);
@@ -305,3 +358,38 @@ export const addCelestia = async () => {
     throw err
   }
 }
+
+// Returns true if enabled, false if not.
+export const checkSnapPermissions = async () => {
+  const res = await window.ethereum.request({
+    "method": "wallet_getPermissions",
+    "params": []
+  });
+  const snapPerm = res.find((perm: any) => perm.parentCapability === "wallet_snap");
+  if (!snapPerm) {
+    return false
+  }
+  const snap = snapPerm.caveats.find((cav: any) => cav.value[snapId] != undefined);
+
+  if (!snap) {
+    return false
+  };
+  return true;
+}
+
+export const runInstallSnap = async () => {
+  await requestSnapPermissions();
+  const isMMInstalled = isMetaMaskInstalled();
+  if (!isMMInstalled) {
+      window.open("https://metamask.io/download", "_blank");
+  }
+  const isSnapInstalledValue = await isSnapInstalled();
+  const isSnapInitValue = await isSnapInitialized();
+  if (!isSnapInstalledValue || !isSnapInitValue) {
+      await window.cosmos.enable();
+  }
+  const isSnapLatestVersionValue = await isSnapLatestVersion();
+  if (!isSnapLatestVersionValue) {
+      await installSnap();
+  }
+};

@@ -9,9 +9,7 @@ export const state = writable({
     alertText: "",
     showAlert: false,
     alertType: "success" || "warning" || "danger",
-    isMetaMaskInstalledValue: false,
-    isSnapInstalledValue: false,
-    isSnapInitValue: false,
+    isSnapInstalled: false,
     isSnapLatestVersion: false,
     loading: false
 });

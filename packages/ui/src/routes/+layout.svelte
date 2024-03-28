@@ -1,51 +1,19 @@
 <script lang="ts">
+  import Connect from "../components/Connect.svelte";
 	import Header from "../components/Header.svelte";
   import { state } from "../store/state";
-  import { page } from '$app/stores';
-  import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import Alert from "../components/Alert.svelte";
 	import Menu from "../components/Menu.svelte";
 	import { updateDirectory } from "../store/directory";
-	import { CosmosSnap, isSnapInitialized, isSnapInstalled } from "@cosmsnap/snapper";
-	import { isMetaMaskInstalled, isSnapLatestVersion, snapId } from "../utils/snap";
-
-	const initializeData = async () => {
-    try {
-      $state.loading = true;
-      $state.isMetaMaskInstalledValue = isMetaMaskInstalled() ?? false;
-      $state.loading = false;
-      if ($state.isMetaMaskInstalledValue) {
-        $state.loading = true;
-        $state.isSnapInstalledValue = await isSnapInstalled(snapId);
-        $state.isSnapLatestVersion = await isSnapLatestVersion();
-        $state.loading = false;
-      }
-      if ($state.isSnapInstalledValue && $state.isSnapLatestVersion) {
-        $state.loading = true;
-        $state.isSnapInitValue = await isSnapInitialized(snapId);
-        $state.loading = false;
-      }
-     } catch (err: any) {
-      $state.loading = false;
-      $state.alertText = `${err.message}`
-      $state.alertType = "danger"
-      $state.showAlert = true
-    }
-	};
+	import { CosmosSnap } from "@cosmsnap/snapper";
+	import { checkSnapPermissions, snapId } from "../utils/snap";
 
   onMount(async () => {
     window.cosmos = new CosmosSnap();
     window.cosmos.changeSnapId(snapId);
     updateDirectory();
-    await initializeData();
-    if (!$state.connected) {
-      goto("/");
-    } else {
-      if ($page.url.pathname == "/") {
-        goto("/balances")
-      }
-    }
+    $state.connected = await checkSnapPermissions();
   });
 </script>
 
@@ -66,8 +34,8 @@
       <div class="right-content">
         <slot/>
       </div>
-  {:else} 
-    <slot/>
+  {:else}
+    <Connect /> 
   {/if}
 </div>
 <Alert />

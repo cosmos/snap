@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
 	import { state } from "../store/state";
+	import { runInstallSnap } from "../utils/snap";
 
     export let connected: boolean = true;
     export let logoSrc: string;
@@ -28,7 +29,7 @@
             <div class="logo-text">{logoText}</div>
         </div>
         <div class="button-container">
-            <button on:click={() => goto("/")} class="connect-button inter-medium-white-12px">
+            <button on:click={runInstallSnap} class="connect-button inter-medium-white-12px">
                 {connectWalletTxt}
             </button>
         </div>

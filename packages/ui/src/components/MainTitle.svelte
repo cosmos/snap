@@ -3,7 +3,7 @@
     export let subtitle: string;
 </script>
 
-<h1 class="connect-cosmos-to-metamask">
+<h1 class="connect-cosmos">
     <span class="inter-extra-bold-white-56px">{title} </span>
     <span class="span1">{subtitle}<br /></span>
     <span class="inter-extra-bold-white-56px">into Metamask</span>
@@ -18,11 +18,11 @@
         --font-family-inter: "Inter", Helvetica;
     }
 
-    .connect-cosmos-to-metamask {
+    .connect-cosmos {
         margin-top: 120px;
         color: transparent;
         font-family: var(--font-family-inter);
-        font-size: var(--font-size-xxl);
+        font-size: 56px;
         font-weight: 800;
         letter-spacing: -1.68px;
         line-height: normal;
@@ -38,7 +38,7 @@
     .inter-extra-bold-white-56px {
         color: var(--white);
         font-family: var(--font-family-inter);
-        font-size: var(--font-size-xxl);
+        font-size: 56px;
         font-style: normal;
         font-weight: 800;
     }
