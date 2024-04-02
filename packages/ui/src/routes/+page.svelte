@@ -22,8 +22,9 @@
   onMount(async () => {
     if ($state.connected) {
       await fetchChains();
-      const account = await window.cosmos.getAccount("akashnet-2")
-      multisigs = await getMultiSigs(toBase64(account.pubkey));
+      const account = await window.cosmos.getAccount("akashnet-2");
+      const b64Pk = toBase64(new Uint8Array(Object.values(account.pubkey)));
+      multisigs = await getMultiSigs(b64Pk);
       console.log(multisigs);
     }
   });
