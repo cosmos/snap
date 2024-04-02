@@ -1,4 +1,4 @@
-import { Query } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
+import { Query } from "https://deno.land/x/appwrite@10.0.0/mod.ts";
 import { db } from "./types.ts";
 import { DB_NOTIFICATION_RETURN, NOTIFICATIONS_COLLECTION_NAME, RESOURCE } from "./types.ts";
 

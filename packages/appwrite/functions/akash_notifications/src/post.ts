@@ -1,4 +1,4 @@
-import { Query, Models, Permission, Role } from "https://deno.land/x/appwrite@7.0.0/mod.ts";
+import { Query, Models, Permission, Role } from "https://deno.land/x/appwrite@10.0.0/mod.ts";
 import { AKASH_LEASE, AKASH_NOTIFICATION, DB_LEASE_RETURN, DB_NOTIFICATION_RETURN, NOTIFICATIONS_COLLECTION_NAME, OPEN_LEASE_COLLECTION_NAME, RESOURCE, RequestBody, apiUrl } from "./types.ts";
 import { db } from "./types.ts";
 

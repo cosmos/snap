@@ -1,27 +1,21 @@
 <script lang="ts">
+  import type { Pubkey } from "@cosmjs/amino";
 	import { copyToClipboard } from "../utils/general";
-  import { directory } from "../store/directory";
   import _ from "lodash";
 
   export let name: string;
-  export let chain_id: string;
-  export let dollarAmount = 0;
-  export let tokenAmount = 0;
-  export let tokenDenom: string;
-  export let chainAddress: string;
+  export let threshold = 0;
+  export let memberCount = 0;
+  export let publicKey: string;
   let copied = false;
+  let pk: Pubkey;
 
   $: {
-    if (tokenDenom) {
-      let chainDir = $directory.filter(chain => chain.chain_id == chain_id);
-      const tokenKey = tokenDenom.toLowerCase();
-      const price = chainDir[0]?.prices?.coingecko?.[tokenKey];
-      dollarAmount = price ? tokenAmount * price.usd : dollarAmount;
-    }
-  };
+    pk = JSON.parse(publicKey);
+  }
 
   const copyAddress = async () => {
-    await copyToClipboard(chainAddress);
+    await copyToClipboard(pk.value);
     copied = true;
     setTimeout(() => {
       copied = false;
@@ -33,16 +27,16 @@
   <div class="group-51">
       <div class="group-28">
           <div class="group-46 rounded-[100px] text-white flex items-center justify-center">
-            M
+            {name[0].toUpperCase()}
           </div>
       </div>
       <div class="group-49">
           <div class="chain inter-bold-white-22px">
-              Mystic Labs
+              {name}
           </div>
       <div class="group-53">
           <p class="price inter-medium-white-12px">
-            1/3 Threshold
+            {threshold}/{memberCount} Threshold
           </p>
       </div>
   </div>
@@ -53,7 +47,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div on:click={copyAddress} class="frame-33 frame-2">
   <div class="cosmos1vhw82tqftrg-1 inter-medium-white-14px">
-      {chainAddress}
+      {pk.value}
   </div>
     {#if copied}
       <svg class="text-white w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">

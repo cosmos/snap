@@ -1,5 +1,12 @@
 import { Client, ExecutionMethod, Functions } from 'appwrite';
 
+export interface Multisig {
+  threshold: number;
+  members: string[];
+  name: string;
+  public_key: string;
+}
+
 const appwrite_url = import.meta.env.VITE_APPWRITE_URL;
 if (!appwrite_url) {
   throw new Error("VITE_APPWRITE_URL is not defined");
@@ -13,13 +20,14 @@ const client = new Client()
   .setEndpoint(appwrite_url)
   .setProject(project_id);
 
-export const getMultiSigs = async (address: string) => {
+export const getMultiSigs = async (memberPk: string): Promise<Multisig[]> => {
     const functions = new Functions(client);
-    const res = await functions.createExecution('get_multisigs', undefined, undefined, `?address=${address}`, ExecutionMethod.GET);
+    const res = await functions.createExecution('get_multisigs', undefined, undefined, `?memberPk=${memberPk}`, ExecutionMethod.GET);
     if (res.responseStatusCode !== 200) {
       throw new Error(`Failed to getMultiSigs. ${res.responseBody}`);
     }
-    return JSON.parse(res.responseBody);
+    const data = JSON.parse(res.responseBody);
+    return data.data;
 };
 
 export const createMultiSig = async (address: string) => {
@@ -28,7 +36,8 @@ export const createMultiSig = async (address: string) => {
   if (res.responseStatusCode !== 200) {
     throw new Error(`Failed to createMultiSig. ${res.responseBody}`);
   }
-  return JSON.parse(res.responseBody);
+  const data = JSON.parse(res.responseBody);
+  return data.data;
 };
 
 export const createMultiSigTx = async (address: string) => {
@@ -37,7 +46,8 @@ export const createMultiSigTx = async (address: string) => {
   if (res.responseStatusCode !== 200) {
     throw new Error(`Failed to createMultiSigTx. ${res.responseBody}`);
   }
-  return JSON.parse(res.responseBody);
+  const data = JSON.parse(res.responseBody);
+  return data.data;
 };
 
 export const signMultiSigTx = async (address: string) => {
@@ -46,7 +56,8 @@ export const signMultiSigTx = async (address: string) => {
   if (res.responseStatusCode !== 200) {
     throw new Error(`Failed to signMultiSigTx. ${res.responseBody}`);
   }
-  return JSON.parse(res.responseBody);
+  const data = JSON.parse(res.responseBody);
+  return data.data;
 };
 
 export const getAkashNotifications = async (address: string) => {
@@ -55,7 +66,8 @@ export const getAkashNotifications = async (address: string) => {
     if (res.responseStatusCode !== 200) {
       throw new Error(`Failed to getAkashNotifications. ${res.responseBody}`);
     }
-    return JSON.parse(res.responseBody);
+    const data = JSON.parse(res.responseBody);
+    return data.data;
 };
 
 export const updateAkashNotifications = async (address: string) => {
@@ -64,5 +76,6 @@ export const updateAkashNotifications = async (address: string) => {
     if (res.responseStatusCode !== 200) {
       throw new Error(`Failed to updateAkashNotifications. ${res.responseBody}`);
     }
-    return JSON.parse(res.responseBody);
+    const data = JSON.parse(res.responseBody);
+    return data.data;
 };

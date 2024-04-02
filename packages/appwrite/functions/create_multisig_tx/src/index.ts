@@ -1,4 +1,4 @@
-import { Client, Databases, ID, Permission, Role } from 'https://deno.land/x/appwrite@7.0.0/mod.ts';
+import { Client, Databases, ID, Permission, Role } from 'https://deno.land/x/appwrite@10.0.0/mod.ts';
 import { Multisig, RequestBody } from './types.ts';
 import { SigningStargateClient } from 'npm:@cosmjs/stargate'
 import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';

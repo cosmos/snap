@@ -1,12 +1,13 @@
 <script lang="ts">
   import { beforeUpdate, onMount } from "svelte";
   import Multisig from "../components/Multisig.svelte";
-  import { balances } from "../store/balances";
   import { chains, fetchChains } from "../store/chains";
   import { updateDirectory } from "../store/directory";
-  import BalanceLoader from "../components/BalanceLoader.svelte";
 	import { state } from "../store/state";
-	import { getMultiSigs } from "../utils/appwrite";
+	import { getMultiSigs, type Multisig as MultiSig } from "../utils/appwrite";
+  import { toBase64 }from "@cosmjs/encoding";
+
+  let multisigs: MultiSig[] = [];
 
   $: {
     if (!$chains) {
@@ -21,12 +22,9 @@
   onMount(async () => {
     if ($state.connected) {
       await fetchChains();
-      const akashAddress = $chains.find((chain) => chain.chain_id === "akashnet-2")?.address;
-      if (!akashAddress) {
-        throw new Error("Akash chain not found. Must have Akash chain added in wallet for multisig usage.");
-      }
-      const multiSigs = await getMultiSigs(akashAddress);
-      console.log(multiSigs);
+      const account = await window.cosmos.getAccount("akashnet-2")
+      multisigs = await getMultiSigs(toBase64(account.pubkey));
+      console.log(multisigs);
     }
   });
   beforeUpdate(updateDirectory);
@@ -38,26 +36,25 @@
       <div class="chain-holding-distribution">
         My Multisigs
       </div>
-      <div class="mt-[20px] grid grid-cols-4 gap-[20px]">
-        {#if $balances.length > 0}
-          {#each $balances as b}
-            {#each b.balances as amount}
-              <div class="balance col-span-2 lg:col-span-1 cursor-pointer">
-                <Multisig
-                  name={b?.pretty_name}
-                  chain_id={b.chain_id}
-                  tokenAmount={Math.round((Number(amount.amount) / 1_000_000) * 100) / 100}
-                  tokenDenom={amount.display}
-                  chainAddress={b?.address ?? ""}
-                />
-              </div>
-            {/each}
-          {/each}
-        {:else}
-          {#each [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as i}
-            <BalanceLoader />
-          {/each}
-        {/if}
+      <div class="mt-[20px] grid grid-cols-5 gap-[20px]">
+        {#each multisigs as ms}
+          <div class="balance col-span-2 lg:col-span-1 cursor-pointer">
+            <Multisig
+              name={ms.name}
+              threshold={ms.threshold}
+              publicKey={ms.public_key}
+              memberCount={ms.members.length}
+            />
+          </div>
+        {/each}
+        <div class="cursor-pointer flex flex-col items-center justify-center p-5 border-2 border-solid border-[#ffffff2e] rounded-lg w-full min-h-[170px] bg-[var(--licorice)]">
+          <div>
+            <svg class="w-10 h-10 text-[#FF414C]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+            </svg>                
+          </div>
+          <div class="mt-4 text-white font-inter font-medium">Add Multisig</div>
+        </div>
       </div>
     </div>
   </div>

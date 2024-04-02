@@ -6,5 +6,5 @@
       }
     ],
     "python.analysis.typeCheckingMode": "basic",
-    "deno.enable": false
+    "deno.enable": true
   }
