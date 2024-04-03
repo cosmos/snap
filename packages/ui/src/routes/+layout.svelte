@@ -33,9 +33,6 @@
         <slot/>
       </div>
     {:else}
-      <div hidden={!$state.showMenu} class="left-content">
-        <Menu />
-      </div>
       <div class="right-content">
         <slot/>
       </div>
@@ -78,22 +75,7 @@
       min-width: 100%;
     }
 
-    .left-content {
-      backdrop-filter: blur(15px) brightness(100%);
-      background-color: #05000b;
-      border: 1px solid;
-      border-color: var(--white-2);
-      border-top: 0px;
-      position: fixed;
-      left: 0;
-      top: 0;
-      height: 100%;
-      width: 200px;
-      margin-top: 75px;
-    }
-
     .right-content {
-      margin-left: 200px; 
       flex-grow: 1;
       overflow: clip;
       margin-top: 75px;
@@ -106,14 +88,6 @@
       .container {
         flex-direction: column;
         min-height: 100vh;
-      }
-
-      .left-content {
-        display: flex;
-        position: fixed;
-        z-index: 1000;
-        width: 100%;
-        justify-content: center;
       }
 
       .right-content {

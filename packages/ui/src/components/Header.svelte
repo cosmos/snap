@@ -1,6 +1,5 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-	import { state } from "../store/state";
 	import { runInstallSnap } from "../utils/snap";
 
     export let connected: boolean = true;
@@ -12,7 +11,7 @@
 {#if connected}
     <div class="navbar">
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="logo-container" on:click={() => goto("/balances")}>
+        <div class="logo-container" on:click={() => goto("/")}>
             <img class="logo-image" src={logoSrc} alt={logoText} />
             <div class="logo-text">{logoText}</div>
         </div>

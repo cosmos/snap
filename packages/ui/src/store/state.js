@@ -12,5 +12,10 @@ export const state = writable({
     isSnapInstalled: false,
     isSnapLatestVersion: false,
     loading: false,
-    currentMultiSig: null
+    currentMultiSig: {
+        threshold: 0,
+        members: [""],
+        name: "",
+        public_key: ""
+    }
 });

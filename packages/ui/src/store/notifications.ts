@@ -56,7 +56,7 @@ export const getNotifications = async ($chains: Chain[], set: (value: Notificati
 
         set(data);
     } catch (error) {
-        console.error("There was a problem with the fetch operation:", error);
+        console.error(error);
     } finally {
         isLoading.set(false);
     }

@@ -22,7 +22,7 @@ const client = new Client()
 
 export const getMultiSigs = async (memberPk: string): Promise<Multisig[]> => {
     const functions = new Functions(client);
-    const res = await functions.createExecution('get_multisigs', undefined, undefined, `?memberPk=${memberPk}`, ExecutionMethod.GET);
+    const res = await functions.createExecution('get_multisigs', undefined, undefined, `?memberPk=${encodeURIComponent(memberPk)}`, ExecutionMethod.GET);
     if (res.responseStatusCode !== 200) {
       throw new Error(`Failed to getMultiSigs. ${res.responseBody}`);
     }
@@ -67,7 +67,7 @@ export const getAkashNotifications = async (address: string) => {
       throw new Error(`Failed to getAkashNotifications. ${res.responseBody}`);
     }
     const data = JSON.parse(res.responseBody);
-    return data.data;
+    return data;
 };
 
 export const updateAkashNotifications = async (address: string) => {

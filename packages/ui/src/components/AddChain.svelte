@@ -6,6 +6,7 @@
 	import { validateChainInfo } from '../utils/general';
   import Button from './Button.svelte';
 	import { fetchChains } from '../store/chains';
+	import type { Multisig } from '../utils/appwrite';
 
   export let chainInfo: ChainInfo = ADD_CHAIN_EXAMPLE;
   let content = { text: undefined, json: chainInfo as any };
@@ -23,7 +24,7 @@
         throw new Error("Chain info is not supplied properly.")
       }
       await window.cosmos.experimentalSuggestChain(chainInfo);
-      await fetchChains();
+      await fetchChains($state.currentMultiSig as Multisig);
       loading = false;
     } catch (err) {
       console.error(err);

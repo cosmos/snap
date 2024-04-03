@@ -8,11 +8,12 @@ export const getMultisigs = async (context: any) => {
     if (!memberPk) {
         throw new Error("Missing memberPk in request query");
     }
+    context.log(decodeURIComponent(memberPk));
     const ret: DB_MULTISIG_RETURN = await db.listDocuments(
         RESOURCE,
         MULTISIG_COLLECTION_NAME,
         [
-          Query.contains("members", memberPk),
+          Query.contains("members", [decodeURIComponent(memberPk)]),
         ],
       ) as unknown as DB_MULTISIG_RETURN;
     

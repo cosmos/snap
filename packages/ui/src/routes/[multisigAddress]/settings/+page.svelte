@@ -5,6 +5,7 @@
 	import { addCelestia, deleteChain } from '../../../utils/snap';
   import lunr from 'lunr';
 	import type { Chain } from '@cosmsnap/snapper';
+	import type { Multisig } from '../../../utils/appwrite';
 
   let searchResults: lunr.Index.Result[] = [];
   let currentChains: Chain[] = $chains;
@@ -42,7 +43,11 @@
 
   const deleteChainFromSnap = async (chain_id: string) => {
     await deleteChain(chain_id);
-    await fetchChains();
+    await fetchChains($state.currentMultiSig as Multisig);
+  }
+
+  const addChainCelestia = async () => {
+    await addCelestia($state.currentMultiSig as Multisig);
   }
 </script>
 
@@ -98,7 +103,7 @@
           </div>
           <div class="group-4450">
             <!-- svelte-ignore a11y-click-events-have-key-events -->
-            <svg on:click={addCelestia} class="w-5 h-5 text-[#FF414C] cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+            <svg on:click={addChainCelestia} class="w-5 h-5 text-[#FF414C] cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16"/>
             </svg>
           </div>

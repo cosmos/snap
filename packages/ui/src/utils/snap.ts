@@ -1,9 +1,11 @@
 import type { Address } from '../../../snap/src/types/address';
 import type { Chain, CosmosAddress } from '../../../snap/src/types/chains';
-import { chains, fetchChains } from '../store/chains';
+import { fetchChains } from '../store/chains';
 import { CELESTIA_CHAIN_REGISTRY_URL } from './constants';
 import { LOCAL_STORAGE_INIT } from './general';
 import type { ChainInfo } from '@keplr-wallet/types';
+import { pubkeyToAddress, createMultisigThresholdPubkey } from "@cosmjs/amino";
+import type { Multisig } from './appwrite';
 
 declare global {
   interface Window {
@@ -117,30 +119,27 @@ export const getChains = async (): Promise<Chain[]> => {
   return result.data.chains;
 };
 
-export const getChainAddresses = async (): Promise<CosmosAddress[]> => {
-  const result = await window.ethereum.request({
-    method: 'wallet_invokeSnap',
-    params: {
-      snapId,
-      request: {
-        method: 'getChainAddresses',
-      },
-    },
+export const getChainAddresses = async (chains: Chain[], multisig: Multisig): Promise<CosmosAddress[]> => {
+  const pk = await getPublicKey(multisig);
+  const addresses = chains.map(chain => {
+    const address = pubkeyToAddress(pk, chain.bech32_prefix);
+    return {
+      chain_id: chain.chain_id,
+      address: address
+    }
   });
-  return result.data.addresses;
+  return addresses;
 };
 
-export const getPublicKey = async (): Promise<string> => {
-  const result = await window.ethereum.request({
-    method: 'wallet_invokeSnap',
-    params: {
-      snapId,
-      request: {
-        method: 'getPublicKey',
-      },
-    },
+export const getPublicKey = async (multisig: Multisig) => {
+  const pks = multisig.members.map((cpk) => {
+    return {
+      type: "tendermint/PubKeySecp256k1",
+      value: cpk,
+    };
   });
-  return result.data.public_key;
+  const multiSigPK = createMultisigThresholdPubkey(pks, multisig.threshold);
+  return multiSigPK
 };
 
 export const getAddresses = async (): Promise<Address[]> => {
@@ -345,14 +344,14 @@ export const addChain = async (chain: Chain) => {
   }
 };
 
-export const addCelestia = async () => {
+export const addCelestia = async (multisig: Multisig) => {
   try {
     const res = await fetch(CELESTIA_CHAIN_REGISTRY_URL);
     const celestia: Chain = await res.json();
     // Set the logo as our local PNG for Celestia
     celestia.logo_URIs = { png: "", svg: "/TIA_icon.svg" };
     await addChain(celestia);
-    await fetchChains();
+    await fetchChains(multisig);
   } catch (err) {
     console.error(err);
     throw err

@@ -53,3 +53,5 @@ export let ADD_CHAIN_EXAMPLE: ChainInfo = {
 export const CELESTIA_CHAIN_REGISTRY_URL = "https://raw.githubusercontent.com/cosmos/chain-registry/master/celestia/chain.json"
 
 export const CELESTIA_PROMPTED_KEY = "cosmsnap:celestia"
+
+export const pubKeyType = "tendermint/PubKeySecp256k1";

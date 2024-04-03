@@ -7,6 +7,7 @@
   import { updateDirectory } from "../../../store/directory";
   import BalanceLoader from "../../../components/BalanceLoader.svelte";
 	import { state } from "../../../store/state";
+	import type { Multisig } from "../../../utils/appwrite";
 
   $: {
     if (!$chains) {
@@ -20,7 +21,7 @@
 
   onMount(() => {
     if ($state.connected) {
-      fetchChains()
+      fetchChains($state.currentMultiSig as Multisig)
     }
   });
   beforeUpdate(updateDirectory);

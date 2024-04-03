@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Pubkey } from "@cosmjs/amino";
 	import { copyToClipboard } from "../utils/general";
   import _ from "lodash";
 
@@ -8,14 +7,9 @@
   export let memberCount = 0;
   export let publicKey: string;
   let copied = false;
-  let pk: Pubkey;
-
-  $: {
-    pk = JSON.parse(publicKey);
-  }
 
   const copyAddress = async () => {
-    await copyToClipboard(pk.value);
+    await copyToClipboard(publicKey);
     copied = true;
     setTimeout(() => {
       copied = false;
@@ -23,7 +17,7 @@
   }
 </script>
 
-<div class="group-55">
+<div class="group-55 hover:bg-red">
   <div class="group-51">
       <div class="group-28">
           <div class="group-46 rounded-[100px] text-white flex items-center justify-center">
@@ -47,7 +41,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div on:click={copyAddress} class="frame-33 frame-2">
   <div class="cosmos1vhw82tqftrg-1 inter-medium-white-14px">
-      {pk.value}
+      {publicKey}
   </div>
     {#if copied}
       <svg class="text-white w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
