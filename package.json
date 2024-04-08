@@ -11,8 +11,7 @@
   "license": "MIT",
   "author": "Mystic Labs, Inc",
   "workspaces": [
-    "packages/*",
-    "packages/cron/functions/*"
+    "packages/*"
   ],
   "scripts": {
     "build": "yarn workspaces foreach --parallel --topological --verbose run build",

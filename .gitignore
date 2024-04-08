@@ -134,3 +134,5 @@ dist
 **/airplane.dev.yaml
 
 package-lock.json
+
+lxd

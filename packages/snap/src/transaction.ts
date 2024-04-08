@@ -5,7 +5,7 @@ import { AccountData, DirectSignResponse, OfflineDirectSigner, makeSignBytes } f
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { Chain, Fees } from "./types/chains";
 import { ChainState } from "./state";
-import { heading, panel, text } from "@metamask/snaps-ui";
+import { heading, panel, text } from "@metamask/snaps-sdk";
 import {
   WALLET_URL,
   DEFAULT_FEES,
