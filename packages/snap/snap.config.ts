@@ -11,6 +11,8 @@ const config: SnapConfig = {
   },
   environment: {
     DENO_SERVERLESS_URL: process.env.DENO_SERVERLESS_URL,
+    APPWRITE_URL: process.env.APPWRITE_URL,
+    APPWRITE_FUNCTION_PROJECT_ID: process.env.APPWRITE_FUNCTION_PROJECT_ID,
   },
 };
 

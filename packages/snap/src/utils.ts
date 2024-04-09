@@ -60,7 +60,7 @@ export const getBalances = async (chains: Chain[]): Promise<ChainBalances[]> => 
 
 export const getMultisigs = async (signer_address: string) => {
     const functions = new Functions(client);
-    const res = await functions.createExecution('get_multisigs', undefined, undefined, `?signer_address=${signer_address}`, ExecutionMethod.GET);
+    const res = await functions.createExecution('get_multisigs', undefined, undefined, `?memberPk=${signer_address}`, ExecutionMethod.GET);
     if (res.responseStatusCode !== 200) {
         throw new Error(`Failed to getMultisigs. ${res.responseBody}`);
     }
