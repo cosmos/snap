@@ -1014,4 +1014,64 @@ export const onHomePage: OnHomePageHandler = async () => {
   };
 };
 
-export const onInstall: OnInstallHandler = async () => {};
+export const onInstall: OnInstallHandler = async () => {
+  // Ensure user confirms initializing Cosmos snap
+  let confirmationInit = await snap.request({
+    method: "snap_dialog",
+    params: {
+      type: "confirmation",
+      content: panel([
+        text(
+          "Would you like to add Cosmos chain support within your Metamask wallet?"
+        ),
+      ]),
+    },
+  });
+  if (!confirmationInit) {
+    throw new Error("Initialize Cosmos chain support was denied.");
+  }
+  // Make sure not initialized already
+  let checkInit = await snap.request({
+    method: "snap_manageState",
+    params: { operation: "get" },
+  });
+  if (checkInit != null && checkInit.initialized) {
+    await snap.request({
+      method: "snap_dialog",
+      params: {
+        type: "alert",
+        content: panel([
+          heading("Already Initialized"),
+          text(
+            "The Cosmos Snap has already been initialized."
+          ),
+        ]),
+      },
+    });
+    throw new Error("The Cosmos Snap has already been initialized.");
+  };
+
+  let chainList = await initializeChains();
+  let chains = new Chains(chainList);
+  // Initialize with initial state
+  await snap.request({
+    method: "snap_manageState",
+    params: {
+      operation: "update",
+      newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true },
+    },
+  });
+
+  await snap.request({
+    method: "snap_dialog",
+    params: {
+      type: "alert",
+      content: panel([
+        heading("Initialization Successful"),
+        text(
+          "Cosmos has been added and initialized into your Metamask wallet."
+        ),
+      ]),
+    },
+  });
+};
