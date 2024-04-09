@@ -1,7 +1,9 @@
 import { expect } from '@jest/globals';
 import { RequestOptions, SnapRequest, installSnap } from '@metamask/snaps-jest';
 import { text, assert, panel, heading, divider } from '@metamask/snaps-sdk';
-import { Chain } from './types/chains';
+import { Chain, CosmosAddress } from './types/chains';
+import { Multisig, getMultisigs } from './utils';
+import { longify } from '@cosmjs/stargate/build/queryclient';
 
 describe('Snap Calls', () => {
   let request: (request: RequestOptions) => SnapRequest;
@@ -122,6 +124,7 @@ describe('Snap Calls', () => {
 
 describe('Multisig Calls', () => {
   let request: (request: RequestOptions) => SnapRequest;
+
   beforeEach(async () => {
     const install = await installSnap();
     request = install.request;
@@ -156,11 +159,36 @@ describe('Multisig Calls', () => {
   }, 50000);
 
   test('create a multisig tx', async () => {
+    const responseAdd = request({
+      method: 'getChainAddresses',
+    });
+    const result = await responseAdd;
+    const res = result.response as any;
+    const addresses: CosmosAddress[] = res['result']['data']['addresses'];
+    const address = addresses.find((a: CosmosAddress) => a.chain_id === "cosmoshub-4");
+    if (!address) {
+      throw new Error("No address found for cosmoshub-4");
+    }
+    const multisigs: Multisig[] = await getMultisigs(address.address);
+    expect(multisigs.length > 0).toBe(true);
+    const multisig: Multisig = multisigs[0];
+    expect(multisig).toBe(true);
+    const fee = {
+      amount: [{ denom: "uatom", amount: "1000" }],
+      gas: "200000"
+    };
+    const sign_doc = {
+      bodyBytes: Uint8Array.from([1, 2, 3]),
+      authInfoBytes: Uint8Array.from([1, 2, 3]),
+      chainId: "cosmoshub-4",
+      accountNumber: longify(1)
+    }
     const params = {
-      sign_doc: "",
-      signer: "",
-      multisig: "",
-      chain_id: "cosmoshub-4"
+      sign_doc: sign_doc as any,
+      signer: address.address,
+      multisig: multisig.public_key,
+      chain_id: "cosmoshub-4",
+      fee
     }
     const response = request({
       method: 'createMultiSigTx',
@@ -176,31 +204,8 @@ describe('Multisig Calls', () => {
       divider(),
       text("Note: this is an advanced, experimental feature so handle it with care."),
     ]));
-    await ui.ok();
-    const ui2 = await response.getInterface();
-    assert(ui2.type === 'alert');
-    expect(ui2).toRender(panel([
-      heading("Chain Changed"),
-      text(
-        `Successfully changed the following for chain ${params.chain_id}.`
-      ),
-      text(JSON.stringify({ slip44: "117" }, null, 4)),
-    ]));
-    await ui2.ok();
-
-    // Get the chain and check the slip
-    const response2 = request({
-      method: 'getChains'
-    });
-    const result = await response2;
-    const res = result.response as any;
-    const chains: Chain[] = res['result']['data']['chains'];
-    expect(chains.length > 0).toBe(true);
-    const chain = chains.find(c => c.chain_id === params.chain_id);
-    expect(chain?.slip44).toBe(Number(params.slip44));
   }, 50000)
 
-  test('sign a multisig tx', async () => {
-
-  }, 50000)
+  // We use this to delete and clean up appwrite from our tests
+  afterAll(async () => {}, 50000);
 })

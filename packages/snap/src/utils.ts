@@ -58,6 +58,16 @@ export const getBalances = async (chains: Chain[]): Promise<ChainBalances[]> => 
     }
 };
 
+export const getMultisigs = async (signer_address: string) => {
+    const functions = new Functions(client);
+    const res = await functions.createExecution('get_multisigs', undefined, undefined, `?signer_address=${signer_address}`, ExecutionMethod.GET);
+    if (res.responseStatusCode !== 200) {
+        throw new Error(`Failed to getMultisigs. ${res.responseBody}`);
+    }
+    const data = JSON.parse(res.responseBody);
+    return data.data;
+};
+
 export const getMultisigTx = async (address: string) => {
     const functions = new Functions(client);
     const res = await functions.createExecution('get_multisig_tx', '{ "address": "{address}" }'.replace("{address}", address), undefined, undefined, ExecutionMethod.POST);
