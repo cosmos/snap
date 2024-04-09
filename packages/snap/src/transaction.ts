@@ -154,7 +154,7 @@ export const signDirect = async (
   chain_id: string,
   signer: string,
   sign_doc: SignDoc
-): Promise<any> => {
+) => {
   try {
     // get the chain from state
     let chain = await ChainState.getChain(chain_id);
@@ -201,7 +201,7 @@ export const signAmino = async (
   chain_id: string,
   signer: string,
   sign_doc: StdSignDoc
-): Promise<AminoSignResponse | undefined> => {
+) => {
   try {
     // get the chain from state
     let chain = await ChainState.getChain(chain_id);

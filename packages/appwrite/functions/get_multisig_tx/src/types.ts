@@ -3,7 +3,8 @@ import { HttpEndpoint } from 'npm:@cosmjs/stargate';
 
 export interface RequestBody {
   id: string;
-  public_key: string;
+  password: string;
+  multisig_id: string;
   rpc: string | HttpEndpoint;
   fee: StdFee;
   prefix: string;
@@ -23,8 +24,7 @@ export interface Multisig {
     threshold: number;
     members: string[];
     name: string;
-    public_key: string;
-    transactions: MultisigTx[]
+    akash_address: string;
 }
 
 export interface MultisigTx {
@@ -38,12 +38,3 @@ export interface MultisigTx {
   body_bytes: string;
   sequence: number;
 }
-
-export interface DB_TX_RETURN {
-  total: number;
-  documents: MultisigTx[];
-}
-
-export const RESOURCE = "multisig";
-export const TRANSACTION_COLLECTION_NAME = "transactions";
-export const MULTISIG_COLLECTION_NAME = "multisig";

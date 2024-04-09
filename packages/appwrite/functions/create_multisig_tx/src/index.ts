@@ -1,5 +1,5 @@
-import { Client, Databases, ID, Permission, Role } from 'https://deno.land/x/appwrite@10.0.0/mod.ts';
-import { Multisig, RequestBody } from './types.ts';
+import { Client, Databases, ID, Permission, Query, Role } from 'https://deno.land/x/appwrite@10.0.0/mod.ts';
+import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Multisig, RESOURCE, RequestBody } from './types.ts';
 import { SigningStargateClient } from 'npm:@cosmjs/stargate'
 import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';
 import { createMultisigThresholdPubkey } from 'npm:@cosmjs/amino';
@@ -36,31 +36,31 @@ export default async ({ req, res, log, error }: Context) => {
       throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
     }
 
-    const { multisig_id, chain_id, type_url, message, signature, address, rpc, prefix } = JSON.parse(req.bodyRaw) as RequestBody;
+    const { public_key, rpc, prefix, signature, messages, chain_id, signer_address, fee } = JSON.parse(req.bodyRaw) as RequestBody;
 
-    if (!multisig_id) {
-      throw new Error("multisig_id is required in body");
-    }
-    if (!chain_id) {
-      throw new Error("chain_id is required in body");
-    }
-    if (!type_url) {
-      throw new Error("type_url is required in body");
-    }
-    if (!message) {
-      throw new Error("message is required in body");
-    }
-    if (!signature) {
-      throw new Error("signature is required in body");
-    }
-    if (!address) {
-      throw new Error("address is required in body");
+    if (!public_key) {
+      throw new Error("public_key is required in body");
     }
     if (!rpc) {
       throw new Error("rpc is required in body");
     }
     if (!prefix) {
       throw new Error("prefix is required in body");
+    }
+    if (!signature) {
+      throw new Error("signature is required in body");
+    }
+    if (!messages) {
+      throw new Error("messages is required in body");
+    }
+    if (!chain_id) {
+      throw new Error("chain_id is required in body");
+    }
+    if (!signer_address) {
+      throw new Error("signer_address is required in body");
+    }
+    if (!fee) {
+      throw new Error("fee is required in body");
     }
 
     const client = new Client()
@@ -70,11 +70,24 @@ export default async ({ req, res, log, error }: Context) => {
     
     const database = new Databases(client);
 
-    const id = ID.unique();
-
     // Get the multisig info
-    const doc = await database.getDocument("multisig", "multisig", multisig_id);
-    const multisig = doc as unknown as Multisig;
+    const multisigReturn: DB_TX_RETURN = await database.listDocuments(
+      RESOURCE,
+      MULTISIG_COLLECTION_NAME,
+      [
+        Query.equal("public_key", public_key),
+      ],
+    ) as unknown as DB_TX_RETURN;
+    if (multisigReturn.total === 0) {
+      throw new Error("No multisig found for this address");
+    }
+    const multisig = multisigReturn.documents[0] as unknown as Multisig;
+
+    // Check if there is a pending tx for the multisig wallet and if so direct the user to sign it before creating a new one
+    const pendingTx = multisig.transactions[0];
+    if (pendingTx) {
+      throw new Error(`There is a pending transaction for the multisig wallet with the name ${multisig.name}. Please have multisig members sign and submit this tx first before creating a new one.`);
+    }
 
     const cosmClient = await SigningStargateClient.connect(rpc);
     // lets get the sequence number for this transaction so we have to construct multi sig address
@@ -82,24 +95,34 @@ export default async ({ req, res, log, error }: Context) => {
     const multiSigAddress = pubkeyToAddress(multiSigPubKey, prefix);
     const sequence = await cosmClient.getSequence(multiSigAddress);
 
-    const response = await database.createDocument("multisig", "transactions", id, {
-      signatures: [JSON.stringify([address, signature])],
+    const tx_id = ID.unique();
+
+    const response = await database.createDocument("multisig", "transactions", tx_id, {
+      signatures: [JSON.stringify([signer_address, signature])],
       signed: [],
       multisig,
-      tx_id: ID.unique(),
+      tx_id,
       chain_id,
-      type_url,
-      message,
-      sequence
+      messages: JSON.stringify(messages),
+      sequence,
+      threshold: multisig.threshold,
+      signer_count: 1,
+      fee: fee
     },
     [
       Permission.read(Role.any())
     ]);
 
-    log(`Created Multisig Transaction ${id}. (${JSON.stringify(response)})`);
+    log(`Created Multisig Transaction ${tx_id}. (${JSON.stringify(response)})`);
 
     return res.json({
-      data: response,
+      data: {
+        tx_id,
+        chain_id,
+        signer_address,
+        threshold: multisig.threshold,
+        signer_count: 1,
+      },
       success: true
     });
 

@@ -1,4 +1,4 @@
-import { OnHomePageHandler, OnRpcRequestHandler, panel, text, heading, divider, copyable } from "@metamask/snaps-sdk";
+import { OnHomePageHandler, OnRpcRequestHandler, panel, text, heading, divider, copyable, OnUpdateHandler, OnInstallHandler } from "@metamask/snaps-sdk";
 import { AccountData } from '@cosmjs/amino';
 import { initializeChains } from "./initialize";
 import { Chain, Chains, Fees, Msg, UpdateChainParams } from "./types/chains";
@@ -13,8 +13,9 @@ import Long from "long";
 import { Key } from '@keplr-wallet/types';
 import { fromBech32 } from '@cosmjs/encoding';
 import { isTxBodyEncodeObject } from "@cosmjs/proto-signing";
-import { getBalances } from "./utils";
+import { createMultiSigTx, getBalances } from "./utils";
 import _ from "lodash";
+import { createMultisigTx, getMultiSigTx, getMultisigs, signDirectMultisig } from "./actions";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -474,6 +475,23 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         success: true,
         statusCode: 201,
       };
+    case "createMultiSigTx":
+      // Create a transaction with a multisig wallet and initially sign it. You can only sign one tx at a time hence we only allow
+      // for one pending tx at a time since each sequence number has to be sequential
+      return await createMultisigTx(request);
+    case "signDirectMultisig":
+      // Sign a transaction with a multisig wallet. You can only sign one tx at a time hence we only allow
+      // for one pending tx at a time since each sequence number has to be sequential
+      return await signDirectMultisig(request);
+    case "signAminoMultisig":
+      // Sign a transaction with a multisig wallet using amino signing. You can only sign one tx at a time hence we only allow
+      // for one pending tx at a time since each sequence number has to be sequential.
+    case "getMultiSigTx":
+      // Check if pending tx for a multisig and return it if so.
+      return await getMultiSigTx(request);
+    case "getMultisigs":
+      // Get all multisigs for the wallet
+      return await getMultisigs(request);
     case "addChain":
       if (
         !(
@@ -995,3 +1013,5 @@ export const onHomePage: OnHomePageHandler = async () => {
     content: panel(main),
   };
 };
+
+export const onInstall: OnInstallHandler = async () => {};
