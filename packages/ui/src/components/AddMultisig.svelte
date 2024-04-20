@@ -5,16 +5,18 @@
 	import Button from "./Button.svelte";
   import _ from "lodash";
   import Select from "./Select.svelte";
+  import type { SinglePubkey } from '@cosmjs/amino';
 
   let threshold = 2;
-  let name = "John Doe";
+  let name = "My Multisig";
+  let members: SinglePubkey[] = [];
   let loading = false;
   let openMember = 0;
 
   const createMultisig = async () => {
     try {
       loading = true;
-      await createMultiSig();
+      await createMultiSig(name, threshold, members);
       $state.openAddMultisigPopup = !$state.openAddMultisigPopup
       loading = false;
     } catch (err) {

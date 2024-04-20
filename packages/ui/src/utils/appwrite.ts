@@ -1,4 +1,5 @@
 import { Client, ExecutionMethod, Functions } from 'appwrite';
+import type { SinglePubkey } from '@cosmjs/amino';
 
 export interface Multisig {
   threshold: number;
@@ -30,9 +31,9 @@ export const getMultiSigs = async (memberPk: string): Promise<Multisig[]> => {
     return data.data;
 };
 
-export const createMultiSig = async () => {
+export const createMultiSig = async (name: string, threshold: number, pubKeys: SinglePubkey[]) => {
   const functions = new Functions(client);
-  const res = await functions.createExecution('create_multisig', '{ "address": "{address}" }', undefined, undefined, ExecutionMethod.POST);
+  const res = await functions.createExecution('create_multisig', `{ "name": "${name}", "threshold": ${threshold}, "pubKeys": "${JSON.stringify(pubKeys)}" }`, undefined, undefined, ExecutionMethod.POST);
   if (res.responseStatusCode !== 200) {
     throw new Error(`Failed to createMultiSig. ${res.responseBody}`);
   }
