@@ -3,8 +3,8 @@ import type { CoinIBC } from "./skip";
 import type { ChainInfo } from "@keplr-wallet/types";
 import { ethers } from "ethers";
 import { StargateClient } from "@cosmjs/stargate";
-import type { Chain } from "@cosmsnap/snapper/dist/types";
 import rpcs from '../apis.json';
+import type { ChainDirectory } from "../store/directory";
 
 export const LOCAL_STORAGE_CHAINS = "cosmsnap:chains";
 export const LOCAL_STORAGE_INIT = "cosmsnap:initialized";
@@ -177,7 +177,7 @@ export async function getERC20Balance(tokenAddress: string, walletAddress: strin
   return balance.toString();
 }
 
-export const getPubkeyFromNode = async (address: string, chain: Chain) => {
+export const getPubkeyFromNode = async (address: string, chain: ChainDirectory) => {
   if (!address.startsWith(chain.bech32_prefix)) {
     throw new Error(`Address ${address} prefix does not belong to chain ${chain.chain_id}`);
   }

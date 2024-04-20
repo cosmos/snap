@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { chains } from "../store/chains";
+  import { directory, type ChainDirectory } from "../store/directory";
   import { state } from "../store/state";
 	import { createMultiSig } from "../utils/appwrite";
 	import Button from "./Button.svelte";
@@ -8,12 +8,10 @@
   import type { SinglePubkey } from '@cosmjs/amino';
 	import { onMount } from "svelte";
 	import { getPubkeyFromNode } from "../utils/general";
-	import type { Chain } from "@cosmsnap/snapper";
 
   interface Member {
     pk: SinglePubkey;
-    chain: Chain;
-    address: string;
+    chain: ChainDirectory;
   }
 
   let threshold = 2;
@@ -22,6 +20,10 @@
   let loading = false;
   let openMember = 0;
 
+  $: {
+    console.log(members);
+  }
+
   onMount(() => {
     members = _.range(0, threshold, 1).map(() => {
       return {
@@ -29,19 +31,36 @@
           type: "tendermint/PubKeySecp256k1",
           value: "",
         },
-        chain: $chains[0],
-        address: "",
+        chain: $directory[0],
       };
     });
   });
 
-  const updateMemberChain = (index: number, chain: Chain) => {
-    members[index].chain = chain;
+  const updateMemberChain = (index: number, chain: ChainDirectory) => {
+    try {
+      members[index].chain = chain;
+    } catch (err) {
+      console.error(err);
+      loading = false;
+      // @ts-ignore
+      $state.alertText = err.message;
+      $state.alertType = "danger";
+      $state.showMenu = true;
+    }
   }
 
   const updateMemberPk = async (index: number, address: string) => {
-    const pk = await getPubkeyFromNode(address, members[index].chain);
-    members[index].pk = pk;
+    try {
+      const pk = await getPubkeyFromNode(address, members[index].chain);
+      members[index].pk = pk;
+    } catch (err) {
+      console.error(err);
+      loading = false;
+      // @ts-ignore
+      $state.alertText = err.message;
+      $state.alertType = "danger";
+      $state.showMenu = true;
+    }
   }
 
   const createMultisig = async () => {
@@ -97,7 +116,7 @@
                       <div class="percent inter-medium-white-14px">
                         Chain
                       </div>
-                      <Select on:change={(e) => updateMemberChain(i, e.detail ) } on:open={() => openMember = i} text="Select Chain" items={$chains} showKey="pretty_name" imageKey="logo_URIs" nestedImageKey="png"/>
+                      <Select on:change={(e) => updateMemberChain(i, e.detail ) } on:open={() => openMember = i} text="Select Chain" items={$directory} showKey="pretty_name" imageKey="image"/>
                       <div class="percent inter-medium-white-14px">
                         Address
                       </div>

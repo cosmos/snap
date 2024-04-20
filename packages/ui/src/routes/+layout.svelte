@@ -2,9 +2,8 @@
   import Connect from "../components/Connect.svelte";
 	import Header from "../components/Header.svelte";
   import { state } from "../store/state";
-  import { onMount } from "svelte";
   import Alert from "../components/Alert.svelte";
-	import Menu from "../components/Menu.svelte";
+  import { onMount } from "svelte";
 	import { updateDirectory } from "../store/directory";
 	import { CosmosSnap } from "@cosmsnap/snapper";
 	import { checkSnapPermissions, snapId } from "../utils/snap";
