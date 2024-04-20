@@ -2,6 +2,9 @@ import _ from "lodash";
 import type { CoinIBC } from "./skip";
 import type { ChainInfo } from "@keplr-wallet/types";
 import { ethers } from "ethers";
+import { StargateClient } from "@cosmjs/stargate";
+import type { Chain } from "@cosmsnap/snapper/dist/types";
+import rpcs from '../apis.json';
 
 export const LOCAL_STORAGE_CHAINS = "cosmsnap:chains";
 export const LOCAL_STORAGE_INIT = "cosmsnap:initialized";
@@ -173,3 +176,21 @@ export async function getERC20Balance(tokenAddress: string, walletAddress: strin
   // The balance is a BigNumber; format it as a string
   return balance.toString();
 }
+
+export const getPubkeyFromNode = async (address: string, chain: Chain) => {
+  if (!address.startsWith(chain.bech32_prefix)) {
+    throw new Error(`Address ${address} prefix does not belong to chain ${chain.chain_id}`);
+  }
+  let rpc = rpcs.apis.find(item => item.chain_id == chain.chain_id);
+  if (!rpc) {
+    throw new Error(`RPC not found for chain ${chain.chain_id}`);
+  }
+  const client = await StargateClient.connect(rpc.rpc);
+  const accountOnChain = await client.getAccount(address);
+  if (!accountOnChain || !accountOnChain.pubkey) {
+    throw new Error(
+      `Account has no pubkey on chain. Send some tokens to ${address} to create it on chain.`,
+    );
+  }
+  return accountOnChain.pubkey;
+};

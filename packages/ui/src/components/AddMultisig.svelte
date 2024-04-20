@@ -6,17 +6,51 @@
   import _ from "lodash";
   import Select from "./Select.svelte";
   import type { SinglePubkey } from '@cosmjs/amino';
+	import { onMount } from "svelte";
+	import { getPubkeyFromNode } from "../utils/general";
+	import type { Chain } from "@cosmsnap/snapper";
+
+  interface Member {
+    pk: SinglePubkey;
+    chain: Chain;
+    address: string;
+  }
 
   let threshold = 2;
   let name = "My Multisig";
-  let members: SinglePubkey[] = [];
+  let members: Member[] = [];
   let loading = false;
   let openMember = 0;
 
+  onMount(() => {
+    members = _.range(0, threshold, 1).map(() => {
+      return {
+        pk: {
+          type: "tendermint/PubKeySecp256k1",
+          value: "",
+        },
+        chain: $chains[0],
+        address: "",
+      };
+    });
+  });
+
+  const updateMemberChain = (index: number, chain: Chain) => {
+    members[index].chain = chain;
+  }
+
+  const updateMemberPk = async (index: number, address: string) => {
+    const pk = await getPubkeyFromNode(address, members[index].chain);
+    members[index].pk = pk;
+  }
+
   const createMultisig = async () => {
     try {
+      if (members.length != threshold) {
+        throw new Error(`Member count does not match threshold. Received ${members.length}, expected ${threshold}`);
+      };
       loading = true;
-      await createMultiSig(name, threshold, members);
+      await createMultiSig(name, threshold, members.map(m => m.pk));
       $state.openAddMultisigPopup = !$state.openAddMultisigPopup
       loading = false;
     } catch (err) {
@@ -63,11 +97,11 @@
                       <div class="percent inter-medium-white-14px">
                         Chain
                       </div>
-                      <Select on:open={() => openMember = i} text="Select Chain" items={$chains} showKey="pretty_name" imageKey="logo_URIs" nestedImageKey="png"/>
+                      <Select on:change={(e) => updateMemberChain(i, e.detail ) } on:open={() => openMember = i} text="Select Chain" items={$chains} showKey="pretty_name" imageKey="logo_URIs" nestedImageKey="png"/>
                       <div class="percent inter-medium-white-14px">
                         Address
                       </div>
-                      <input type="text" placeholder="Enter address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+                      <input on:change={(e) => updateMemberPk(i, e.currentTarget.value)} type="text" placeholder="Enter address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
                     </div>
                 </div>
               {/each}
