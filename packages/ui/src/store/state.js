@@ -6,6 +6,7 @@ export const state = writable({
     openAddAddressPopup: false,
     openAddChainPopup: false,
     confirmDeleteChainPopup: false,
+    openAddMultisigPopup: false,
     alertText: "",
     showAlert: false,
     alertType: "success" || "warning" || "danger",

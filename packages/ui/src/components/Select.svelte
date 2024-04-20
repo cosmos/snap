@@ -74,8 +74,8 @@
         aria-haspopup="true"
         aria-expanded="true"
         on:click={() => {
-          opened();
           isOpen = !isOpen;
+          opened();
           checkDropdownDirection();
         }}
       >

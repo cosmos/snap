@@ -42,7 +42,7 @@
   <div>
     <button
       type="button"
-      class="mt-3 custom-bg inter-font inline-flex w-full rounded-[10px] border border-gray-600 shadow-sm px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 border-opacity-35"
+      class="custom-bg inter-font inline-flex w-full rounded-[10px] border border-gray-600 shadow-sm px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 border-opacity-35"
       id="options-menu"
       aria-haspopup="true"
       aria-expanded="true"

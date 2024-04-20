@@ -30,9 +30,9 @@ export const getMultiSigs = async (memberPk: string): Promise<Multisig[]> => {
     return data.data;
 };
 
-export const createMultiSig = async (address: string) => {
+export const createMultiSig = async () => {
   const functions = new Functions(client);
-  const res = await functions.createExecution('create_multisig', '{ "address": "{address}" }'.replace("{address}", address), undefined, undefined, ExecutionMethod.POST);
+  const res = await functions.createExecution('create_multisig', '{ "address": "{address}" }', undefined, undefined, ExecutionMethod.POST);
   if (res.responseStatusCode !== 200) {
     throw new Error(`Failed to createMultiSig. ${res.responseBody}`);
   }

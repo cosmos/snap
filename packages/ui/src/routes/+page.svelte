@@ -1,6 +1,7 @@
 <script lang="ts">
   import { beforeUpdate, onMount } from "svelte";
   import Multisig from "../components/Multisig.svelte";
+  import AddMultisig from "../components/AddMultisig.svelte";
   import { updateDirectory } from "../store/directory";
 	import { state } from "../store/state";
 	import { getMultiSigs, type Multisig as MultiSig } from "../utils/appwrite";
@@ -21,7 +22,11 @@
   const selectMultisig = (multisig: MultiSig) => {
     $state.currentMultiSig = multisig;
     goto(`/${encodeURIComponent(multisig.public_key)}/balances`);
-  }
+  };
+
+  const createMultisig = () => {
+    $state.openAddMultisigPopup = true;
+  };
 </script>
 
 <div style="padding: 25px;">
@@ -30,10 +35,10 @@
       <div class="chain-holding-distribution">
         My Multisigs
       </div>
-      <div class="mt-[20px] grid grid-cols-5 gap-[20px]">
+      <div class="mt-[20px] grid grid-cols-6 gap-[20px]">
         {#each multisigs as ms}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div on:click={() => selectMultisig(ms)} class="balance col-span-2 lg:col-span-1 cursor-pointer">
+          <div on:click={() => selectMultisig(ms)} class="w-full lg:col-span-2 col-span-3 cursor-pointer">
             <Multisig
               name={ms.name}
               threshold={ms.threshold}
@@ -42,7 +47,8 @@
             />
           </div>
         {/each}
-        <div class="cursor-pointer flex flex-col items-center justify-center p-5 border-2 border-solid border-[#ffffff1a] rounded-[14px] w-full min-h-[110px] bg-[var(--licorice)]">
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div on:click={() => createMultisig()} class="cursor-pointer w-full lg:col-span-2 col-span-3  flex flex-col items-center justify-center p-5 border-2 border-solid border-[#ffffff1a] rounded-[14px] w-full min-h-[110px] bg-[var(--licorice)]">
           <div>
             <svg class="w-10 h-10 text-[#FF414C]" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
@@ -53,6 +59,9 @@
       </div>
     </div>
   </div>
+</div>
+<div hidden={!$state.openAddMultisigPopup}>
+  <AddMultisig/>
 </div>
 
 <style>
