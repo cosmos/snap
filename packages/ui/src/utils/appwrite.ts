@@ -6,6 +6,7 @@ export interface Multisig {
   members: string[];
   name: string;
   public_key: string;
+  akash_address: string;
 }
 
 const appwrite_url = import.meta.env.VITE_APPWRITE_URL;
@@ -33,7 +34,8 @@ export const getMultiSigs = async (memberPk: string): Promise<Multisig[]> => {
 
 export const createMultiSig = async (name: string, threshold: number, pubKeys: SinglePubkey[]) => {
   const functions = new Functions(client);
-  const res = await functions.createExecution('create_multisig', `{ "name": "${name}", "threshold": ${threshold}, "pubKeys": "${JSON.stringify(pubKeys)}" }`, undefined, undefined, ExecutionMethod.POST);
+  const body = { "name": name, "threshold": threshold, "pubKeys": pubKeys };
+  const res = await functions.createExecution('create_multisig', JSON.stringify(body), undefined, undefined, ExecutionMethod.POST);
   if (res.responseStatusCode !== 200) {
     throw new Error(`Failed to createMultiSig. ${res.responseBody}`);
   }

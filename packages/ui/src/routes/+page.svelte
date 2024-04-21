@@ -42,6 +42,7 @@
               threshold={ms.threshold}
               publicKey={ms.public_key}
               memberCount={ms.members.length}
+              akashAddress={ms.akash_address}
             />
           </div>
         {/each}

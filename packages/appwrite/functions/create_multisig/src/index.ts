@@ -64,8 +64,9 @@ export default async ({ req, res, log, error }: Context) => {
     const response = await database.createDocument("multisig", "multisig", ID.unique(), {
       name: name,
       threshold: threshold,
-      members: pubKeys.map((pubKey) => JSON.stringify(pubKey)),
+      members: pubKeys.map((pubKey) => pubKey.value),
       public_key: JSON.stringify(multiSigPubKey),
+      akash_address: address
     },
     [
       Permission.read(Role.any())

@@ -6,6 +6,7 @@
   export let threshold = 0;
   export let memberCount = 0;
   export let publicKey: string;
+  export let akashAddress: string;
   let copied = false;
 
   const copyAddress = async () => {
@@ -41,7 +42,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div on:click={copyAddress} class="frame-33 frame-2">
   <div class="cosmos1vhw82tqftrg-1 inter-medium-white-14px">
-      {publicKey}
+      {akashAddress}
   </div>
     {#if copied}
       <svg class="text-white w-5 h-5 text-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
