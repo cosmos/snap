@@ -7,6 +7,7 @@ export interface Multisig {
   name: string;
   public_key: string;
   akash_address: string;
+  $id: string;
 }
 
 const appwrite_url = import.meta.env.VITE_APPWRITE_URL;

@@ -19,7 +19,7 @@
 
   const selectMultisig = (multisig: MultiSig) => {
     $state.currentMultiSig = multisig;
-    goto(`/${encodeURIComponent(multisig.public_key)}/balances`);
+    goto(`/${encodeURIComponent(multisig.$id)}/balances`);
   };
 
   const createMultisig = () => {
