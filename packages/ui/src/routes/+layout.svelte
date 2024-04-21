@@ -11,7 +11,7 @@
   onMount(async () => {
     window.cosmos = new CosmosSnap();
     window.cosmos.changeSnapId(snapId);
-    updateDirectory();
+    await updateDirectory();
     $state.connected = await checkSnapPermissions();
   });
 </script>

@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { beforeUpdate, onMount } from "svelte";
+  import { onMount } from "svelte";
   import Balance from "../../../components/Balance.svelte";
   import Transfer from "../../../components/Transfer.svelte";
   import { balances } from "../../../store/balances";
   import { chains, fetchChains } from "../../../store/chains";
-  import { updateDirectory } from "../../../store/directory";
   import BalanceLoader from "../../../components/BalanceLoader.svelte";
 	import { state } from "../../../store/state";
 	import type { Multisig } from "../../../utils/appwrite";
@@ -24,7 +23,6 @@
       fetchChains($state.currentMultiSig as Multisig)
     }
   });
-  beforeUpdate(updateDirectory);
 </script>
 
 <div style="padding: 25px;">

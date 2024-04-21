@@ -158,7 +158,9 @@ export async function updateDirectory() {
     const res = await fetch('https://chains.cosmos.directory/');
     if (res.ok) {
       const data = await res.json();
-      directory.set(data.chains);
+      const chainsRaw: ChainDirectory[] = data.chains;
+      const chains = chainsRaw.filter((chain) => chain.proxy_status.rest && chain.proxy_status.rpc);
+      directory.set(chains);
     } else {
       console.error('Failed to fetch data: ', res.json());
     }

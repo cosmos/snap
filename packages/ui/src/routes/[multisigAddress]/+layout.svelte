@@ -5,13 +5,12 @@ import Menu from "../../components/Menu.svelte";
 import { updateDirectory } from "../../store/directory";
 import { CosmosSnap } from "@cosmsnap/snapper";
 import { checkSnapPermissions, snapId } from "../../utils/snap";
-import { page } from '$app/stores';
 import { goto } from "$app/navigation";
 
 onMount(async () => {
     window.cosmos = new CosmosSnap();
     window.cosmos.changeSnapId(snapId);
-    updateDirectory();
+    await updateDirectory();
     $state.connected = await checkSnapPermissions();
 });
 

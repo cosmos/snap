@@ -14,18 +14,15 @@
     chain: ChainDirectory;
   }
 
-  let threshold = 2;
+  let threshold = 1;
+  let memberCount = 2;
   let name = "My Multisig";
   let members: Member[] = [];
   let loading = false;
   let openMember = 0;
 
-  $: {
-    console.log(members);
-  }
-
   onMount(() => {
-    members = _.range(0, threshold, 1).map(() => {
+    members = _.range(0, memberCount, 1).map(() => {
       return {
         pk: {
           type: "tendermint/PubKeySecp256k1",
@@ -52,6 +49,7 @@
   const updateMemberPk = async (index: number, address: string) => {
     try {
       const pk = await getPubkeyFromNode(address, members[index].chain);
+      console.log(pk);
       members[index].pk = pk;
     } catch (err) {
       console.error(err);
@@ -65,8 +63,8 @@
 
   const createMultisig = async () => {
     try {
-      if (members.length != threshold) {
-        throw new Error(`Member count does not match threshold. Received ${members.length}, expected ${threshold}`);
+      if (members.length != memberCount) {
+        throw new Error(`Member count does not match. Received ${members.length}, expected ${memberCount}`);
       };
       loading = true;
       await createMultiSig(name, threshold, members.map(m => m.pk));
@@ -105,12 +103,16 @@
                     </div>
                     <input bind:value={name} type="text" placeholder="Enter address name" class="enter-amount inter-medium-white-14px overlap-group-7"/>
                     <div class="percent inter-medium-white-14px">
-                      Number of Members
+                      Threshold
                     </div>
                     <input bind:value={threshold} type="number" placeholder="Enter threshold" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+                    <div class="percent inter-medium-white-14px">
+                      Number of Members
+                    </div>
+                    <input bind:value={memberCount} type="number" placeholder="Enter member count" class="enter-amount inter-medium-white-14px overlap-group-7"/>
                   </div>
               </div>
-              {#each _.range(0, threshold, 1) as i}
+              {#each _.range(0, memberCount, 1) as i}
                 <div class="group-4445 mt-4" style={openMember == i ? `z-index: ${100};` : ""}>
                     <div class="overlap-group">
                       <div class="percent inter-medium-white-14px">

@@ -181,11 +181,7 @@ export const getPubkeyFromNode = async (address: string, chain: ChainDirectory) 
   if (!address.startsWith(chain.bech32_prefix)) {
     throw new Error(`Address ${address} prefix does not belong to chain ${chain.chain_id}`);
   }
-  let rpc = rpcs.apis.find(item => item.chain_id == chain.chain_id);
-  if (!rpc) {
-    throw new Error(`RPC not found for chain ${chain.chain_id}`);
-  }
-  const client = await StargateClient.connect(rpc.rpc);
+  const client = await StargateClient.connect(`https://rpc.cosmos.directory/${chain.chain_name}`);
   const accountOnChain = await client.getAccount(address);
   if (!accountOnChain || !accountOnChain.pubkey) {
     throw new Error(

@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { beforeUpdate, onMount } from "svelte";
+  import { onMount } from "svelte";
   import Multisig from "../components/Multisig.svelte";
   import AddMultisig from "../components/AddMultisig.svelte";
-  import { updateDirectory } from "../store/directory";
 	import { state } from "../store/state";
 	import { getMultiSigs, type Multisig as MultiSig } from "../utils/appwrite";
   import { toBase64 }from "@cosmjs/encoding";
@@ -17,7 +16,6 @@
       multisigs = await getMultiSigs(b64Pk);
     }
   });
-  beforeUpdate(updateDirectory);
 
   const selectMultisig = (multisig: MultiSig) => {
     $state.currentMultiSig = multisig;
