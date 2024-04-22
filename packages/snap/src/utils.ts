@@ -117,7 +117,7 @@ export const getPubKeyFromAddress = async (address: string, chain_id: string, rp
     const account = await client.getAccount(address);
     if (!account || !account.pubkey) {
         throw new Error(
-        `Account ${address} does not exist on chain ${chain_id}, please create a transaction with this address to create the address.`,
+        `Account ${address} does not exist on chain ${chain_id}, please send some tokens to this address to create it.`,
         );
     }
 

@@ -15,7 +15,7 @@ onMount(async () => {
 });
 
 beforeUpdate(() => {
-  if (!$state.currentMultiSig.public_key) {
+  if (!$state.currentMultiSig.$id) {
     goto("/");
   }
 })

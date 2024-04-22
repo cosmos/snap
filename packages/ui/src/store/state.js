@@ -17,6 +17,8 @@ export const state = writable({
         threshold: 0,
         members: [""],
         name: "",
-        public_key: ""
+        public_key: "",
+        akash_address: "",
+        $id: ""
     }
 });
