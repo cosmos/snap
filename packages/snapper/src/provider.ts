@@ -65,6 +65,7 @@ export interface SnapProvider {
 }
 
 export class CosmosSnap implements SnapProvider {
+    multisig: string | undefined = undefined;
     snap_id: string = DEFAULT_SNAP_ID;
     changeSnapId(snap_id: string): void {
         this.snap_id = snap_id;
@@ -214,4 +215,9 @@ export class CosmosSnap implements SnapProvider {
         signer.signDirect = undefined;
         return signer
     }
+    getPendingMultisigTx() {}
+    signPendingMultisigTx() {}
+    createMultisigTx() {}
+    getMultisigs() {}
+    createNewMultisig() {}
 }
