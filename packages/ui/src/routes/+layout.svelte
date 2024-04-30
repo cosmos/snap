@@ -5,7 +5,7 @@
   import Alert from "../components/Alert.svelte";
   import { onMount } from "svelte";
 	import { updateDirectory } from "../store/directory";
-	import { CosmosSnap } from "@cosmsnap/snapper";
+	import { CosmosSnap } from "../../../snapper/src/index";
 	import { checkSnapPermissions, snapId } from "../utils/snap";
 
   onMount(async () => {

@@ -7,7 +7,7 @@ import { DeliverTxResponse } from "@cosmjs/stargate";
 import { DEFAULT_SNAP_ID, addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, getKey, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
 import { CosmJSOfflineSigner } from './signer.js';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { createMultiSig, createMultiSigTx, getMultiSigs, signMultiSigTx } from './appwrite';
+import { Appwrite } from './appwrite';
 
 declare global {
   interface Window {
@@ -66,8 +66,8 @@ export interface SnapProvider {
 }
 
 export class CosmosSnap implements SnapProvider {
-    multisig: string | undefined = undefined;
     snap_id: string = DEFAULT_SNAP_ID;
+    appwrite: Appwrite;
     changeSnapId(snap_id: string): void {
         this.snap_id = snap_id;
     }
@@ -216,8 +216,18 @@ export class CosmosSnap implements SnapProvider {
         signer.signDirect = undefined;
         return signer
     }
+    setupAppwrite(appwrite_url: string, appwrite_id: string): void {
+        this.appwrite = new Appwrite(appwrite_url, appwrite_id);
+    }
+    checkMultisigSetup() {
+        if (!this.appwrite) {
+            throw new Error('Multisig use is not setup. Please use "setupAppwrite" method to setup the multisig database.');
+        }
+    }
     async getPendingMultisigTx(multisigPublicKey: string, memberPublicKey: string) {
-        const multisigs = await getMultiSigs(memberPublicKey);
+        // We check if the multisig setup is done
+        this.checkMultisigSetup();
+        const multisigs = await this.appwrite.getMultiSigs(memberPublicKey);
         const ms = multisigs.find((ms) => ms.public_key === multisigPublicKey);
         if (!ms) {
             throw new Error(`Multisig with public key ${multisigPublicKey} not found`);
@@ -228,19 +238,27 @@ export class CosmosSnap implements SnapProvider {
         };
     }
     async signPendingMultisigTx(public_key: string, rpc: string, fee: StdFee, prefix: string, signature: StdSignature) {
-        const res = await signMultiSigTx(public_key, rpc, fee, prefix, signature);
+        // We check if the multisig setup is done
+        this.checkMultisigSetup();
+        const res = await this.appwrite.signMultiSigTx(public_key, rpc, fee, prefix, signature);
         return res;
     }
     async createMultisigTx(public_key: string, rpc: string, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) {
-        const res = await createMultiSigTx(public_key, rpc, prefix, signature, messages, chain_id, signer_address, fee);
+        // We check if the multisig setup is done
+        this.checkMultisigSetup();
+        const res = await this.appwrite.createMultiSigTx(public_key, rpc, prefix, signature, messages, chain_id, signer_address, fee);
         return res;
     }
     async getMultisigs(memberPublicKey: string) {
-        const multisigs = await getMultiSigs(memberPublicKey);
+        // We check if the multisig setup is done
+        this.checkMultisigSetup();
+        const multisigs = await this.appwrite.getMultiSigs(memberPublicKey);
         return multisigs;
     }
     async createNewMultisig(name: string, threshold: number, pubKeys: SinglePubkey[]) {
-        const res = await createMultiSig(name, threshold, pubKeys);
+        // We check if the multisig setup is done
+        this.checkMultisigSetup();
+        const res = await this.appwrite.createMultiSig(name, threshold, pubKeys);
         return res;
     }
 }

@@ -440,14 +440,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cosmsnap/snapper@npm:^0.1.29":
+"@cosmsnap/snapper@file:../snapper::locator=%40cosmsnap%2Fui%40workspace%3A.":
   version: 0.1.29
-  resolution: "@cosmsnap/snapper@npm:0.1.29"
+  resolution: "@cosmsnap/snapper@file:../snapper#../snapper::hash=ed253e&locator=%40cosmsnap%2Fui%40workspace%3A."
   dependencies:
+    "@cosmjs/amino": ^0.31.3
     "@keplr-wallet/proto-types": 0.12.12
     "@keplr-wallet/types": 0.12.12
+    appwrite: ^14.0.0
     ses: ^0.18.4
-  checksum: 911d211d5e92522b4dd839c290f168088fd828c8a47cab6857485f3d9e2a32d13c47f76e963cb0717d145b2d998fbff0633534e4cb652cb6eaa80bea1566b42f
+  checksum: a8d272ac2f7494ea20f7f2d3e651d9987c851e1877a3d4a2f89a5e744df7ebb8f63a7e1116a9c929aab1d2ce5aa60f894a06f1cea931d7fd3fe7e5a8fd0b2183
   languageName: node
   linkType: hard
 
@@ -458,7 +460,7 @@ __metadata:
     "@0xsquid/sdk": ^1.14.8
     "@cosmjs/crypto": ^0.31.1
     "@cosmjs/stargate": ^0.31.3
-    "@cosmsnap/snapper": ^0.1.29
+    "@cosmsnap/snapper": "file:../snapper"
     "@fullhuman/postcss-purgecss": ^5.0.0
     "@keplr-wallet/types": 0.12.12
     "@metamask/detect-provider": ^2.0.0
