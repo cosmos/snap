@@ -90,23 +90,6 @@
             "commands": "deno cache src/index.ts",
             "ignore": [],
             "path": "functions/create_multisig_tx"
-        },
-        {
-            "$id": "get_multisig_tx",
-            "name": "get_multisig_tx",
-            "runtime": "deno-1.35",
-            "execute": [
-                "any"
-            ],
-            "events": [],
-            "schedule": "",
-            "timeout": 600,
-            "enabled": true,
-            "logging": true,
-            "entrypoint": "src/index.ts",
-            "commands": "deno cache src/index.ts",
-            "ignore": [],
-            "path": "functions/get_multisig_tx"
         }
     ]
 }

@@ -1,10 +1,13 @@
 import { Client, Databases } from "https://deno.land/x/appwrite@10.0.0/mod.ts";
+import { MultisigTx } from "../../sign_multisig_tx/src/types.ts";
 
 export interface Multisig {
   threshold: number;
   members: string[];
   name: string;
   akash_address: string;
+  transactions: MultisigTx[];
+  public_key: string;
 }
 
 export const RESOURCE = "multisig";

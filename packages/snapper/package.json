@@ -46,7 +46,9 @@
   "dependencies": {
     "@keplr-wallet/proto-types": "0.12.12",
     "@keplr-wallet/types": "0.12.12",
-    "ses": "^0.18.4"
+    "ses": "^0.18.4",
+    "appwrite": "^14.0.0",
+    "@cosmjs/amino": "^0.31.3"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.4",

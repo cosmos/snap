@@ -10,18 +10,18 @@ export const getMultisigs = async (context: any) => {
     }
     context.log(decodeURIComponent(memberPk));
     const ret: DB_MULTISIG_RETURN = await db.listDocuments(
-        RESOURCE,
-        MULTISIG_COLLECTION_NAME,
-        [
-          Query.contains("members", [decodeURIComponent(memberPk)]),
-        ],
-      ) as unknown as DB_MULTISIG_RETURN;
-    
-      context.log(`Multisigs: ${JSON.stringify(ret.documents)}`);
-      const res = {
-        total: ret.total,
-        data: ret.documents,
-        success: true
-      };
-      return res
+      RESOURCE,
+      MULTISIG_COLLECTION_NAME,
+      [
+        Query.contains("members", [decodeURIComponent(memberPk)]),
+      ],
+    ) as unknown as DB_MULTISIG_RETURN;
+  
+    context.log(`Multisigs: ${JSON.stringify(ret.documents)}`);
+    const res = {
+      total: ret.total,
+      data: ret.documents,
+      success: true
+    };
+    return res
 }

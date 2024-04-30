@@ -1,12 +1,13 @@
 import { AccountData, ChainInfo, Key, OfflineAminoSigner, OfflineDirectSigner, StdSignature } from '@keplr-wallet/types';
 import { DirectSignResponse } from "@cosmjs/proto-signing";
-import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
+import { AminoSignResponse, SinglePubkey, StdFee, StdSignDoc } from "@cosmjs/amino";
 import { Long } from 'long';
 import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
 import { DeliverTxResponse } from "@cosmjs/stargate";
 import { DEFAULT_SNAP_ID, addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, getKey, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
 import { CosmJSOfflineSigner } from './signer.js';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { createMultiSig, createMultiSigTx, getMultiSigs, signMultiSigTx } from './appwrite';
 
 declare global {
   interface Window {
@@ -215,9 +216,31 @@ export class CosmosSnap implements SnapProvider {
         signer.signDirect = undefined;
         return signer
     }
-    getPendingMultisigTx() {}
-    signPendingMultisigTx() {}
-    createMultisigTx() {}
-    getMultisigs() {}
-    createNewMultisig() {}
+    async getPendingMultisigTx(multisigPublicKey: string, memberPublicKey: string) {
+        const multisigs = await getMultiSigs(memberPublicKey);
+        const ms = multisigs.find((ms) => ms.public_key === multisigPublicKey);
+        if (!ms) {
+            throw new Error(`Multisig with public key ${multisigPublicKey} not found`);
+        }
+        return {
+            transaction: ms.transactions.length > 0 ? ms.transactions[0] : null,
+            hasPending: ms.transactions.length > 0,
+        };
+    }
+    async signPendingMultisigTx(public_key: string, rpc: string, fee: StdFee, prefix: string, signature: StdSignature) {
+        const res = await signMultiSigTx(public_key, rpc, fee, prefix, signature);
+        return res;
+    }
+    async createMultisigTx(public_key: string, rpc: string, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) {
+        const res = await createMultiSigTx(public_key, rpc, prefix, signature, messages, chain_id, signer_address, fee);
+        return res;
+    }
+    async getMultisigs(memberPublicKey: string) {
+        const multisigs = await getMultiSigs(memberPublicKey);
+        return multisigs;
+    }
+    async createNewMultisig(name: string, threshold: number, pubKeys: SinglePubkey[]) {
+        const res = await createMultiSig(name, threshold, pubKeys);
+        return res;
+    }
 }
