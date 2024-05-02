@@ -1,4 +1,4 @@
-import type { Chain } from '@cosmsnap/snapper';
+import type { Chain } from '../../../snapper/src/index';
 import { chains } from './chains';
 import { derived } from 'svelte/store';
 import { denoUrl } from './balances';

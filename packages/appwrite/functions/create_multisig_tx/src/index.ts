@@ -1,7 +1,8 @@
 import { Client, Databases, ID, Permission, Query, Role } from 'https://deno.land/x/appwrite@10.0.0/mod.ts';
-import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Multisig, RESOURCE, RequestBody } from './types.ts';
-import { SigningStargateClient } from 'npm:@cosmjs/stargate'
+import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Signature, Multisig, RESOURCE, RequestBody } from './types.ts';
 import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';
+import { fromBase64 } from "npm:@cosmjs/encoding";
+import { makeMultisignedTxBytes, SigningStargateClient } from "npm:@cosmjs/stargate";
 import { createMultisigThresholdPubkey } from 'npm:@cosmjs/amino';
 
 type Context = {
@@ -36,7 +37,7 @@ export default async ({ req, res, log, error }: Context) => {
       throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
     }
 
-    const { public_key, rpc, prefix, signature, messages, chain_id, signer_address, fee } = JSON.parse(req.bodyRaw) as RequestBody;
+    const { public_key, rpc, prefix, signature, body_bytes, messages, chain_id, signer_address, fee } = JSON.parse(req.bodyRaw) as RequestBody;
 
     if (!public_key) {
       throw new Error("public_key is required in body");
@@ -49,6 +50,9 @@ export default async ({ req, res, log, error }: Context) => {
     }
     if (!signature) {
       throw new Error("signature is required in body");
+    }
+    if (!body_bytes) {
+      throw new Error("body_bytes is required in body");
     }
     if (!messages) {
       throw new Error("messages is required in body");
@@ -95,6 +99,46 @@ export default async ({ req, res, log, error }: Context) => {
     const multiSigAddress = pubkeyToAddress(multiSigPubKey, prefix);
     const sequence = await cosmClient.getSequence(multiSigAddress);
 
+    // If the multisig takes just one signature threshold we can construct the full multisig tx and return it. No need to add it
+    if (multisig.threshold === 1) {
+
+      // So we have to map through the signatures and turn them into byte arrays
+      const signatures: Signature[] = [];
+      const sigs = new Map(signatures.map((s) => {
+        return [s.address, fromBase64(s.signature)]
+      }))
+
+      const multiSigPubKey = createMultisigThresholdPubkey(multisig.members.map(mem => JSON.parse(mem)), Number(multisig.threshold));
+  
+      const cosmClient = await SigningStargateClient.connect(rpc);
+
+      const signedTxBytes = makeMultisignedTxBytes(
+        multiSigPubKey,
+        sequence.sequence,
+        fee,
+        fromBase64(body_bytes),
+        sigs,
+      );
+
+      // Broadcast tx
+      const result = await cosmClient.broadcastTx(signedTxBytes);
+
+      if (result.code === 0) {
+        return res.json({
+          data: result,
+          success: false,
+          statusCode: 201
+        });
+      }
+
+      // If not successful we just return the result as 500 server error
+      return res.json({
+        data: result,
+        success: false,
+        statusCode: 500
+      });
+    }
+
     const tx_id = ID.unique();
 
     const response = await database.createDocument("multisig", "transactions", tx_id, {
@@ -104,7 +148,8 @@ export default async ({ req, res, log, error }: Context) => {
       tx_id,
       chain_id,
       messages: JSON.stringify(messages),
-      sequence,
+      body_bytes: body_bytes,
+      sequence: sequence.sequence,
       threshold: multisig.threshold,
       signer_count: 1,
       fee: fee

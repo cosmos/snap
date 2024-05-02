@@ -1,5 +1,6 @@
 import { Client, ExecutionMethod, Functions } from 'appwrite';
 import type { SinglePubkey, StdFee, StdSignature } from '@cosmjs/amino';
+import { HttpEndpoint } from "@cosmjs/stargate";
 
 enum MultisigTxStatus {
   Created = 'created',
@@ -25,15 +26,6 @@ export interface Multisig {
   akash_address: string;
   transactions: MultisigTx[];
   $id: string;
-}
-
-const appwrite_url = process.env.VITE_APPWRITE_URL;
-if (!appwrite_url) {
-  throw new Error("VITE_APPWRITE_URL is not defined");
-}
-const project_id = process.env.VITE_APPWRITE_FUNCTION_PROJECT_ID;
-if (!project_id) {
-  throw new Error("VITE_APPWRITE_FUNCTION_PROJECT_ID is not defined");
 }
 
 export class Appwrite {
@@ -65,7 +57,7 @@ export class Appwrite {
     return data.data;
   };
 
-  createMultiSigTx = async (public_key: string, rpc: string, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) => {
+  createMultiSigTx = async (public_key: string, rpc: string | HttpEndpoint, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) => {
     const functions = new Functions(this.client);
     const res = await functions.createExecution('create_multisig_tx', `{ "public_key": "${public_key}", "rpc": "${rpc}", "prefix": "${prefix}", "signature": "${signature}", "messages": "${messages}", "chain_id": "${chain_id}", "signer_address": "${signer_address}", "fee": ${fee} } `, undefined, undefined, ExecutionMethod.POST);
     if (res.responseStatusCode !== 200) {

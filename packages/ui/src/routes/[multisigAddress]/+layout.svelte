@@ -1,18 +1,8 @@
 <script lang="ts">
 import { state } from "../../store/state";
-import { beforeUpdate, onMount } from "svelte";
+import { beforeUpdate } from "svelte";
 import Menu from "../../components/Menu.svelte";
-import { updateDirectory } from "../../store/directory";
-import { CosmosSnap } from "@cosmsnap/snapper";
-import { checkSnapPermissions, snapId } from "../../utils/snap";
 import { goto } from "$app/navigation";
-
-onMount(async () => {
-    window.cosmos = new CosmosSnap();
-    window.cosmos.changeSnapId(snapId);
-    await updateDirectory();
-    $state.connected = await checkSnapPermissions();
-});
 
 beforeUpdate(() => {
   if (!$state.currentMultiSig.$id) {

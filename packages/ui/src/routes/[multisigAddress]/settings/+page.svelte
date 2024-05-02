@@ -4,7 +4,7 @@
 	import { state } from "../../../store/state";
 	import { addCelestia, deleteChain } from '../../../utils/snap';
   import lunr from 'lunr';
-	import type { Chain } from '@cosmsnap/snapper';
+	import type { Chain } from '../../../../../snapper/src/index';
 	import type { Multisig } from '../../../utils/appwrite';
 
   let searchResults: lunr.Index.Result[] = [];

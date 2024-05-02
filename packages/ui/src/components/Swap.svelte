@@ -9,7 +9,7 @@
 	import type { SkipMsgs } from "../utils/skip";
 	import type { RouteData } from "@0xsquid/sdk";
 	import { state } from "../store/state";
-	import { sendTxAlert, type Chain } from "@cosmsnap/snapper";
+	import { sendTxAlert, type Chain } from "../../../snapper/src/index";
 	import Button from "./Button.svelte";
 	import AlertModal from "./AlertModal.svelte";
     import { getERC20Balance } from "../utils/general";

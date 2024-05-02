@@ -4,10 +4,11 @@ import { AminoSignResponse, SinglePubkey, StdFee, StdSignDoc } from "@cosmjs/ami
 import { Long } from 'long';
 import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
 import { DeliverTxResponse } from "@cosmjs/stargate";
-import { DEFAULT_SNAP_ID, addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, getKey, installSnap, isSnapInitialized, isSnapInstalled, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
+import { DEFAULT_SNAP_ID, addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, getKey, installSnap, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
 import { CosmJSOfflineSigner } from './signer.js';
 import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { Appwrite } from './appwrite';
+import { HttpEndpoint } from "@cosmjs/stargate";
 
 declare global {
   interface Window {
@@ -243,7 +244,7 @@ export class CosmosSnap implements SnapProvider {
         const res = await this.appwrite.signMultiSigTx(public_key, rpc, fee, prefix, signature);
         return res;
     }
-    async createMultisigTx(public_key: string, rpc: string, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) {
+    async createMultisigTx(public_key: string, rpc: string | HttpEndpoint, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) {
         // We check if the multisig setup is done
         this.checkMultisigSetup();
         const res = await this.appwrite.createMultiSigTx(public_key, rpc, prefix, signature, messages, chain_id, signer_address, fee);

@@ -4,12 +4,12 @@
 	import { balances, forceUpdate } from "../store/balances";
   import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/skip';
 	import { state } from "../store/state";
-	import type { Chain, Msg } from "@cosmsnap/snapper";
+	import type { Chain, Msg } from "../../../snapper/src/index";
   import _ from 'lodash';
 	import { getClient } from "../utils/tx";
 	import { addTransaction } from "../store/transactions";
 	import Button from "./Button.svelte";
-  import { sendTxAlert } from "@cosmsnap/snapper";
+  import { sendTxAlert } from "../../../snapper/src/index";
   import Select from "./Select.svelte";
 	import { snapId } from "../utils/snap";
 	import { onMount } from "svelte";
@@ -25,7 +25,6 @@
   let recipient = "";
   let slippage = "1";
   let sourceBalances: CoinIBC[] = [];
-  let feesOpen = false;
   let fromAddress: string | undefined = "";
   let fromChain: Chain = {
 	  chain_name: "",
@@ -80,6 +79,7 @@
                 amount: (amount * 1000000).toString(),  
               },
             ]
+            const account = await window.cosmos.getAccount(fromChain.chain_id);
             let msg = {
               typeUrl: "/cosmos.bank.v1beta1.MsgSend",
               value: {
@@ -88,15 +88,19 @@
                 amount: sendAmt
               }
             }
+            // We replace the address with the signing address here because the simulation requires the address to be the signer since we do not have all multisig signers
+            const replaced = JSON.parse(JSON.stringify([msg]).replace(fromAddress, account.address));
             // Simulate the transaction
-            const gasEstimation = await client.simulate(fromAddress, [msg], "");
+            const gasEstimation = await client.simulate(account.address, replaced, "");
 
             // Calculate the fee using 1.4 multiplier to be safe
             const fee = {
                 amount: coins((_.round(gasEstimation*1.4, 0)).toString(), source!.fees.fee_tokens[0].denom),
                 gas: (_.round(gasEstimation*1.4, 0)).toString(),
             };
-            const tx = await client.signAndBroadcast(fromAddress, [msg], fee);
+            const sig = await client.sign(account.address, [msg], fee, "");
+            const base = Buffer.from(sig.signatures[0]).toString("base64");
+            const tx = await window.cosmos.createMultisigTx($state.currentMultiSig.public_key, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base, JSON.stringify([msg]), fromChain.chain_id, fromAddress, fee);
             
             if (tx.code == 0) {
               await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
@@ -148,14 +152,19 @@
               };
           });
           // Simulate the transaction
-          const gasEstimation = await client.simulate(fromAddress, messages, "");
+          const account = await window.cosmos.getAccount(fromChain.chain_id);
+          // We replace the address with the signing address here because the simulation requires the address to be the signer since we do not have all multisig signers
+          const replaced = JSON.parse(JSON.stringify(messages).replace(fromAddress, account.address));
+          const gasEstimation = await client.simulate(account.address, replaced, "");
 
           // Calculate the fee using 1.4 multiplier to be safe
           const fee = {
               amount: coins((_.round(gasEstimation*1.4, 0)).toString(), source!.fees.fee_tokens[0].denom),
               gas: (_.round(gasEstimation*1.4, 0)).toString(),
           };
-          const tx = await client.signAndBroadcast(fromAddress, messages, fee);
+          const sig = await client.sign(account.address, messages, fee, "");
+          const base = Buffer.from(sig.signatures[0]).toString("base64");
+          const tx = await window.cosmos.createMultisigTx($state.currentMultiSig.public_key, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base, JSON.stringify(messages), fromChain.chain_id, fromAddress, fee);
 
           if (tx.code == 0) {
             await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});

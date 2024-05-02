@@ -96,7 +96,7 @@ export default async ({ req, res, error }: Context) => {
     if ((tx.signatures.length+1) === multisig.threshold) {
 
       // So we have to map through the signatures and turn them into byte arrays
-      const signatures: Signature[] = [];
+      const signatures: Signature[] = tx.signatures.map((s) => JSON.parse(s));
       const sigs = new Map(signatures.map((s) => {
         return [s.address, fromBase64(s.signature)]
       }))
@@ -119,9 +119,14 @@ export default async ({ req, res, error }: Context) => {
       // Delete the multisig tx from the database if successful
       if (result.code === 0) {
         await database.deleteDocument("multisig", "transactions", tx.tx_id);
+        return res.json({
+          data: result,
+          success: false,
+          statusCode: 201
+        });
       }
 
-      // If not successful we just return the result
+      // If not successful we just return the result as 500 server error
       return res.json({
         data: result,
         success: false,

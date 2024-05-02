@@ -1,11 +1,32 @@
 import { HttpEndpoint, StdFee } from 'npm:@cosmjs/stargate';
-import { MultisigTx } from '../../sign_multisig_tx/src/types.ts';
+
+export interface MultisigTx {
+  multisigs: Multisig;
+  tx_id: string;
+  chain_id: string;
+  type_url: string;
+  message: string;
+  status: MultisigTxStatus;
+  signatures: string[];
+  body_bytes: string;
+  sequence: number;
+}
+
+enum MultisigTxStatus {
+  Created = 'created',
+}
+
+export interface Signature {
+  address: string;
+  signature: string;
+}
 
 export interface RequestBody {
   messages: string;
   chain_id: string;
   public_key: string;
   signature: string;
+  body_bytes: string;
   prefix: string;
   rpc: string | HttpEndpoint;
   signer_address: string;

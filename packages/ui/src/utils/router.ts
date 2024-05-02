@@ -7,7 +7,7 @@ import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
 import { toUtf8 } from '@cosmjs/encoding';
 import type { EncodeObject } from '@cosmjs/proto-signing';
 import { getClient } from './tx';
-import type { Chain } from '@cosmsnap/snapper';
+import type { Chain } from '../../../snapper/src/index';
 import _ from 'lodash';
 
 export interface RouteChain {
