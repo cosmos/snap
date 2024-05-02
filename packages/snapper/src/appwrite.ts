@@ -59,7 +59,7 @@ export class Appwrite {
 
   createMultiSigTx = async (public_key: string, rpc: string | HttpEndpoint, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) => {
     const functions = new Functions(this.client);
-    const res = await functions.createExecution('create_multisig_tx', `{ "public_key": "${public_key}", "rpc": "${rpc}", "prefix": "${prefix}", "signature": "${signature}", "messages": "${messages}", "chain_id": "${chain_id}", "signer_address": "${signer_address}", "fee": ${fee} } `, undefined, undefined, ExecutionMethod.POST);
+    const res = await functions.createExecution('create_multisig_tx', `{ "public_key": "${public_key}", "rpc": "${rpc}", "prefix": "${prefix}", "signature": "${signature}", "messages": "${messages}", "chain_id": "${chain_id}", "signer_address": "${signer_address}", "fee": "${JSON.stringify(fee)}" } `, undefined, undefined, ExecutionMethod.POST);
     if (res.responseStatusCode !== 200) {
       throw new Error(`Failed to createMultiSigTx. ${res.responseBody}`);
     }

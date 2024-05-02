@@ -7,12 +7,14 @@
 	import { updateDirectory } from "../store/directory";
 	import { CosmosSnap } from "../../../snapper/src/index";
 	import { checkSnapPermissions, snapId } from "../utils/snap";
+  import { appwrite_url, project_id } from "../utils/appwrite";
 
   onMount(async () => {
     window.cosmos = new CosmosSnap();
     window.cosmos.changeSnapId(snapId);
     await updateDirectory();
     $state.connected = await checkSnapPermissions();
+    window.cosmos.setupAppwrite(appwrite_url, project_id);
   });
 </script>
 

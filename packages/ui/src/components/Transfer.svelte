@@ -14,6 +14,7 @@
 	import { snapId } from "../utils/snap";
 	import { onMount } from "svelte";
 	import { coins } from "@cosmjs/stargate";
+  import { toBase64 }from "@cosmjs/encoding";
   
   let loading = false;
   let source: Chain | undefined;
@@ -99,7 +100,7 @@
                 gas: (_.round(gasEstimation*1.4, 0)).toString(),
             };
             const sig = await client.sign(account.address, [msg], fee, "");
-            const base = Buffer.from(sig.signatures[0]).toString("base64");
+            const base = toBase64(sig.signatures[0]);
             const tx = await window.cosmos.createMultisigTx($state.currentMultiSig.public_key, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base, JSON.stringify([msg]), fromChain.chain_id, fromAddress, fee);
             
             if (tx.code == 0) {
@@ -163,7 +164,7 @@
               gas: (_.round(gasEstimation*1.4, 0)).toString(),
           };
           const sig = await client.sign(account.address, messages, fee, "");
-          const base = Buffer.from(sig.signatures[0]).toString("base64");
+          const base = toBase64(sig.signatures[0]);
           const tx = await window.cosmos.createMultisigTx($state.currentMultiSig.public_key, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base, JSON.stringify(messages), fromChain.chain_id, fromAddress, fee);
 
           if (tx.code == 0) {

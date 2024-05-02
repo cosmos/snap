@@ -10,11 +10,11 @@ export interface Multisig {
   $id: string;
 }
 
-const appwrite_url = import.meta.env.VITE_APPWRITE_URL;
+export const appwrite_url = import.meta.env.VITE_APPWRITE_URL;
 if (!appwrite_url) {
   throw new Error("VITE_APPWRITE_URL is not defined");
 }
-const project_id = import.meta.env.VITE_APPWRITE_FUNCTION_PROJECT_ID;
+export const project_id = import.meta.env.VITE_APPWRITE_FUNCTION_PROJECT_ID;
 if (!project_id) {
   throw new Error("VITE_APPWRITE_FUNCTION_PROJECT_ID is not defined");
 }
