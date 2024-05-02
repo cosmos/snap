@@ -60,7 +60,7 @@
         {
             "$id": "sign_multisig_tx",
             "name": "sign_multisig_tx",
-            "runtime": "deno-1.35",
+            "runtime": "deno-1.40",
             "execute": [
                 "any"
             ],
@@ -77,7 +77,7 @@
         {
             "$id": "create_multisig_tx",
             "name": "create_multisig_tx",
-            "runtime": "deno-1.35",
+            "runtime": "node-18.0",
             "execute": [
                 "any"
             ],
@@ -86,8 +86,8 @@
             "timeout": 600,
             "enabled": true,
             "logging": true,
-            "entrypoint": "src/index.ts",
-            "commands": "deno cache src/index.ts",
+            "entrypoint": "dist/index.js",
+            "commands": "npm install && npm run build",
             "ignore": [],
             "path": "functions/create_multisig_tx"
         }

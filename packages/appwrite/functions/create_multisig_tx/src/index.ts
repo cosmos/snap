@@ -1,9 +1,9 @@
-import { Client, Databases, ID, Permission, Query, Role } from 'https://deno.land/x/appwrite@10.0.0/mod.ts';
-import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Signature, Multisig, RESOURCE, RequestBody } from './types.ts';
-import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';
-import { fromBase64 } from "npm:@cosmjs/encoding";
-import { makeMultisignedTxBytes, SigningStargateClient } from "npm:@cosmjs/stargate";
-import { createMultisigThresholdPubkey } from 'npm:@cosmjs/amino';
+import { Client, Databases, ID, Permission, Query, Role } from 'node-appwrite';
+import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Signature, Multisig, RESOURCE, RequestBody } from './types';
+import { pubkeyToAddress } from '@cosmjs/launchpad';
+import { fromBase64 } from "@cosmjs/encoding";
+import { makeMultisignedTxBytes, SigningStargateClient } from "@cosmjs/stargate";
+import { createMultisigThresholdPubkey } from '@cosmjs/amino';
 
 type Context = {
   // deno-lint-ignore no-explicit-any
@@ -24,15 +24,15 @@ export default async ({ req, res, log, error }: Context) => {
       throw new Error(`Invalid request method: ${req.method}`);
     }
 
-    const appwriteKey = Deno.env.get("APPWRITE_KEY");
+    const appwriteKey = process.env.APPWRITE_KEY;
     if (!appwriteKey) {
       throw new Error("The environment variable APPWRITE_KEY is not set.");
     }
-    const appwrite_url = Deno.env.get("APPWRITE_URL");
+    const appwrite_url = process.env.APPWRITE_URL;
     if (!appwrite_url) {
       throw new Error("APPWRITE_URL is not defined");
     }
-    const project_id = Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID");
+    const project_id = process.env.APPWRITE_FUNCTION_PROJECT_ID;
     if (!project_id) {
       throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
     }
