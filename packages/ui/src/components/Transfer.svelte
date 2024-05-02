@@ -15,6 +15,7 @@
 	import { onMount } from "svelte";
 	import { coins } from "@cosmjs/stargate";
   import { toBase64 }from "@cosmjs/encoding";
+  import type { MultisigThresholdPubkey } from '@cosmjs/amino';
   
   let loading = false;
   let source: Chain | undefined;
@@ -100,8 +101,10 @@
                 gas: (_.round(gasEstimation*1.4, 0)).toString(),
             };
             const sig = await client.sign(account.address, [msg], fee, "");
-            const base = toBase64(sig.signatures[0]);
-            const tx = await window.cosmos.createMultisigTx($state.currentMultiSig.public_key, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base, JSON.stringify([msg]), fromChain.chain_id, fromAddress, fee);
+            const base64Signature = toBase64(sig.signatures[0]);
+            const base64BodyBytes = toBase64(sig.bodyBytes);
+            const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
+            const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify([msg]), fromChain.chain_id, fromAddress, fee);
             
             if (tx.code == 0) {
               await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
@@ -164,8 +167,10 @@
               gas: (_.round(gasEstimation*1.4, 0)).toString(),
           };
           const sig = await client.sign(account.address, messages, fee, "");
-          const base = toBase64(sig.signatures[0]);
-          const tx = await window.cosmos.createMultisigTx($state.currentMultiSig.public_key, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base, JSON.stringify(messages), fromChain.chain_id, fromAddress, fee);
+          const base64Signature = toBase64(sig.signatures[0]);
+          const base64BodyBytes = toBase64(sig.bodyBytes);
+          const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
+          const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify(messages), fromChain.chain_id, fromAddress, fee);
 
           if (tx.code == 0) {
             await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});

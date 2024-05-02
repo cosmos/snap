@@ -1,5 +1,5 @@
 import { Client, ExecutionMethod, Functions } from 'appwrite';
-import type { SinglePubkey, StdFee, StdSignature } from '@cosmjs/amino';
+import type { SinglePubkey, StdFee, StdSignature, MultisigThresholdPubkey } from '@cosmjs/amino';
 import { HttpEndpoint } from "@cosmjs/stargate";
 
 enum MultisigTxStatus {
@@ -57,9 +57,10 @@ export class Appwrite {
     return data.data;
   };
 
-  createMultiSigTx = async (public_key: string, rpc: string | HttpEndpoint, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) => {
+  createMultiSigTx = async (public_key: MultisigThresholdPubkey, rpc: string | HttpEndpoint, prefix: string, signature: string, body_bytes: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) => {
     const functions = new Functions(this.client);
-    const res = await functions.createExecution('create_multisig_tx', `{ "public_key": "${public_key}", "rpc": "${rpc}", "prefix": "${prefix}", "signature": "${signature}", "messages": "${messages}", "chain_id": "${chain_id}", "signer_address": "${signer_address}", "fee": "${JSON.stringify(fee)}" } `, undefined, undefined, ExecutionMethod.POST);
+    const body = { public_key, rpc, prefix, signature, body_bytes, messages, chain_id, signer_address, fee };
+    const res = await functions.createExecution('create_multisig_tx', JSON.stringify(body) , undefined, undefined, ExecutionMethod.POST);
     if (res.responseStatusCode !== 200) {
       throw new Error(`Failed to createMultiSigTx. ${res.responseBody}`);
     }

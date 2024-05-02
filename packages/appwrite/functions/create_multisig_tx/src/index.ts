@@ -1,9 +1,9 @@
-import { Client, Databases, ID, Permission, Query, Role } from 'node-appwrite';
-import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Signature, Multisig, RESOURCE, RequestBody } from './types';
-import { pubkeyToAddress } from '@cosmjs/launchpad';
-import { fromBase64 } from "@cosmjs/encoding";
-import { makeMultisignedTxBytes, SigningStargateClient } from "@cosmjs/stargate";
-import { createMultisigThresholdPubkey } from '@cosmjs/amino';
+import { Client, Databases, ID, Permission, Query, Role } from 'https://deno.land/x/appwrite@10.0.0/mod.ts';
+import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Signature, Multisig, RESOURCE, RequestBody } from './types.ts';
+import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';
+import { fromBase64 } from "npm:@cosmjs/encoding";
+import { makeMultisignedTxBytes, SigningStargateClient } from "npm:@cosmjs/stargate";
+import { createMultisigThresholdPubkey } from 'npm:@cosmjs/amino';
 
 type Context = {
   // deno-lint-ignore no-explicit-any
@@ -24,18 +24,20 @@ export default async ({ req, res, log, error }: Context) => {
       throw new Error(`Invalid request method: ${req.method}`);
     }
 
-    const appwriteKey = process.env.APPWRITE_KEY;
+    const appwriteKey = Deno.env.get("APPWRITE_KEY");
     if (!appwriteKey) {
       throw new Error("The environment variable APPWRITE_KEY is not set.");
     }
-    const appwrite_url = process.env.APPWRITE_URL;
+    const appwrite_url = Deno.env.get("APPWRITE_URL");
     if (!appwrite_url) {
       throw new Error("APPWRITE_URL is not defined");
     }
-    const project_id = process.env.APPWRITE_FUNCTION_PROJECT_ID;
+    const project_id = Deno.env.get("APPWRITE_FUNCTION_PROJECT_ID");
     if (!project_id) {
       throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
     }
+
+    log(req.bodyRaw);
 
     const { public_key, rpc, prefix, signature, body_bytes, messages, chain_id, signer_address, fee } = JSON.parse(req.bodyRaw) as RequestBody;
 
@@ -79,7 +81,7 @@ export default async ({ req, res, log, error }: Context) => {
       RESOURCE,
       MULTISIG_COLLECTION_NAME,
       [
-        Query.equal("public_key", public_key),
+        Query.equal("public_key", JSON.stringify(public_key)),
       ],
     ) as unknown as DB_TX_RETURN;
     if (multisigReturn.total === 0) {
@@ -95,7 +97,7 @@ export default async ({ req, res, log, error }: Context) => {
 
     const cosmClient = await SigningStargateClient.connect(rpc);
     // lets get the sequence number for this transaction so we have to construct multi sig address
-    const multiSigPubKey = createMultisigThresholdPubkey(multisig.members.map(mem => JSON.parse(mem)), Number(multisig.threshold));
+    const multiSigPubKey = createMultisigThresholdPubkey(multisig.members.map(mem => { return { type: "tendermint/PubKeySecp256k1", value: mem } }), Number(multisig.threshold));
     const multiSigAddress = pubkeyToAddress(multiSigPubKey, prefix);
     const sequence = await cosmClient.getSequence(multiSigAddress);
 
@@ -152,7 +154,7 @@ export default async ({ req, res, log, error }: Context) => {
       sequence: sequence.sequence,
       threshold: multisig.threshold,
       signer_count: 1,
-      fee: fee
+      fee
     },
     [
       Permission.read(Role.any())

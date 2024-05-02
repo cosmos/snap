@@ -1,6 +1,6 @@
 import { AccountData, ChainInfo, Key, OfflineAminoSigner, OfflineDirectSigner, StdSignature } from '@keplr-wallet/types';
 import { DirectSignResponse } from "@cosmjs/proto-signing";
-import { AminoSignResponse, SinglePubkey, StdFee, StdSignDoc } from "@cosmjs/amino";
+import { AminoSignResponse, SinglePubkey, StdFee, StdSignDoc, MultisigThresholdPubkey } from "@cosmjs/amino";
 import { Long } from 'long';
 import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
 import { DeliverTxResponse } from "@cosmjs/stargate";
@@ -244,10 +244,10 @@ export class CosmosSnap implements SnapProvider {
         const res = await this.appwrite.signMultiSigTx(public_key, rpc, fee, prefix, signature);
         return res;
     }
-    async createMultisigTx(public_key: string, rpc: string | HttpEndpoint, prefix: string, signature: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) {
+    async createMultisigTx(public_key: MultisigThresholdPubkey, rpc: string | HttpEndpoint, prefix: string, signature: string, body_bytes: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) {
         // We check if the multisig setup is done
         this.checkMultisigSetup();
-        const res = await this.appwrite.createMultiSigTx(public_key, rpc, prefix, signature, messages, chain_id, signer_address, fee);
+        const res = await this.appwrite.createMultiSigTx(public_key, rpc, prefix, signature, body_bytes, messages, chain_id, signer_address, fee);
         return res;
     }
     async getMultisigs(memberPublicKey: string) {

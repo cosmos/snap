@@ -1,4 +1,5 @@
 import { HttpEndpoint, StdFee } from 'npm:@cosmjs/stargate';
+import { MultisigThresholdPubkey } from 'npm:@cosmjs/amino';
 
 export interface MultisigTx {
   multisigs: Multisig;
@@ -24,7 +25,7 @@ export interface Signature {
 export interface RequestBody {
   messages: string;
   chain_id: string;
-  public_key: string;
+  public_key: MultisigThresholdPubkey;
   signature: string;
   body_bytes: string;
   prefix: string;
