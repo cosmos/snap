@@ -37,8 +37,6 @@ export default async ({ req, res, log, error }: Context) => {
       throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
     }
 
-    log(req.bodyRaw);
-
     const { public_key, rpc, prefix, signature, body_bytes, messages, chain_id, signer_address, fee } = JSON.parse(req.bodyRaw) as RequestBody;
 
     if (!public_key) {
@@ -125,6 +123,12 @@ export default async ({ req, res, log, error }: Context) => {
 
       // Broadcast tx
       const result = await cosmClient.broadcastTx(signedTxBytes);
+
+      log(`Created & Broadcasted Multisig Transaction ${result.transactionHash}. (${JSON.stringify({
+        ...result,
+        gasUsed: result.gasUsed.toString(),
+        gasWanted: result.gasWanted.toString(),
+      })})`);
 
       if (result.code === 0) {
         return res.json({
