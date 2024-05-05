@@ -95,16 +95,23 @@
             // Simulate the transaction
             const gasEstimation = await client.simulate(account.address, replaced, "");
 
-            // Calculate the fee using 1.4 multiplier to be safe
+            // Calculate the fee using 2 multiplier to be safe
             const fee = {
-                amount: coins((_.round(gasEstimation*1.4, 0)).toString(), source!.fees.fee_tokens[0].denom),
-                gas: (_.round(gasEstimation*1.4, 0)).toString(),
+                amount: coins((_.round(gasEstimation*2, 0)).toString(), source!.fees.fee_tokens[0].denom),
+                gas: (_.round(gasEstimation*2, 0)).toString(),
             };
-            const sig = await client.sign(account.address, [msg], fee, "");
+            const msAccount = await client.getSequence(fromAddress);
+            console.log(msAccount);
+            const signerData = {
+              accountNumber: msAccount.accountNumber,
+              sequence: msAccount.sequence,
+              chainId: fromChain.chain_id,
+            };
+            const sig = await client.sign(account.address, [msg], fee, "", signerData);
             const base64Signature = toBase64(sig.signatures[0]);
             const base64BodyBytes = toBase64(sig.bodyBytes);
             const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
-            const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify([msg]), fromChain.chain_id, fromAddress, fee);
+            const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify([msg]), fromChain.chain_id, account.address, fee);
             
             if (tx.code == 0) {
               await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
@@ -161,16 +168,23 @@
           const replaced = JSON.parse(JSON.stringify(messages).replace(fromAddress, account.address));
           const gasEstimation = await client.simulate(account.address, replaced, "");
 
-          // Calculate the fee using 1.4 multiplier to be safe
+          // Calculate the fee using 2 multiplier to be safe
           const fee = {
-              amount: coins((_.round(gasEstimation*1.4, 0)).toString(), source!.fees.fee_tokens[0].denom),
-              gas: (_.round(gasEstimation*1.4, 0)).toString(),
+              amount: coins((_.round(gasEstimation*2, 0)).toString(), source!.fees.fee_tokens[0].denom),
+              gas: (_.round(gasEstimation*2, 0)).toString(),
           };
-          const sig = await client.sign(account.address, messages, fee, "");
+          const msAccount = await client.getSequence(fromAddress);
+          console.log(msAccount);
+          const signerData = {
+            accountNumber: msAccount.accountNumber,
+            sequence: msAccount.sequence,
+            chainId: fromChain.chain_id,
+          };
+          const sig = await client.sign(account.address, messages, fee, "", signerData);
           const base64Signature = toBase64(sig.signatures[0]);
           const base64BodyBytes = toBase64(sig.bodyBytes);
           const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
-          const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify(messages), fromChain.chain_id, fromAddress, fee);
+          const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify(messages), fromChain.chain_id, account.address, fee);
 
           if (tx.code == 0) {
             await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});

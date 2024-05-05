@@ -1,8 +1,8 @@
 import { Client, Databases, ID, Permission, Query, Role } from 'https://deno.land/x/appwrite@10.0.0/mod.ts';
-import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Signature, Multisig, RESOURCE, RequestBody } from './types.ts';
+import { DB_TX_RETURN, MULTISIG_COLLECTION_NAME, Multisig, RESOURCE, RequestBody } from './types.ts';
 import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';
 import { fromBase64 } from "npm:@cosmjs/encoding";
-import { makeMultisignedTxBytes, SigningStargateClient } from "npm:@cosmjs/stargate";
+import { makeMultisignedTxBytes, StargateClient } from "npm:@cosmjs/stargate";
 import { createMultisigThresholdPubkey } from 'npm:@cosmjs/amino';
 
 type Context = {
@@ -95,7 +95,7 @@ export default async ({ req, res, log, error }: Context) => {
       throw new Error(`There is a pending transaction for the multisig wallet with the name ${multisig.name}. Please have multisig members sign and submit this tx first before creating a new one.`);
     }
 
-    const cosmClient = await SigningStargateClient.connect(rpc);
+    const cosmClient = await StargateClient.connect(rpc);
     // lets get the sequence number for this transaction so we have to construct multi sig address
     const multiSigPubKey = createMultisigThresholdPubkey(multisig.members.map(mem => { return { type: "tendermint/PubKeySecp256k1", value: mem } }), Number(multisig.threshold));
     const multiSigAddress = pubkeyToAddress(multiSigPubKey, prefix);
@@ -105,14 +105,15 @@ export default async ({ req, res, log, error }: Context) => {
     if (multisig.threshold === 1) {
 
       // So we have to map through the signatures and turn them into byte arrays
-      const signatures: Signature[] = [];
-      const sigs = new Map(signatures.map((s) => {
-        return [s.address, fromBase64(s.signature)]
-      }))
-
-      const multiSigPubKey = createMultisigThresholdPubkey(multisig.members.map(mem => JSON.parse(mem)), Number(multisig.threshold));
+      const signatures = [
+        {
+          address: signer_address,
+          signature: signature
+        }
+      ];
+      const sigs = new Map(signatures.map((s) => [s.address, fromBase64(s.signature)]));
   
-      const cosmClient = await SigningStargateClient.connect(rpc);
+      const cosmClient = await StargateClient.connect(rpc);
 
       const signedTxBytes = makeMultisignedTxBytes(
         multiSigPubKey,
@@ -128,7 +129,7 @@ export default async ({ req, res, log, error }: Context) => {
       if (result.code === 0) {
         return res.json({
           data: result,
-          success: false,
+          success: true,
           statusCode: 201
         });
       }
