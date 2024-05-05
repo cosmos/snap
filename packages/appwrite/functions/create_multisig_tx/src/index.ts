@@ -128,7 +128,11 @@ export default async ({ req, res, log, error }: Context) => {
 
       if (result.code === 0) {
         return res.json({
-          data: result,
+          data: {
+            ...result,
+            gasUsed: result.gasUsed.toString(),
+            gasWanted: result.gasWanted.toString(),
+          },
           success: true,
           statusCode: 201
         });
@@ -136,7 +140,11 @@ export default async ({ req, res, log, error }: Context) => {
 
       // If not successful we just return the result as 500 server error
       return res.json({
-        data: result,
+        data: {
+          ...result,
+          gasUsed: result.gasUsed.toString(),
+          gasWanted: result.gasWanted.toString(),
+        },
         success: false,
         statusCode: 500
       });
