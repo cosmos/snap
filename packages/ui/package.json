@@ -40,6 +40,7 @@
 		"@cosmjs/crypto": "^0.31.1",
 		"@cosmjs/proto-signing": "^0.31.3",
 		"@cosmjs/stargate": "^0.31.3",
+		"@cosmjs/tendermint-rpc": "^0.31.3",
 		"@cosmsnap/snapper": "^0.1.29",
 		"@keplr-wallet/types": "0.12.12",
 		"@metamask/detect-provider": "^2.0.0",

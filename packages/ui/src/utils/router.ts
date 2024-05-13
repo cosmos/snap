@@ -2,8 +2,9 @@ import { ethers } from 'ethers';
 import { Squid, type ChainData, type TokenData, type RouteData, type TokenBalance } from "@0xsquid/sdk";
 import { getMsgs, type SkipChain, type SkipToken, type SkipMsgs, type Fee } from './skip';
 import rpcs from '../apis.json';
-import { type DeliverTxResponse, type SigningStargateClient, coins } from '@cosmjs/stargate';
-import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
+import { toBase64 }from "@cosmjs/encoding";
+import type { MultisigThresholdPubkey } from '@cosmjs/amino';
+import type { SigningStargateClient, StdFee } from '@cosmjs/stargate';
 import { toUtf8 } from '@cosmjs/encoding';
 import type { EncodeObject } from '@cosmjs/proto-signing';
 import { getClient } from './tx';
@@ -57,7 +58,7 @@ export class Router {
 
     private async getCosmosSigner(chain: Chain): Promise<SigningStargateClient> {
         if (window.cosmos) {
-            return await getClient(chain, "amino")
+            return await getClient(chain)
         } else {
             throw new Error('Cosmos signer not found.');
         }
@@ -206,19 +207,23 @@ export class Router {
         return _.uniqBy(_.uniqBy(tokens, 'denom'), "ibc_denom");
     }
 
-    public async execute(fromChain: RouteChain, toChain: RouteChain, route: SkipMsgs | RouteData, fromAddress: string, chain: Chain) {
+    public async execute(fromChain: RouteChain, toChain: RouteChain, route: SkipMsgs | RouteData, fromAddress: string, chain: Chain, fee: StdFee, multisig_public_key: MultisigThresholdPubkey) {
         if (fromChain.chain_type === "evm" || toChain.chain_type === "evm") {
             return await this.squidExecute(
                 route as RouteData,
                 fromChain.chain_type,
-                chain
+                chain,
+                fee,
+                multisig_public_key
             )
         }
 
         return await this.skipExecute(
             route as SkipMsgs,
             fromAddress,
-            chain
+            chain,
+            fee,
+            multisig_public_key
         );
     }
 
@@ -314,7 +319,9 @@ export class Router {
     private async squidExecute(
         route: RouteData,
         type: "cosmos" | "evm",
-        chain: Chain
+        chain: Chain,
+        fee: StdFee,
+        multisig_public_key: MultisigThresholdPubkey,
     ) {
         let signer = await this.getSigner(type, chain);
 
@@ -325,16 +332,33 @@ export class Router {
             return txReceipt;
         }
         // Its a Cosmos -> EVM route if we get here
-        const tx = await this.squid.executeRoute({
-            signer,
-            signerAddress: chain.address,
-            route,
-        }) as TxRaw;
-
         const client = await getClient(chain);
-        const cosmosTx = await client.broadcastTx(TxRaw.encode(tx).finish())
-    
-        return cosmosTx;
+
+        if (!route.transactionRequest?.data) { throw new Error("Invalid transaction request data.") }
+        const rawMsg = JSON.parse(route.transactionRequest?.data);
+        const value = rawMsg.msg;
+        if (rawMsg.msgTypeUrl === "/ibc.applications.transfer.v1.MsgTransfer") { 
+            value.timeoutTimestamp = String((Date.now() + (3600000)) * 1000000);
+        }
+        const messages = [{
+            value,
+            typeUrl: rawMsg.msgTypeUrl
+        }];
+
+        const account = await window.cosmos.getAccount(chain.chain_id);
+        const msAccount = await client.getSequence(chain.address!);
+
+        const signerData = {
+            accountNumber: msAccount.accountNumber,
+            sequence: msAccount.sequence,
+            chainId: chain.chain_id,
+        };
+        const sig = await client.sign(account.address, messages, fee, "", signerData);
+        const base64Signature = toBase64(sig.signatures[0]);
+        const base64BodyBytes = toBase64(sig.bodyBytes);
+        const tx = await window.cosmos.createMultisigTx(multisig_public_key, chain.apis.rpc[0].address, chain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify(messages), chain.chain_id, account.address, fee);
+
+        return tx;
     }
 
     private async skipRoute(
@@ -349,12 +373,8 @@ export class Router {
     ) {
         const fees: Fee[] = [
             {
-                basis_points_fee: "57",
+                basis_points_fee: "85",
                 address: "osmo1636lu4j34nk4quf9kpy2gxrjsxpxl92acxexa2"
-            },
-            {
-                basis_points_fee: "28",
-                address: "osmo1gpdnc4gggc9c7t5fltrwsufck9ufgx6gv8dsfw"
             }
         ]
 
@@ -369,7 +389,7 @@ export class Router {
         return msg;
     }
 
-    private async skipExecute(msg: SkipMsgs, fromAddress: string, chain: Chain) {
+    private async skipExecute(msg: SkipMsgs, fromAddress: string, chain: Chain, fee: StdFee, multisig_public_key: MultisigThresholdPubkey) {
         const messages: EncodeObject[] = msg.msgs.map(item => {
             if (!item.multi_chain_msg.msg || !item.multi_chain_msg.msg_type_url) {
                 throw new Error("Invalid message format.");
@@ -389,16 +409,19 @@ export class Router {
         });
         const client = await getClient(chain);
 
-        // Simulate the transaction
-        const gasEstimation = await client.simulate(fromAddress, messages, "");
+        const account = await window.cosmos.getAccount(chain.chain_id);
 
-        // Calculate the fee using 1.4 multiplier to be safe
-        const fee = {
-            amount: coins((_.round(gasEstimation*1.4, 0)).toString(), chain.fees.fee_tokens[0].denom),
-            gas: (_.round(gasEstimation*1.4, 0)).toString(),
+        const msAccount = await client.getSequence(fromAddress);
+        const signerData = {
+          accountNumber: msAccount.accountNumber,
+          sequence: msAccount.sequence,
+          chainId: chain.chain_id,
         };
 
-        const tx = await client.signAndBroadcast(fromAddress, messages, fee);
+        const sig = await client.sign(account.address, messages, fee, "", signerData);
+        const base64Signature = toBase64(sig.signatures[0]);
+        const base64BodyBytes = toBase64(sig.bodyBytes);
+        const tx = await window.cosmos.createMultisigTx(multisig_public_key, chain.apis.rpc[0].address, chain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify(messages), chain.chain_id, account.address, fee);
 
         return tx
     }

@@ -13,7 +13,6 @@
   import Select from "./Select.svelte";
 	import { snapId } from "../utils/snap";
 	import { onMount } from "svelte";
-	import { coins } from "@cosmjs/stargate";
   import { toBase64 }from "@cosmjs/encoding";
   import type { MultisigThresholdPubkey } from '@cosmjs/amino';
   
@@ -42,6 +41,8 @@
 	  },
 	  address: undefined
   };
+  let gas: number = 100000;
+  let gasPrice = 0.0025;
 
   $: {
     if (source) {
@@ -90,23 +91,19 @@
                 amount: sendAmt
               }
             }
-            // We replace the address with the signing address here because the simulation requires the address to be the signer since we do not have all multisig signers
-            const replaced = JSON.parse(JSON.stringify([msg]).replace(fromAddress, account.address));
-            // Simulate the transaction
-            const gasEstimation = await client.simulate(account.address, replaced, "");
-
-            // Calculate the fee using 2 multiplier to be safe
-            const fee = {
-                amount: coins((_.round(gasEstimation*2, 0)).toString(), source!.fees.fee_tokens[0].denom),
-                gas: (_.round(gasEstimation*2, 0)).toString(),
-            };
+            
             const msAccount = await client.getSequence(fromAddress);
-            console.log(msAccount);
             const signerData = {
               accountNumber: msAccount.accountNumber,
               sequence: msAccount.sequence,
               chainId: fromChain.chain_id,
             };
+            console.log(gasPrice);
+            const fee = {
+              amount: [{amount: (gas*gasPrice).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+              gas: gas.toString()
+            }
+            console.log(fee);
             const sig = await client.sign(account.address, [msg], fee, "", signerData);
             const base64Signature = toBase64(sig.signatures[0]);
             const base64BodyBytes = toBase64(sig.bodyBytes);
@@ -121,7 +118,7 @@
               if (tx.rawLog) {
                 $state.alertText = tx.rawLog
               } else {
-                $state.alertText = "There was an issue while submitting your transaction."
+                $state.alertText = tx ?? "There was an issue while submitting your transaction. Check your transaction."
               }
               $state.alertType = "danger"
               $state.showAlert = true
@@ -157,29 +154,31 @@
 
               const msgCamel = _.mapKeys(JSON.parse(item.multi_chain_msg.msg), (value: any, key: any) => _.camelCase(key));
 
+              // Need to do this for proper amino conversion
+              if (item.multi_chain_msg.msg_type_url == "/ibc.applications.transfer.v1.MsgTransfer") {
+                msgCamel["memo"] = "";
+                msgCamel["timeoutHeight"] = undefined;
+              }
+
               return {
                   value: JSON.parse(JSON.stringify(msgCamel)),
                   typeUrl: item.multi_chain_msg.msg_type_url
               };
           });
-          // Simulate the transaction
           const account = await window.cosmos.getAccount(fromChain.chain_id);
-          // We replace the address with the signing address here because the simulation requires the address to be the signer since we do not have all multisig signers
-          const replaced = JSON.parse(JSON.stringify(messages).replace(fromAddress, account.address));
-          const gasEstimation = await client.simulate(account.address, replaced, "");
 
-          // Calculate the fee using 2 multiplier to be safe
-          const fee = {
-              amount: coins((_.round(gasEstimation*2, 0)).toString(), source!.fees.fee_tokens[0].denom),
-              gas: (_.round(gasEstimation*2, 0)).toString(),
-          };
           const msAccount = await client.getSequence(fromAddress);
-          console.log(msAccount);
           const signerData = {
             accountNumber: msAccount.accountNumber,
             sequence: msAccount.sequence,
             chainId: fromChain.chain_id,
           };
+          console.log(gasPrice);
+          const fee = {
+            amount: [{amount: (gas*gasPrice).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+            gas: gas.toString()
+          }
+          console.log(fee);
           const sig = await client.sign(account.address, messages, fee, "", signerData);
           const base64Signature = toBase64(sig.signatures[0]);
           const base64BodyBytes = toBase64(sig.bodyBytes);
@@ -194,7 +193,7 @@
             if (tx.rawLog) {
               $state.alertText = tx.rawLog
             } else {
-              $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
+              $state.alertText = tx ?? "There was an issue while submitting your transaction. Check your transaction."
             }
             $state.alertType = "danger"
             $state.showAlert = true
@@ -221,7 +220,16 @@
     if (destination == undefined) {
       destination = $chains[0];
     }
-  })
+    // Here we set the average gas fee for the source chain
+    gasPrice = source?.fees.fee_tokens[0].average_gas_price
+  });
+
+  const updateGas = () => {
+      // Here we set the average gas fee for the source chain
+      if (source && source?.fees.fee_tokens.length > 0) {
+        gasPrice = source?.fees.fee_tokens[0].average_gas_price
+      }
+  };
 </script>
 
 <div class="overlap-group1">
@@ -235,7 +243,7 @@
           Source Chain
       </div>
     </div>
-    <Select on:change={() => sourceChainChange = true} text="Select Chain" items={$chains} bind:selectedItem={source} showKey="pretty_name" imageKey="logo_URIs" nestedImageKey="png"/>
+    <Select on:change={updateGas} on:change={() => sourceChainChange = true} text="Select Chain" items={$chains} bind:selectedItem={source} showKey="pretty_name" imageKey="logo_URIs" nestedImageKey="png"/>
     <div style="width: 100%;">
         <div class="percent inter-medium-white-14px">
             Asset
@@ -260,6 +268,12 @@
         Route Not Found
     </div>
     <input bind:value={recipient} type="text" placeholder="Enter recipient address" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+    <div style="width: 100%;">
+      <div class="percent inter-medium-white-14px">
+        Max Gas
+      </div>
+      <input bind:value={gas} type="number" placeholder="Enter max gas" class="enter-amount inter-medium-white-14px overlap-group-7"/>
+    </div>
     <Button onClick={computeIBCRoute} bind:loading={loading}/>
 </div>
 

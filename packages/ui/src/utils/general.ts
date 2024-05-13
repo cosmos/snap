@@ -190,3 +190,12 @@ export const getPubkeyFromNode = async (address: string, chain: ChainDirectory) 
   }
   return accountOnChain.pubkey;
 };
+
+export const toCamelCase = (obj: any): any => {
+  if (_.isArray(obj)) {
+      return obj.map(toCamelCase);
+  } else if (_.isObject(obj)) {
+      return _.mapKeys(obj, (value, key) => _.camelCase(key));
+  }
+  return obj;
+}

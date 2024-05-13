@@ -189,7 +189,12 @@ export default async ({ req, res, log, error }: Context) => {
   } catch (e) {
 
     error(e);
-    throw e;
+    
+    return res.json({
+      data: e.message,
+      success: false,
+      statusCode: 500
+    });
 
   }
 

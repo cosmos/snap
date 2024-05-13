@@ -2,8 +2,8 @@
     import { chains } from "../store/chains";
     import Select from "./Select.svelte";
     import { Router, type RouteChain, type RouteToken } from "../utils/router"
-	import { onMount } from "svelte";
-    import _ from "lodash";
+	import { afterUpdate, onMount } from "svelte";
+    import _, { chain } from "lodash";
 	import { balances } from "../store/balances";
 	import TruncateString from "./TruncateString.svelte";
 	import type { SkipMsgs } from "../utils/skip";
@@ -16,6 +16,7 @@
 	import { addTransaction } from "../store/transactions";
     import type { TransactionReceipt } from "@ethersproject/abstract-provider";
 	import { snapId } from "../utils/snap";
+    import type { MultisigThresholdPubkey } from '@cosmjs/amino';
 
     let sourceChain :RouteChain;
     let destinationChain :RouteChain;
@@ -43,6 +44,7 @@
     let loading = false;
     let showAlert = false;
     let inputShown: "from" | "to" = "from";
+    let gas: number = 0;
 
     const copy = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -153,7 +155,13 @@
             if (route === undefined) {
                 route = await getRoute();
             }
-            const tx = await router.execute(sourceChain, destinationChain, route, fromChain?.address, fromChain);
+            const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
+            const fee = {
+                amount: [{amount: (gas * Math.pow(10, 6)).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+                gas: ((gas*40) * Math.pow(10, 6)).toString()
+            }
+            console.log(fee);
+            const tx = await router.execute(sourceChain, destinationChain, route, fromChain?.address, fromChain, fee, ms);
             loading = false;
             if ('code' in tx) {
                 if (tx.code == 0) {
@@ -250,6 +258,15 @@
         }
         loading = false;
     }
+
+    afterUpdate(async () => {
+        // Here we set the average gas fee for the source chain
+        if (sourceChain) {
+            let fromChain: Chain | undefined;
+            fromChain = $chains.find(chain => chain.chain_id === sourceChain.chain_id);
+            gas = fromChain?.fees.fee_tokens[0].average_gas_price ?? 0.2;
+        }
+    });
 
     onMount(async () => {
         router = new Router();
