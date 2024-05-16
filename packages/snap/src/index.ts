@@ -380,8 +380,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       if (authInfo.fee) {
         ui.push(divider())
         ui.push(heading("Gas"))
-        ui.push(text(`Amount: ${authInfo.fee.amount[0].amount} ${authInfo.fee.amount[0].denom.toUpperCase()}`))
-        ui.push(text("Gas Limit: "+authInfo.fee.gasLimit.toString()))
+        ui.push(text(`**Amount**: ${authInfo.fee.amount[0].amount} ${authInfo.fee.amount[0].denom.toUpperCase()}`))
+        ui.push(text("**Gas Limit**: "+authInfo.fee.gasLimit.toString()))
       }
 
       if (txBody.memo) {
@@ -459,8 +459,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       signDocAmino.msgs.map(item => {
         uiAmino.push(heading(item.type)),
-        uiAmino.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
-        uiAmino.push(divider())
+        uiAmino.push(text(JSON.stringify(bigintReplacer(item.value), null, 2)))
       });
 
       // Here we check if there are notes to display. If so we make sure its a string and display it.
@@ -477,8 +476,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       if (signDocAmino.fee) {
         uiAmino.push(divider())
         uiAmino.push(heading("Gas"))
-        uiAmino.push(text(`Amount: ${signDocAmino.fee.amount[0].amount} ${signDocAmino.fee.amount[0].denom.toUpperCase()}`))
-        uiAmino.push(text("Gas Limit: "+signDocAmino.fee.gas))
+        uiAmino.push(text(`**Amount**: ${signDocAmino.fee.amount[0].amount} ${signDocAmino.fee.amount[0].denom.toUpperCase()}`))
+        uiAmino.push(text("**Gas Limit**: "+signDocAmino.fee.gas))
       }
 
       // Ensure user confirms transaction
@@ -1016,11 +1015,16 @@ export const onHomePage: OnHomePageHandler = async () => {
     if (!chain) {
       throw new Error(`No chain found for ${address.chain_id}`);
     }
-    main.push(heading(chain ? chain.pretty_name : address.chain_id))
-    main.push(text("**Balances**"))
-    chain.balances.forEach((balance) => {
-      main.push(copyable(`${_.round((Number(balance.amount) / 1_000_000), 2)} ${balance.display}`))
-    })
+    main.push(heading(chain ? chain.pretty_name : address.chain_id));
+    // Filter for non-zero balances only
+    const noZeroBalances = chain.balances.filter((balance) => Number(balance.amount) != 0);
+    // If there are non-zero balances, display them. Otherwise dont.
+    if (noZeroBalances.length > 0) {
+      main.push(text("**Balances**"))
+      noZeroBalances.forEach((balance) => {
+        main.push(copyable(`${_.round((Number(balance.amount) / 1_000_000), 2)} ${balance.display}`))
+      })
+    }
     main.push(text("**Address**"))
     main.push(copyable(address.address))
     main.push(divider())
