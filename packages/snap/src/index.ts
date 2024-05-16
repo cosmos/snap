@@ -1,4 +1,4 @@
-import { OnHomePageHandler, OnRpcRequestHandler, panel, text, heading, divider, copyable } from "@metamask/snaps-sdk";
+import { OnHomePageHandler, OnRpcRequestHandler, panel, text, heading, divider, copyable, OnInstallHandler } from "@metamask/snaps-sdk";
 import { AccountData } from '@cosmjs/amino';
 import { initializeChains } from "./initialize";
 import { Chain, Chains, Fees, Msg, UpdateChainParams } from "./types/chains";
@@ -6,7 +6,7 @@ import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 import { sendTx, signAmino, signDirect, submitTransaction } from "./transaction";
 import { COIN_TYPES, DEFAULT_FEES } from "./constants";
-import { SignDoc, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { SignDoc, TxBody, AuthInfo } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { StdSignDoc } from "@cosmjs/amino";
 import { bigintReplacer, decodeProtoMessage, decodeTxBodyIntoMessages } from "./parser";
 import Long from "long";
@@ -343,6 +343,9 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         msgs.push(decMsg);
       }
 
+      // Lets get the fee info to display
+      let authInfo = AuthInfo.decode(signDocNew.authInfoBytes);
+
       // create all msg prompts
       let ui = [
         heading("Confirm Transaction"),
@@ -362,6 +365,24 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           ui.push(text(JSON.stringify(bigintReplacer(item.value), null, 2)))
         }
       });
+
+      // Here we check if there are notes to display. If so we make sure its a string and display it.
+      // NOTE: notes are for displaying extra info only. They are used for nothing else but displaying info like signers in a multisig.
+      if (request.params.notes) {
+        if (typeof request.params.notes != "string") {
+          throw new Error("Notes in params must be a string");
+        }
+        ui.push(divider())
+        ui.push(heading("Notes"))
+        ui.push(text(request.params.notes))
+      }
+
+      if (authInfo.fee) {
+        ui.push(divider())
+        ui.push(heading("Gas"))
+        ui.push(text(`Amount: ${authInfo.fee.amount[0].amount} ${authInfo.fee.amount[0].denom.toUpperCase()}`))
+        ui.push(text("Gas Limit: "+authInfo.fee.gasLimit.toString()))
+      }
 
       if (txBody.memo) {
         ui.push(divider())
@@ -441,6 +462,24 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         uiAmino.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
         uiAmino.push(divider())
       });
+
+      // Here we check if there are notes to display. If so we make sure its a string and display it.
+      // NOTE: notes are for displaying extra info only. They are used for nothing else but displaying info like signers in a multisig.
+      if (request.params.notes) {
+        if (typeof request.params.notes != "string") {
+          throw new Error("Notes in params must be a string");
+        }
+        uiAmino.push(divider())
+        uiAmino.push(heading("Notes"))
+        uiAmino.push(text(request.params.notes))
+      }
+
+      if (signDocAmino.fee) {
+        uiAmino.push(divider())
+        uiAmino.push(heading("Gas"))
+        uiAmino.push(text(`Amount: ${signDocAmino.fee.amount[0].amount} ${signDocAmino.fee.amount[0].denom.toUpperCase()}`))
+        uiAmino.push(text("Gas Limit: "+signDocAmino.fee.gas))
+      }
 
       // Ensure user confirms transaction
       let confirmationSignAmino = await snap.request({

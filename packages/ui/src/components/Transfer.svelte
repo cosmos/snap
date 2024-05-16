@@ -41,7 +41,7 @@
 	  },
 	  address: undefined
   };
-  let gas: number = 100000;
+  let gas: number = 0.001;
   let gasPrice = 0.0025;
 
   $: {
@@ -100,8 +100,8 @@
             };
             console.log(gasPrice);
             const fee = {
-              amount: [{amount: (gas*gasPrice).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
-              gas: gas.toString()
+              amount: [{amount: (gas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+              gas: ((gas*1000000)/gasPrice).toString()
             }
             console.log(fee);
             const sig = await client.sign(account.address, [msg], fee, "", signerData);
@@ -175,8 +175,8 @@
           };
           console.log(gasPrice);
           const fee = {
-            amount: [{amount: (gas*gasPrice).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
-            gas: gas.toString()
+            amount: [{amount: (gas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+            gas: ((gas*1000000)/gasPrice).toString()
           }
           console.log(fee);
           const sig = await client.sign(account.address, messages, fee, "", signerData);
@@ -225,10 +225,10 @@
   });
 
   const updateGas = () => {
-      // Here we set the average gas fee for the source chain
-      if (source && source?.fees.fee_tokens.length > 0) {
-        gasPrice = source?.fees.fee_tokens[0].average_gas_price
-      }
+    // Here we set the average gas fee for the source chain
+    if (source && source?.fees.fee_tokens.length > 0) {
+      gasPrice = source?.fees.fee_tokens[0].average_gas_price
+    }
   };
 </script>
 
