@@ -1108,8 +1108,5 @@ export const onCronjob: OnCronjobHandler = async ({ request }) => {
       // Get akash address
       let akash: AccountData = await ChainState.GetAccount("akashnet-2");
       await snapNotify(akash.address);
-
-    default:
-      throw new Error("Method not found.");
   }
 };

@@ -71,6 +71,7 @@
     "@metamask/snaps-cli": "^6.0.2",
     "@metamask/snaps-jest": "^6.0.1",
     "@types/jest": "^29.5.12",
+    "@types/lodash": "^4.17.4",
     "@types/node-fetch": "^2.6.4",
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
