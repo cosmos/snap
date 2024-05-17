@@ -1,4 +1,4 @@
-import { OnHomePageHandler, OnRpcRequestHandler, panel, text, heading, divider, copyable, OnInstallHandler } from "@metamask/snaps-sdk";
+import { OnHomePageHandler, OnRpcRequestHandler, panel, text, heading, divider, copyable, OnInstallHandler, OnCronjobHandler } from "@metamask/snaps-sdk";
 import { AccountData } from '@cosmjs/amino';
 import { initializeChains } from "./initialize";
 import { Chain, Chains, Fees, Msg, UpdateChainParams } from "./types/chains";
@@ -15,6 +15,7 @@ import { fromBech32 } from '@cosmjs/encoding';
 import { isTxBodyEncodeObject } from "@cosmjs/proto-signing";
 import { getBalances } from "./utils";
 import _ from "lodash";
+import { snapNotify } from "./notification";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -1099,4 +1100,16 @@ export const onInstall: OnInstallHandler = async () => {
       ]),
     },
   });
+};
+
+export const onCronjob: OnCronjobHandler = async ({ request }) => {
+  switch (request.method) {
+    case "notification":
+      // Get akash address
+      let akash: AccountData = await ChainState.GetAccount("akashnet-2");
+      await snapNotify(akash.address);
+
+    default:
+      throw new Error("Method not found.");
+  }
 };

@@ -7,7 +7,7 @@
     "url": "git+https://github.com/cosmos/snap.git"
   },
   "source": {
-    "shasum": "THbQQq4098Wdew5xW5z5Cco2N62cfAit0FYd92Ys2Fs=",
+    "shasum": "SeGPqlRot3xcN3e3TcoO3fv2Miimne1LxmQxNukGE78=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -91,7 +91,19 @@
       "dapps": true
     },
     "endowment:page-home": {},
-    "endowment:lifecycle-hooks": {}
+    "endowment:lifecycle-hooks": {},
+    "snap_notify": {},
+    "endowment:cronjob": {
+      "jobs": [
+        {
+          "expression": "*/5 * * * *",
+          "request": {
+            "method": "notification",
+            "params": {}
+          }
+        }
+      ]
+    }
   },
   "manifestVersion": "0.1"
 }

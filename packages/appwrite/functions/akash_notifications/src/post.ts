@@ -35,6 +35,8 @@ export const postNotification = async (context: any) => {
         lease_id: deployment.deployment.deployment_id.dseq,
         state: deployment.deployment.state,
         address: deployment.deployment.deployment_id.owner,
+        balance: Number(deployment.escrow_account.balance.amount),
+        denom_escrow: deployment.escrow_account.balance.denom
       }));
       context.log(`Leases: ${JSON.stringify(leases)}`);
 
@@ -98,6 +100,52 @@ export const postNotification = async (context: any) => {
               );
             }
           }
+          // Check if we need to create notifications for low balances in escrow for active leases
+          if (lease.state == "active" && lease.balance < 250000) {
+            // Check if we have sent this notification already, (do not compare timestamp or read)
+            const notifReturn: DB_NOTIFICATION_RETURN = await db.listDocuments(
+              RESOURCE,
+              NOTIFICATIONS_COLLECTION_NAME,
+              [
+                Query.equal("address", lease.address),
+                Query.equal("lease", lease.lease_id),
+                Query.equal(
+                  "notification",
+                  `Lease ${lease.lease_id} balance has fallen low. Visit Akash Console to replenish to avoid downtime.`,
+                ),
+                Query.equal("type", lease.state),
+              ],
+            ) as unknown as DB_NOTIFICATION_RETURN;
+
+            const notifAdd: AKASH_NOTIFICATION = {
+              read: false,
+              address: lease.address,
+              lease: lease.lease_id,
+              notification: `Lease ${lease.lease_id} balance has fallen low. Visit Akash Console to replenish to avoid downtime.`,
+              timestamp: Date.now(),
+              type: lease.state,
+            };
+
+            // Add the notification if it does not exist
+            if (notifReturn.documents.length === 0) {
+              context.log(`Adding notification for lease ${lease.lease_id}.`);
+              const res = await db.createDocument(
+                RESOURCE,
+                NOTIFICATIONS_COLLECTION_NAME,
+                crypto.randomUUID(),
+                notifAdd,
+                [
+                  Permission.read(Role.any())
+                ],
+              );
+              docsAdded.push(res);
+            } else {
+              context.log(
+                `Notification for lease ${lease.lease_id} already exists.`,
+              );
+            }
+          }
+          
           // Since we already have the lease in the database, we can update it
           await db.updateDocument(
             RESOURCE,

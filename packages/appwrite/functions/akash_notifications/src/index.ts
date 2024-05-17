@@ -13,6 +13,9 @@ type Context = {
 };
 
 export default async (context: Context) => {
+  context.res.headers.set("Access-Control-Allow-Origin", "*");
+  context.res.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  context.res.headers.set("Access-Control-Allow-Headers", "Content-Type");
   try {
     switch (context.req.method) {
       case "GET": {

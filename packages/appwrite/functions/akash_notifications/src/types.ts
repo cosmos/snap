@@ -14,6 +14,8 @@ export interface AKASH_LEASE {
   lease_id: string;
   state: Status;
   address: string;
+  balance: number;
+  denom_escrow: string;
 }
 
 export interface AKASH_NOTIFICATION {
