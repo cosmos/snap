@@ -7,6 +7,7 @@ export interface Multisig {
   name: string;
   public_key: string;
   akash_address: string;
+  transactions: any[];
   $id: string;
 }
 

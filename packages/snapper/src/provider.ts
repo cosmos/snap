@@ -238,10 +238,10 @@ export class CosmosSnap implements SnapProvider {
             hasPending: ms.transactions.length > 0,
         };
     }
-    async signPendingMultisigTx(public_key: string, rpc: string, fee: StdFee, prefix: string, signature: StdSignature) {
+    async signPendingMultisigTx(public_key: string, rpc: string | HttpEndpoint, fee: StdFee, prefix: string, signature: string, signer_address: string) {
         // We check if the multisig setup is done
         this.checkMultisigSetup();
-        const res = await this.appwrite.signMultiSigTx(public_key, rpc, fee, prefix, signature);
+        const res = await this.appwrite.signMultiSigTx(public_key, rpc, fee, prefix, signature, signer_address);
         return res;
     }
     async createMultisigTx(public_key: MultisigThresholdPubkey, rpc: string | HttpEndpoint, prefix: string, signature: string, body_bytes: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) {

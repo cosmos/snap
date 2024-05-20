@@ -35,7 +35,7 @@ export default async ({ req, res, error }: Context) => {
       throw new Error("APPWRITE_FUNCTION_PROJECT_ID is not defined");
     }
 
-    const { public_key, rpc, fee, prefix, signature } = JSON.parse(req.bodyRaw) as RequestBody;
+    const { public_key, rpc, fee, prefix, signature, signer_address } = JSON.parse(req.bodyRaw) as RequestBody;
 
     if (!public_key) {
       throw new Error("public_key is required in body");
@@ -52,6 +52,9 @@ export default async ({ req, res, error }: Context) => {
     if (!signature) {
       throw new Error("signature is required in body");
     }
+    if (!signer_address) {
+      throw new Error("signer_address is required in body");
+    }
 
     const client = new Client()
       .setEndpoint(appwrite_url)
@@ -59,6 +62,8 @@ export default async ({ req, res, error }: Context) => {
       .setKey(appwriteKey);
     
     const database = new Databases(client);
+
+    const cosmClient = await SigningStargateClient.connect(rpc);
 
     // Get the multisig info
     const multisigReturn: DB_TX_RETURN = await database.listDocuments(
@@ -76,18 +81,26 @@ export default async ({ req, res, error }: Context) => {
     // get the multisig tx from the multisig
     const tx = multisig.transactions[0];
 
+    const account = await cosmClient.getAccount(signer_address);
+    if (!account) {
+      throw new Error(`Account with address ${signer_address} not found. Create a transaction with this account to create it.`);
+    }
+    if (!account.pubkey) {
+      throw new Error(`Public key for address ${signer_address} not found. Create a transaction with this account to create it.`);
+    }
+
     // Check if this signer already signed the tx
-    const signed = tx.signatures.find((s) => JSON.parse(s).pub_key === signature.pub_key);
+    const signed = tx.signatures.find((s) => JSON.parse(s).pub_key === account.pubkey);
     if (signed) {
       return res.json({
-        data: "This user has already signed this transaction",
+        data: "This user has already signed this transaction.",
         success: false,
         statusCode: 400
       });
     }
 
     // Check that the user who is adding the signature is a member of the multisig
-    const member = tx.multisigs.members.find((m) => JSON.parse(m) === signature.pub_key);
+    const member = tx.multisigs.members.find((m) => JSON.parse(m) === account.pubkey);
     if (!member) {
       throw new Error("This user is not a member of the multisig");
     }
@@ -95,15 +108,19 @@ export default async ({ req, res, error }: Context) => {
     // If we have met the threshold then we can construct the full multisig tx and return it
     if ((tx.signatures.length+1) === multisig.threshold) {
 
-      // So we have to map through the signatures and turn them into byte arrays
+      // So we have to map through the signatures and parse them from json strings
       const signatures: Signature[] = tx.signatures.map((s) => JSON.parse(s));
+      signatures.push(
+        {
+          address: signer_address,
+          signature: signature
+        }
+      )
       const sigs = new Map(signatures.map((s) => {
         return [s.address, fromBase64(s.signature)]
       }))
 
       const multiSigPubKey = createMultisigThresholdPubkey(multisig.members.map(mem => JSON.parse(mem)), Number(multisig.threshold));
-  
-      const cosmClient = await SigningStargateClient.connect(rpc);
 
       const signedTxBytes = makeMultisignedTxBytes(
         multiSigPubKey,
@@ -134,9 +151,11 @@ export default async ({ req, res, error }: Context) => {
       });
     }
 
+    const sig = { address: signer_address, signature };
+
     // If we have not met the threshold then we update the document with the new signature
     const response = await database.updateDocument("multisig", "transactions", tx.tx_id, {
-      signatures: [...tx.signatures, JSON.stringify(signature)]
+      signatures: tx.signatures.push(JSON.stringify(sig))
     });
 
     return res.json({

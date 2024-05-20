@@ -39,7 +39,8 @@ export interface Multisig {
   members: string[];
   name: string;
   public_key: string;
-  transactions: MultisigTx[]
+  transactions: MultisigTx[];
+  $id: string;
 }
 
 export interface DB_TX_RETURN {

@@ -1,13 +1,13 @@
 <script lang="ts">
   import { directory, type ChainDirectory } from "../store/directory";
   import { state } from "../store/state";
-	import { createMultiSig } from "../utils/appwrite";
 	import Button from "./Button.svelte";
   import _ from "lodash";
   import Select from "./Select.svelte";
   import type { SinglePubkey } from '@cosmjs/amino';
 	import { onMount } from "svelte";
 	import { getPubkeyFromNode } from "../utils/general";
+	import { goto } from "$app/navigation";
 
   interface Member {
     pk: SinglePubkey;
@@ -42,14 +42,13 @@
       // @ts-ignore
       $state.alertText = err.message;
       $state.alertType = "danger";
-      $state.showMenu = true;
+      $state.showAlert = true;
     }
   }
 
   const updateMemberPk = async (index: number, address: string) => {
     try {
       const pk = await getPubkeyFromNode(address, members[index].chain);
-      console.log(pk);
       members[index].pk = pk;
     } catch (err) {
       console.error(err);
@@ -57,7 +56,7 @@
       // @ts-ignore
       $state.alertText = err.message;
       $state.alertType = "danger";
-      $state.showMenu = true;
+      $state.showAlert = true;
     }
   }
 
@@ -67,7 +66,9 @@
         throw new Error(`Member count does not match. Received ${members.length}, expected ${memberCount}`);
       };
       loading = true;
-      await createMultiSig(name, threshold, members.map(m => m.pk));
+      const multisig = await window.cosmos.createNewMultisig(name, threshold, members.map(m => m.pk));
+      $state.currentMultiSig = multisig;
+      goto(`/${encodeURIComponent(multisig.$id)}/balances`);
       $state.openAddMultisigPopup = !$state.openAddMultisigPopup
       loading = false;
     } catch (err) {
@@ -76,7 +77,7 @@
       // @ts-ignore
       $state.alertText = err.message;
       $state.alertType = "danger";
-      $state.showMenu = true;
+      $state.showAlert = true;
     }
   }
 </script>

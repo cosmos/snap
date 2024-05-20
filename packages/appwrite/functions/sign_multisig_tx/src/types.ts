@@ -1,4 +1,4 @@
-import { StdFee, StdSignature } from 'npm:@cosmjs/launchpad';
+import { StdFee } from 'npm:@cosmjs/launchpad';
 import { HttpEndpoint } from 'npm:@cosmjs/stargate';
 
 export interface RequestBody {
@@ -7,7 +7,8 @@ export interface RequestBody {
   rpc: string | HttpEndpoint;
   fee: StdFee;
   prefix: string;
-  signature: StdSignature;
+  signature: string;
+  signer_address: string;
 }
 
 export interface Signature {

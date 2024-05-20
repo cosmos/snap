@@ -154,30 +154,27 @@ export default async ({ req, res, log, error }: Context) => {
       });
     }
 
-    const tx_id = ID.unique();
-
-    const response = await database.createDocument("multisig", "transactions", tx_id, {
-      signatures: [JSON.stringify([signer_address, signature])],
-      signed: [],
-      multisig,
-      tx_id,
+    const response = await database.createDocument("multisig", "transactions", ID.unique(), {
+      signatures: [JSON.stringify({address: signer_address, signature})],
       chain_id,
       messages: JSON.stringify(messages),
       body_bytes: body_bytes,
       sequence: sequence.sequence,
-      threshold: multisig.threshold,
-      signer_count: 1,
-      fee
+      fee: JSON.stringify(fee)
     },
     [
       Permission.read(Role.any())
     ]);
 
-    log(`Created Multisig Transaction ${tx_id}. (${JSON.stringify(response)})`);
+    await database.updateDocument("multisig", "multisig", multisig.$id, {
+      transactions: [response.$id]
+    });
+
+    log(`Created Multisig Transaction ${response.$id}. (${JSON.stringify(response)})`);
 
     return res.json({
       data: {
-        tx_id,
+        tx_id: response.$id,
         chain_id,
         signer_address,
         threshold: multisig.threshold,

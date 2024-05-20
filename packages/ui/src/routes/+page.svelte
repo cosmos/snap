@@ -14,6 +14,7 @@
       const account = await window.cosmos.getAccount("akashnet-2");
       const b64Pk = toBase64(new Uint8Array(Object.values(account.pubkey)));
       multisigs = await getMultiSigs(b64Pk);
+      console.log(multisigs);
     }
   });
 
@@ -40,7 +41,6 @@
             <Multisig
               name={ms.name}
               threshold={ms.threshold}
-              publicKey={ms.public_key}
               memberCount={ms.members.length}
               akashAddress={ms.akash_address}
             />

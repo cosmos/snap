@@ -326,7 +326,7 @@ export class Router {
         let signer = await this.getSigner(type, chain);
 
         if (type === "evm") {
-            const tx = await this.squid.executeRoute({ signer, route }) as ethers.providers.TransactionResponse;
+            const tx = await this.squid.executeRoute({ signer: signer as any, route }) as ethers.providers.TransactionResponse;
             const txReceipt = await tx.wait();
 
             return txReceipt;
@@ -400,6 +400,11 @@ export class Router {
             // If cosmwasm turn the json into bytes
             if (item.multi_chain_msg.msg_type_url === "/cosmwasm.wasm.v1.MsgExecuteContract") {
                 value.msg = toUtf8(JSON.stringify(value.msg))
+            }
+
+            // Need to do this for proper amino conversion
+            if (item.multi_chain_msg.msg_type_url == "/ibc.applications.transfer.v1.MsgTransfer") {
+            value["timeoutHeight"] = undefined;
             }
 
             return {

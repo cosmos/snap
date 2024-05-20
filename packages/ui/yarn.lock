@@ -456,7 +456,9 @@ __metadata:
   resolution: "@cosmsnap/ui@workspace:."
   dependencies:
     "@0xsquid/sdk": ^1.14.8
+    "@cosmjs/amino": ^0.31.3
     "@cosmjs/crypto": ^0.31.1
+    "@cosmjs/encoding": ^0.31.3
     "@cosmjs/proto-signing": ^0.31.3
     "@cosmjs/stargate": ^0.31.3
     "@cosmjs/tendermint-rpc": ^0.31.3

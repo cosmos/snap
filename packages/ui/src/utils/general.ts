@@ -185,7 +185,7 @@ export const getPubkeyFromNode = async (address: string, chain: ChainDirectory) 
   const accountOnChain = await client.getAccount(address);
   if (!accountOnChain || !accountOnChain.pubkey) {
     throw new Error(
-      `Account has no pubkey on chain. Send some tokens to ${address} to create it on chain.`,
+      `Account has no pubkey on chain. Create a transaction with ${address} to proceed.`,
     );
   }
   return accountOnChain.pubkey;

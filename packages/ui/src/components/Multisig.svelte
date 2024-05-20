@@ -5,12 +5,11 @@
   export let name: string;
   export let threshold = 0;
   export let memberCount = 0;
-  export let publicKey: string;
   export let akashAddress: string;
   let copied = false;
 
   const copyAddress = async () => {
-    await copyToClipboard(publicKey);
+    await copyToClipboard(akashAddress);
     copied = true;
     setTimeout(() => {
       copied = false;

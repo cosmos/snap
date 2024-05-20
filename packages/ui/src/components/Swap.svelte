@@ -3,7 +3,7 @@
     import Select from "./Select.svelte";
     import { Router, type RouteChain, type RouteToken } from "../utils/router"
 	import { afterUpdate, onMount } from "svelte";
-    import _, { chain } from "lodash";
+    import _ from "lodash";
 	import { balances } from "../store/balances";
 	import TruncateString from "./TruncateString.svelte";
 	import type { SkipMsgs } from "../utils/skip";
@@ -14,7 +14,6 @@
 	import AlertModal from "./AlertModal.svelte";
     import { getERC20Balance } from "../utils/general";
 	import { addTransaction } from "../store/transactions";
-    import type { TransactionReceipt } from "@ethersproject/abstract-provider";
 	import { snapId } from "../utils/snap";
     import type { MultisigThresholdPubkey } from '@cosmjs/amino';
 
@@ -33,12 +32,13 @@
     let receiver = "";
     let editReceiver = false;
     let showEditButton = false;
-    let showDetails = false;
     let copied = false;
     let copiedReciever = false;
     let route: SkipMsgs | RouteData | undefined;
     let estimatedReceiveAmount = 0;
     let slippage = 1;
+    let maxGas = 0.001;
+    let gasPrice = 0.0025;
     let estimatedTimeMetric: "Seconds" | "Minute(s)" = "Minute(s)";
     let estimatedTime = 1;
     let loading = false;
@@ -157,10 +157,9 @@
             }
             const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
             const fee = {
-                amount: [{amount: (gas * Math.pow(10, 6)).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
-                gas: ((gas*40) * Math.pow(10, 6)).toString()
-            }
-            console.log(fee);
+                amount: [{amount: (maxGas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+                gas: ((maxGas*1000000)/gasPrice).toString()
+            };
             const tx = await router.execute(sourceChain, destinationChain, route, fromChain?.address, fromChain, fee, ms);
             loading = false;
             if ('code' in tx) {
@@ -176,9 +175,11 @@
                     $state.alertType = "danger"
                     $state.showAlert = true
                 }
-            } else {
-                const evmTx = tx as TransactionReceipt;
-                await sendTxAlert(sourceChain.chain_name, evmTx.transactionHash, snapId);
+            }
+            if ('signer_count' in tx) {
+                $state.alertText = `Multisig transaction was created. There are currently ${tx.signer_count} signers of the transaction with ${tx.threshold} needed. Have the other signers complete the transaction to execute.`
+                $state.alertType = "success"
+                $state.showAlert = true
             }
         } catch (e: any) {
             loading = false;
@@ -203,6 +204,10 @@
             }
             if (fromChain && fromChain.address) {
                 chainAddress = fromChain.address;
+            }
+            // Here we set the average gas fee for the source chain
+            if (fromChain && fromChain?.fees.fee_tokens.length > 0) {
+                gasPrice = fromChain?.fees.fee_tokens[0].average_gas_price
             }
         }
         if (destinationChain) {
@@ -403,13 +408,15 @@
                                 <div class="w-1/2 font-medium text-white text-lg tracking-tight leading-normal">
                                     Details
                                 </div>
-                                <div class="flex w-1/2 items-center justify-end">
-                                    <svg on:click={() => showDetails = !showDetails} class="w-5 h-full ml-2 cursor-pointer text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 16">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 1h4m0 0v4m0-4-5 5.243M5 15H1m0 0v-4m0 4 5.243-5"/>
-                                    </svg>
-                                </div>
                             </div>
-                            {#if showDetails}
+                                <div class="w-full flex">
+                                    <div class="w-1/2 font-medium flex mt-3 font-inter text-white text-base items-center">
+                                        Max gas
+                                    </div>
+                                    <div class="w-1/2 flex mt-3 font-inter text-white text-base justify-end">
+                                        <input type="number" on:change={update} bind:value={maxGas} class="flex justify-end items-end w-1/2 tracking-tight leading-normal bg-transparent focus:outline-none custom-bg inter-font rounded-[10px] border border-gray-600 shadow-sm px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 border-opacity-35"/>
+                                    </div>
+                                </div>
                                 <div class="w-full flex flex-col">
                                     <div class="w-full flex">
                                         <div class="w-1/2 font-medium flex mt-3 font-inter text-white text-base">
@@ -436,7 +443,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            {/if}
                         </div>
                     </div>
                 {/if}

@@ -43,6 +43,9 @@ export class Appwrite {
         throw new Error(`Failed to getMultiSigs. ${res.responseBody}`);
       }
       const data = JSON.parse(res.responseBody);
+      if (data.success === false) {
+        throw new Error(`Error Occured: ${data.data}`);
+      }
       return data.data;
   };
 
@@ -54,6 +57,9 @@ export class Appwrite {
       throw new Error(`Failed to createMultiSig. ${res.responseBody}`);
     }
     const data = JSON.parse(res.responseBody);
+    if (data.success === false) {
+      throw new Error(`Error Occured: ${data.data}`);
+    }
     return data.data;
   };
 
@@ -65,16 +71,22 @@ export class Appwrite {
       throw new Error(`Failed to createMultiSigTx. ${res.responseBody}`);
     }
     const data = JSON.parse(res.responseBody);
+    if (data.success === false) {
+      throw new Error(`Error Occured: ${data.data}`);
+    }
     return data.data;
   };
 
-  signMultiSigTx = async (public_key: string, rpc: string, fee: StdFee, prefix: string, signature: StdSignature) => {
+  signMultiSigTx = async (public_key: string, rpc: string | HttpEndpoint, fee: StdFee, prefix: string, signature: string, signer_address: string) => {
     const functions = new Functions(this.client);
-    const res = await functions.createExecution('sign_multisig_tx', `{ "public_key": "${public_key}", "rpc": "${rpc}", "fee": ${fee}, "prefix": "${prefix}", "signature": ${signature} }`, undefined, undefined, ExecutionMethod.POST);
+    const res = await functions.createExecution('sign_multisig_tx', `{ "public_key": "${public_key}", "rpc": "${rpc}", "fee": ${fee}, "prefix": "${prefix}", "signature": ${signature}, "signer_address": ${signer_address} }`, undefined, undefined, ExecutionMethod.POST);
     if (res.responseStatusCode !== 200) {
       throw new Error(`Failed to signMultiSigTx. ${res.responseBody}`);
     }
     const data = JSON.parse(res.responseBody);
+    if (data.success === false) {
+      throw new Error(`Error Occured: ${data.data}`);
+    }
     return data.data;
   };
 
@@ -85,6 +97,9 @@ export class Appwrite {
         throw new Error(`Failed to getAkashNotifications. ${res.responseBody}`);
       }
       const data = JSON.parse(res.responseBody);
+      if (data.success === false) {
+        throw new Error(`Error Occured: ${data.data}`);
+      }
       return data;
   };
 
@@ -95,6 +110,9 @@ export class Appwrite {
         throw new Error(`Failed to updateAkashNotifications. ${res.responseBody}`);
       }
       const data = JSON.parse(res.responseBody);
+      if (data.success === false) {
+        throw new Error(`Error Occured: ${data.data}`);
+      }
       return data.data;
   };
 

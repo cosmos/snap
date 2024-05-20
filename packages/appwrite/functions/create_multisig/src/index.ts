@@ -46,7 +46,7 @@ export default async ({ req, res, log, error }: Context) => {
       throw new Error("pubKeys is required in body");
     }
 
-    log(`Creating Multisig named ${name} and with threshold ${threshold}`);
+    log(`Creating Multisig named ${name} with threshold ${threshold} and public keys ${JSON.stringify(pubKeys)}`);
 
     const client = new Client()
       .setEndpoint(appwrite_url)
