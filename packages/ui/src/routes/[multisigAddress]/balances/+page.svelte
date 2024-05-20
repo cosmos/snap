@@ -90,14 +90,16 @@
 <div style="padding: 25px;">
   <div class="grid grid-cols-8 gap-[20px]">
     <div class="lg:col-span-5 col-span-8">
-      <div class="chain-holding-distribution">
-        Pending Multisig Transaction
-      </div>
-      <div class="chain-holding-distribution">
-        <div class="w-1/2">
-          <Button disabled={!showPendingTx} loading={loading} onClick={signMultisisTx} text={showPendingTx ? "Sign Transaction" : "Already Signed"} />
+      {#if $state.currentMultiSig.transactions.length > 0}
+        <div class="chain-holding-distribution">
+          Pending Multisig Transaction
         </div>
-      </div>
+        <div class="chain-holding-distribution">
+          <div class="w-1/2">
+            <Button disabled={!showPendingTx} loading={loading} onClick={signMultisisTx} text={showPendingTx ? "Sign Transaction" : "Already Signed"} />
+          </div>
+        </div>
+      {/if}
       <div class="chain-holding-distribution mt-7">
         Balances
       </div>

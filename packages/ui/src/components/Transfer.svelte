@@ -15,6 +15,7 @@
 	import { onMount } from "svelte";
   import { toBase64 }from "@cosmjs/encoding";
   import type { MultisigThresholdPubkey } from '@cosmjs/amino';
+	import { getMultiSigs } from "../utils/appwrite";
   
   let loading = false;
   let source: Chain | undefined;
@@ -65,6 +66,17 @@
     }
   }
 
+  const updateMultisig = async () => {
+      const account = await window.cosmos.getAccount("akashnet-2");
+      const b64Pk = toBase64(new Uint8Array(Object.values(account.pubkey)));
+      const multisigs = await getMultiSigs(b64Pk);
+      const multisig = multisigs.find(ms => ms.$id === $state.currentMultiSig.$id);
+      if (!multisig) {
+          throw new Error(`Multisig ${$state.currentMultiSig.name} not found.`);
+      }
+      $state.currentMultiSig = multisig;
+  }
+
   const computeIBCRoute = async () => {
       loading = true;
       noRoute = false;
@@ -101,7 +113,7 @@
             console.log(gasPrice);
             const fee = {
               amount: [{amount: (gas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
-              gas: ((gas*1000000)/gasPrice).toString()
+              gas: ((gas*500000)/gasPrice).toString()
             }
             console.log(fee);
             const sig = await client.sign(account.address, [msg], fee, "", signerData);
@@ -109,7 +121,8 @@
             const base64BodyBytes = toBase64(sig.bodyBytes);
             const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
             const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify([msg]), fromChain.chain_id, account.address, fee);
-            
+            await updateMultisig();
+
             if (tx.code == 0) {
               await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
               await sendTxAlert(source!.chain_id, tx.transactionHash, snapId);
@@ -176,7 +189,7 @@
           console.log(gasPrice);
           const fee = {
             amount: [{amount: (gas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
-            gas: ((gas*1000000)/gasPrice).toString()
+            gas: ((gas*500000)/gasPrice).toString()
           }
           console.log(fee);
           const sig = await client.sign(account.address, messages, fee, "", signerData);
