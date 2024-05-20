@@ -4,6 +4,7 @@ import { pubkeyToAddress } from 'npm:@cosmjs/launchpad';
 import { fromBase64 } from "npm:@cosmjs/encoding";
 import { makeMultisignedTxBytes, StargateClient } from "npm:@cosmjs/stargate";
 import { createMultisigThresholdPubkey } from 'npm:@cosmjs/amino';
+import type { EncodeObject } from 'npm:@cosmjs/proto-signing';
 
 type Context = {
   // deno-lint-ignore no-explicit-any
@@ -157,7 +158,7 @@ export default async ({ req, res, log, error }: Context) => {
     const response = await database.createDocument("multisig", "transactions", ID.unique(), {
       signatures: [JSON.stringify({address: signer_address, signature})],
       chain_id,
-      messages,
+      messages: JSON.parse(messages).map((m: EncodeObject) => JSON.stringify(m)),
       body_bytes: body_bytes,
       sequence: sequence.sequence,
       fee: JSON.stringify(fee)
