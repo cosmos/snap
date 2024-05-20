@@ -15,7 +15,7 @@
 	import { snapId } from "../../../utils/snap";
 
   let loading = false;
-  let showPendingTx = false;
+  let showPendingTxDisabled = true;
 
   $: {
     if (!$chains) {
@@ -28,45 +28,57 @@
   }
 
   const signMultisisTx = async () => {
-    loading = true;
-    const chain = $chains.find((c) => c.chain_id === $state.currentMultiSig.transactions[0].chain_id);
-    if (!chain) {
-      throw new Error(`Chain with chain id ${$state.currentMultiSig.transactions[0].chain_id} not found. Please add the chain to proceed.`);
-    }
-    const client = await getClient(chain);
+    try {
+      loading = true;
+      const chain = $chains.find((c) => c.chain_id === $state.currentMultiSig.transactions[0].chain_id);
+      if (!chain) {
+        throw new Error(`Chain with chain id ${$state.currentMultiSig.transactions[0].chain_id} not found. Please add the chain to proceed.`);
+      }
+      const client = await getClient(chain);
 
-    const account = await window.cosmos.getAccount(chain.chain_id);
+      const account = await window.cosmos.getAccount(chain.chain_id);
 
-    const msAccount = await client.getSequence(chain.address!);
-    const signerData = {
-      accountNumber: msAccount.accountNumber,
-      sequence: msAccount.sequence,
-      chainId: chain.chain_id,
-    };
-    const messages = JSON.parse($state.currentMultiSig.transactions[0].messages);
-    const fee = JSON.parse($state.currentMultiSig.transactions[0].fee);
-    const sig = await client.sign(account.address, messages, fee, "", signerData);
-    const base64Signature = toBase64(sig.signatures[0]);
-    const tx = await window.cosmos.signPendingMultisigTx($state.currentMultiSig.public_key, chain.apis.rpc[0].address, fee, chain.bech32_prefix, base64Signature, account.address);
-    loading = false;
-    if ('code' in tx) {
-        if (tx.code == 0) {
-            await addTransaction({address: chain.address!, chain: chain.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
-            await sendTxAlert(chain.chain_name, tx.transactionHash, snapId);
-        } else {
-            if (tx.rawLog) {
-                $state.alertText = tx.rawLog
-            } else {
-                $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
-            }
-            $state.alertType = "danger"
-            $state.showAlert = true
-        }
-    }
-    if ('signer_count' in tx) {
-        $state.alertText = `Multisig transaction was created. There are currently ${tx.signer_count} signers of the transaction with ${tx.threshold} needed. Have the other signers complete the transaction to execute.`
-        $state.alertType = "success"
-        $state.showAlert = true
+      const msAccount = await client.getSequence(chain.address!);
+      const signerData = {
+        accountNumber: msAccount.accountNumber,
+        sequence: msAccount.sequence,
+        chainId: chain.chain_id,
+      };
+      const messages = JSON.parse(JSON.parse($state.currentMultiSig.transactions[0].messages));
+      messages.map((msg: any) => {
+        console.log(JSON.parse(msg.value));
+      });
+      console.log(messages);
+      const fee = JSON.parse($state.currentMultiSig.transactions[0].fee);
+      const sig = await client.sign(account.address, messages, fee, "", signerData);
+      const base64Signature = toBase64(sig.signatures[0]);
+      const tx = await window.cosmos.signPendingMultisigTx($state.currentMultiSig.public_key, chain.apis.rpc[0].address, fee, chain.bech32_prefix, base64Signature, account.address);
+      loading = false;
+      if ('code' in tx) {
+          if (tx.code == 0) {
+              await addTransaction({address: chain.address!, chain: chain.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
+              await sendTxAlert(chain.chain_name, tx.transactionHash, snapId);
+          } else {
+              if (tx.rawLog) {
+                  $state.alertText = tx.rawLog
+              } else {
+                  $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
+              }
+              $state.alertType = "danger"
+              $state.showAlert = true
+          }
+      }
+      if ('signer_count' in tx) {
+          $state.alertText = `Multisig transaction was created. There are currently ${tx.signer_count} signers of the transaction with ${tx.threshold} needed. Have the other signers complete the transaction to execute.`
+          $state.alertType = "success"
+          $state.showAlert = true
+      }
+    } catch (e: any) {
+      console.error(e);
+      $state.alertText = e.message;
+      $state.alertType = "danger";
+      $state.showAlert = true;
+      loading = false;
     }
   };
 
@@ -79,10 +91,11 @@
   afterUpdate(async () => {
     if ($state.currentMultiSig.transactions.length > 0) {
       let account = await window.cosmos.getAccount($state.currentMultiSig.transactions[0].chain_id);
+      console.log(account);
       if ($state.currentMultiSig.transactions[0].signatures.some((sig: string) => sig.includes(account.address))) {
-        showPendingTx = true;
+        showPendingTxDisabled = true;
       }
-      showPendingTx = false;
+      showPendingTxDisabled = false;
     }
   })
 </script>
@@ -96,7 +109,7 @@
         </div>
         <div class="chain-holding-distribution">
           <div class="w-1/2">
-            <Button disabled={!showPendingTx} loading={loading} onClick={signMultisisTx} text={showPendingTx ? "Sign Transaction" : "Already Signed"} />
+            <Button disabled={!showPendingTxDisabled} loading={loading} onClick={signMultisisTx} text={showPendingTxDisabled ? "Sign Transaction" : "Already Signed"} />
           </div>
         </div>
       {/if}
