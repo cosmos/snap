@@ -157,7 +157,7 @@ export default async ({ req, res, log, error }: Context) => {
     const response = await database.createDocument("multisig", "transactions", ID.unique(), {
       signatures: [JSON.stringify({address: signer_address, signature})],
       chain_id,
-      messages: JSON.stringify(messages),
+      messages,
       body_bytes: body_bytes,
       sequence: sequence.sequence,
       fee: JSON.stringify(fee)

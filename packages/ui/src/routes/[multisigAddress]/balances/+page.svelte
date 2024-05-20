@@ -86,12 +86,18 @@
     if ($state.connected) {
       fetchChains($state.currentMultiSig as Multisig)
     }
+    if ($state.currentMultiSig.transactions.length > 0) {
+      let account = await window.cosmos.getAccount($state.currentMultiSig.transactions[0].chain_id);
+      if ($state.currentMultiSig.transactions[0].signatures.some((sig: string) => sig.includes(account.address))) {
+        showPendingTxDisabled = true;
+      }
+      showPendingTxDisabled = false;
+    }
   });
 
   afterUpdate(async () => {
     if ($state.currentMultiSig.transactions.length > 0) {
       let account = await window.cosmos.getAccount($state.currentMultiSig.transactions[0].chain_id);
-      console.log(account);
       if ($state.currentMultiSig.transactions[0].signatures.some((sig: string) => sig.includes(account.address))) {
         showPendingTxDisabled = true;
       }
