@@ -367,17 +367,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         }
       });
 
-      // Here we check if there are notes to display. If so we make sure its a string and display it.
-      // NOTE: notes are for displaying extra info only. They are used for nothing else but displaying info like signers in a multisig.
-      if (request.params.notes) {
-        if (typeof request.params.notes != "string") {
-          throw new Error("Notes in params must be a string");
-        }
-        ui.push(divider())
-        ui.push(heading("Notes"))
-        ui.push(text(request.params.notes))
-      }
-
       if (authInfo.fee) {
         ui.push(divider())
         ui.push(heading("Gas"))
@@ -462,17 +451,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         uiAmino.push(heading(item.type)),
         uiAmino.push(text(JSON.stringify(bigintReplacer(item.value), null, 2)))
       });
-
-      // Here we check if there are notes to display. If so we make sure its a string and display it.
-      // NOTE: notes are for displaying extra info only. They are used for nothing else but displaying info like signers in a multisig.
-      if (request.params.notes) {
-        if (typeof request.params.notes != "string") {
-          throw new Error("Notes in params must be a string");
-        }
-        uiAmino.push(divider())
-        uiAmino.push(heading("Notes"))
-        uiAmino.push(text(request.params.notes))
-      }
 
       if (signDocAmino.fee) {
         uiAmino.push(divider())

@@ -3,22 +3,21 @@
   import Multisig from "../components/Multisig.svelte";
   import AddMultisig from "../components/AddMultisig.svelte";
 	import { state } from "../store/state";
-	import { getMultiSigs, type Multisig as MultiSig } from "../utils/appwrite";
+	import type { Multisig as MS } from "../utils/appwrite";
   import { toBase64 }from "@cosmjs/encoding";
 	import { goto } from "$app/navigation";
 
-  let multisigs: MultiSig[] = [];
+  let multisigs: MS[] = [];
 
   onMount(async () => {
     if ($state.connected) {
       const account = await window.cosmos.getAccount("akashnet-2");
       const b64Pk = toBase64(new Uint8Array(Object.values(account.pubkey)));
-      multisigs = await getMultiSigs(b64Pk);
-      console.log(multisigs);
+      multisigs = await window.cosmos.getMultisigs(b64Pk);
     }
   });
 
-  const selectMultisig = (multisig: MultiSig) => {
+  const selectMultisig = (multisig: MS) => {
     $state.currentMultiSig = multisig;
     goto(`/${encodeURIComponent(multisig.$id)}/balances`);
   };

@@ -17,7 +17,6 @@
 	import { snapId } from "../utils/snap";
     import type { MultisigThresholdPubkey } from '@cosmjs/amino';
 	import { toBase64 } from "@cosmjs/encoding";
-	import { getMultiSigs } from "../utils/appwrite";
 
     let sourceChain :RouteChain;
     let destinationChain :RouteChain;
@@ -67,7 +66,7 @@
     const updateMultisig = async () => {
         const account = await window.cosmos.getAccount("akashnet-2");
         const b64Pk = toBase64(new Uint8Array(Object.values(account.pubkey)));
-        const multisigs = await getMultiSigs(b64Pk);
+        const multisigs = await window.cosmos.getMultisigs(b64Pk);
         const multisig = multisigs.find(ms => ms.$id === $state.currentMultiSig.$id);
         if (!multisig) {
             throw new Error(`Multisig ${$state.currentMultiSig.name} not found.`);
@@ -170,8 +169,8 @@
             }
             const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
             const fee = {
-                amount: [{amount: (maxGas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
-                gas: ((maxGas*500000)/gasPrice).toString()
+                amount: [{amount: _.round(maxGas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+                gas: _.round((maxGas*100000)/gasPrice).toString()
             };
             const tx = await router.execute(sourceChain, destinationChain, route, fromChain?.address, fromChain, fee, ms);
             await updateMultisig();

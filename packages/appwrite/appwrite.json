@@ -3,26 +3,9 @@
     "projectName": "",
     "functions": [
         {
-            "$id": "659e1d905dde5ef4504f",
-            "name": "akash_notifications",
-            "runtime": "deno-1.35",
-            "execute": [
-                "any"
-            ],
-            "events": [],
-            "schedule": "",
-            "timeout": 600,
-            "enabled": true,
-            "logging": true,
-            "entrypoint": "src/index.ts",
-            "commands": "deno cache src/index.ts",
-            "ignore": [],
-            "path": "functions/akash_notifications"
-        },
-        {
             "$id": "get_multisigs",
             "name": "get_multisigs",
-            "runtime": "deno-1.35",
+            "runtime": "deno-1.40",
             "execute": [
                 "any"
             ],
@@ -41,7 +24,7 @@
         {
             "$id": "create_multisig",
             "name": "create_multisig",
-            "runtime": "deno-1.35",
+            "runtime": "deno-1.40",
             "execute": [
                 "any"
             ],

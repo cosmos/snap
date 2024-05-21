@@ -46,10 +46,12 @@ export default async ({ req, res, log, error }: Context) => {
     
     const database = new Databases(client);
 
-    const response = await database.deleteDocument("multisig", "transactions", tx_id);
+    await database.deleteDocument("multisig", "transactions", tx_id);
 
     return res.json({
-      data: response,
+      data: {
+        id: tx_id
+      },
       success: true,
       statusCode: 201
     });

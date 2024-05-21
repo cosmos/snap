@@ -1,5 +1,20 @@
 import { Client, Databases } from "https://deno.land/x/appwrite@10.0.0/mod.ts";
-import { MultisigTx } from "../../sign_multisig_tx/src/types.ts";
+
+enum MultisigTxStatus {
+  Created = 'created',
+}
+
+export interface MultisigTx {
+  multisigs: Multisig;
+  tx_id: string;
+  chain_id: string;
+  type_url: string;
+  message: string;
+  status: MultisigTxStatus;
+  signatures: string[];
+  body_bytes: string;
+  sequence: number;
+}
 
 export interface Multisig {
   threshold: number;

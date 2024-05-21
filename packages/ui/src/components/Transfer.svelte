@@ -15,7 +15,6 @@
 	import { onMount } from "svelte";
   import { toBase64 }from "@cosmjs/encoding";
   import type { MultisigThresholdPubkey } from '@cosmjs/amino';
-	import { getMultiSigs } from "../utils/appwrite";
   
   let loading = false;
   let source: Chain | undefined;
@@ -69,7 +68,7 @@
   const updateMultisig = async () => {
       const account = await window.cosmos.getAccount("akashnet-2");
       const b64Pk = toBase64(new Uint8Array(Object.values(account.pubkey)));
-      const multisigs = await getMultiSigs(b64Pk);
+      const multisigs = await window.cosmos.getMultisigs(b64Pk);
       const multisig = multisigs.find(ms => ms.$id === $state.currentMultiSig.$id);
       if (!multisig) {
           throw new Error(`Multisig ${$state.currentMultiSig.name} not found.`);
@@ -110,12 +109,10 @@
               sequence: msAccount.sequence,
               chainId: fromChain.chain_id,
             };
-            console.log(gasPrice);
             const fee = {
-              amount: [{amount: (gas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
-              gas: ((gas*500000)/gasPrice).toString()
+              amount: [{amount: _.round(gas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+              gas: _.round((gas*500000)/gasPrice).toString()
             }
-            console.log(fee);
             const sig = await client.sign(account.address, [msg], fee, "", signerData);
             const base64Signature = toBase64(sig.signatures[0]);
             const base64BodyBytes = toBase64(sig.bodyBytes);
@@ -186,12 +183,10 @@
             sequence: msAccount.sequence,
             chainId: fromChain.chain_id,
           };
-          console.log(gasPrice);
           const fee = {
-            amount: [{amount: (gas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
-            gas: ((gas*500000)/gasPrice).toString()
+            amount: [{amount: _.round(gas*1000000).toString(), denom: fromChain.fees.fee_tokens[0].denom}],
+            gas: _.round((gas*500000)/gasPrice).toString()
           }
-          console.log(fee);
           const sig = await client.sign(account.address, messages, fee, "", signerData);
           const base64Signature = toBase64(sig.signatures[0]);
           const base64BodyBytes = toBase64(sig.bodyBytes);

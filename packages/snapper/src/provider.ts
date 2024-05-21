@@ -244,6 +244,12 @@ export class CosmosSnap implements SnapProvider {
         const res = await this.appwrite.signMultiSigTx(public_key, rpc, fee, prefix, signature, signer_address);
         return res;
     }
+    async deletePendingMultisigTx(tx_id: string) {
+        // We check if the multisig setup is done
+        this.checkMultisigSetup();
+        const res = await this.appwrite.deleteMultisigTx(tx_id);
+        return res;
+    }
     async createMultisigTx(public_key: MultisigThresholdPubkey, rpc: string | HttpEndpoint, prefix: string, signature: string, body_bytes: string, messages: string, chain_id: string, signer_address: string, fee: StdFee) {
         // We check if the multisig setup is done
         this.checkMultisigSetup();

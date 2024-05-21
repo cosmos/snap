@@ -1,13 +1,14 @@
 <script>
 	import Button from "./Button.svelte";
 
-    export let show = false;
-    export let text = "Delete the transaction?"
-    export let yesButtonText = "Yes, I'm sure"
-    export let noButtonText = "No, cancel"
-    export let onYesClick = () => {};
-    export let onNoClick = () => {};
-    export let onClose = () => {};
+  export let loading = false;
+  export let show = false;
+  export let text = "Delete the transaction?"
+  export let yesButtonText = "Yes, I'm sure"
+  export let noButtonText = "No, cancel"
+  export let onYesClick = () => {};
+  export let onNoClick = () => {};
+  export let onClose = () => {};
 </script>
 
 {#if show}
@@ -32,7 +33,7 @@
                 </div>
                 <div class="w-full flex">
                     <div class="w-1/2 mr-5">
-                        <Button onClick={onYesClick} text={yesButtonText}/>
+                        <Button bind:loading={loading} onClick={onYesClick} text={yesButtonText}/>
                     </div>
                     <div class="w-1/2 ml-5">
                         <Button onClick={onNoClick} text={noButtonText}/>

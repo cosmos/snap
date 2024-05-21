@@ -19,6 +19,7 @@
   let loading = false;
   let showPendingTxDisabled = true;
   let openDeleteTx = false;
+  let loadingDelete = false;
 
   $: {
     if (!$chains) {
@@ -31,7 +32,13 @@
   }
 
   const onYesClick = async () => {
+    loadingDelete = true;
+    const res = await window.cosmos.deletePendingMultisigTx($state.currentMultiSig.transactions[0].$id);
+    if (res.id) {
+      $state.currentMultiSig.transactions = [];
+    }
     openDeleteTx = false;
+    loadingDelete = false;
   }
 
   const onNoClick = async () => {
@@ -69,6 +76,7 @@
           if (tx.code == 0) {
               await addTransaction({address: chain.address!, chain: chain.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
               await sendTxAlert(chain.chain_name, tx.transactionHash, snapId);
+              $state.currentMultiSig.transactions = [];
           } else {
               if (tx.rawLog) {
                   $state.alertText = tx.rawLog

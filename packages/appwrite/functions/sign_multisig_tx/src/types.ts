@@ -30,7 +30,7 @@ export interface Multisig {
 
 export interface MultisigTx {
   multisigs: Multisig;
-  tx_id: string;
+  $id: string;
   chain_id: string;
   type_url: string;
   message: string;

@@ -143,28 +143,34 @@ export default async ({ req, res, log, error }: Context) => {
       // Delete the multisig tx from the database if successful
       if (result.code === 0) {
         log("Deleting multisig tx from database as it was successfully broadcasted.");
-        await database.deleteDocument("multisig", "transactions", tx.tx_id);
+        await database.deleteDocument("multisig", "transactions", tx.$id);
         return res.json({
-          data: result,
-          success: false,
+          data: {
+            ...result,
+            gasUsed: result.gasUsed.toString(),
+            gasWanted: result.gasWanted.toString(),
+          },
+          success: true,
           statusCode: 201
         });
       }
 
       // If not successful we just return the result as 500 server error
       return res.json({
-        data: result,
+        data: {
+          ...result,
+          gasUsed: result.gasUsed.toString(),
+          gasWanted: result.gasWanted.toString(),
+        },
         success: false,
         statusCode: 500
       });
     }
 
-    const sig = { address: signer_address, signature };
-
     // If we have not met the threshold then we update the document with the new signature
     log("Threshold not met. Adding signature to multisig tx in DB.");
-    const response = await database.updateDocument("multisig", "transactions", tx.tx_id, {
-      signatures: tx.signatures.push(JSON.stringify(sig))
+    const response = await database.updateDocument("multisig", "transactions", tx.$id, {
+      signatures: [JSON.stringify({address: signer_address, signature})],
     });
 
     return res.json({
