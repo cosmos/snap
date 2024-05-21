@@ -977,6 +977,11 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
+  // Check for notifications
+  // Get akash address
+  let akash: AccountData = await ChainState.GetAccount("akashnet-2");
+  await snapNotify(akash.address);
+
   const main: any[] = [
     heading('Metamask Extension'),
     text('Manage everything across the Cosmos!'),
