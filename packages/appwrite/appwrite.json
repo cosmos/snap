@@ -90,6 +90,23 @@
             "commands": "deno cache src/index.ts",
             "ignore": [],
             "path": "functions/create_multisig_tx"
+        },
+        {
+            "$id": "delete_multisig_tx",
+            "name": "delete_multisig_tx",
+            "runtime": "deno-1.40",
+            "execute": [
+                "any"
+            ],
+            "events": [],
+            "schedule": "",
+            "timeout": 600,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "src/index.ts",
+            "commands": "deno cache src/index.ts",
+            "ignore": [],
+            "path": "functions/delete_multisig_tx"
         }
     ]
 }

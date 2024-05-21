@@ -13,9 +13,12 @@
 	import { addTransaction } from "../../../store/transactions";
 	import { sendTxAlert } from "../../../../../snapper/src";
 	import { snapId } from "../../../utils/snap";
+	import type { StdFee } from "@cosmjs/amino";
+	import Confirm from "../../../components/Confirm.svelte";
 
   let loading = false;
   let showPendingTxDisabled = true;
+  let openDeleteTx = false;
 
   $: {
     if (!$chains) {
@@ -25,6 +28,18 @@
     } else {
       $state.showAlert = false
     }
+  }
+
+  const onYesClick = async () => {
+    openDeleteTx = false;
+  }
+
+  const onNoClick = async () => {
+    openDeleteTx = false;
+  }
+
+  const onClose = async () => {
+    openDeleteTx = false;
   }
 
   const signMultisisTx = async () => {
@@ -44,12 +59,8 @@
         sequence: msAccount.sequence,
         chainId: chain.chain_id,
       };
-      const messages = JSON.parse(JSON.parse($state.currentMultiSig.transactions[0].messages));
-      messages.map((msg: any) => {
-        console.log(JSON.parse(msg.value));
-      });
-      console.log(messages);
-      const fee = JSON.parse($state.currentMultiSig.transactions[0].fee);
+      const messages = $state.currentMultiSig.transactions[0].messages.map((m: string) => JSON.parse(m));
+      const fee: StdFee = JSON.parse($state.currentMultiSig.transactions[0].fee);
       const sig = await client.sign(account.address, messages, fee, "", signerData);
       const base64Signature = toBase64(sig.signatures[0]);
       const tx = await window.cosmos.signPendingMultisigTx($state.currentMultiSig.public_key, chain.apis.rpc[0].address, fee, chain.bech32_prefix, base64Signature, account.address);
@@ -110,9 +121,16 @@
   <div class="grid grid-cols-8 gap-[20px]">
     <div class="lg:col-span-5 col-span-8">
       {#if $state.currentMultiSig.transactions.length > 0}
-        <div class="chain-holding-distribution">
-          Pending Multisig Transaction
-        </div>
+        <div class="flex justify-end w-full">
+          <div class=" w-2/3 chain-holding-distribution">
+            Pending Multisig Transaction
+          </div>
+          <div class="w-1/3 flex w-full justify-end">
+            <svg on:click={() => { openDeleteTx = true }} class="w-6 h-6 text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+            </svg> 
+          </div>
+        </div>  
         <div class="chain-holding-distribution">
           <div class="w-1/2">
             <Button disabled={!showPendingTxDisabled} loading={loading} onClick={signMultisisTx} text={showPendingTxDisabled ? "Sign Transaction" : "Already Signed"} />
@@ -150,6 +168,7 @@
     </div>
   </div>
 </div>
+<Confirm bind:show={openDeleteTx} onYesClick={onYesClick} onNoClick={onNoClick} onClose={onClose}/>
 
 <style>
   .chain-holding-distribution {

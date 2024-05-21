@@ -14,7 +14,7 @@ type Context = {
   // deno-lint-ignore no-explicit-any
   error: (msg: any) => void;
 };
-export default async ({ req, res, error }: Context) => {
+export default async ({ req, res, log, error }: Context) => {
 
   try {
 
@@ -55,6 +55,8 @@ export default async ({ req, res, error }: Context) => {
     if (!signer_address) {
       throw new Error("signer_address is required in body");
     }
+
+    log(`Received request to sign multisig tx for public key ${public_key} and signer address ${signer_address}`);
 
     const client = new Client()
       .setEndpoint(appwrite_url)
@@ -100,13 +102,18 @@ export default async ({ req, res, error }: Context) => {
     }
 
     // Check that the user who is adding the signature is a member of the multisig
-    const member = tx.multisigs.members.find((m) => JSON.parse(m) === account.pubkey);
+    if (!account.pubkey) {
+      throw new Error(`Public key not found for ${account.address}. Create a transaction with this account to create it.`);
+    }
+    const member = multisig.members.find((m) => m === account.pubkey!.value);
     if (!member) {
       throw new Error("This user is not a member of the multisig");
     }
 
     // If we have met the threshold then we can construct the full multisig tx and return it
     if ((tx.signatures.length+1) === multisig.threshold) {
+
+      log("Threshold met. Constructing full multisig tx and broadcasting it.");
 
       // So we have to map through the signatures and parse them from json strings
       const signatures: Signature[] = tx.signatures.map((s) => JSON.parse(s));
@@ -120,7 +127,7 @@ export default async ({ req, res, error }: Context) => {
         return [s.address, fromBase64(s.signature)]
       }))
 
-      const multiSigPubKey = createMultisigThresholdPubkey(multisig.members.map(mem => JSON.parse(mem)), Number(multisig.threshold));
+      const multiSigPubKey = createMultisigThresholdPubkey(multisig.members.map(mem => { return { type: "tendermint/PubKeySecp256k1", value: mem } }), Number(multisig.threshold));
 
       const signedTxBytes = makeMultisignedTxBytes(
         multiSigPubKey,
@@ -135,6 +142,7 @@ export default async ({ req, res, error }: Context) => {
 
       // Delete the multisig tx from the database if successful
       if (result.code === 0) {
+        log("Deleting multisig tx from database as it was successfully broadcasted.");
         await database.deleteDocument("multisig", "transactions", tx.tx_id);
         return res.json({
           data: result,
@@ -154,6 +162,7 @@ export default async ({ req, res, error }: Context) => {
     const sig = { address: signer_address, signature };
 
     // If we have not met the threshold then we update the document with the new signature
+    log("Threshold not met. Adding signature to multisig tx in DB.");
     const response = await database.updateDocument("multisig", "transactions", tx.tx_id, {
       signatures: tx.signatures.push(JSON.stringify(sig))
     });

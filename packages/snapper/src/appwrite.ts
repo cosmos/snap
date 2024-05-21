@@ -79,7 +79,8 @@ export class Appwrite {
 
   signMultiSigTx = async (public_key: string, rpc: string | HttpEndpoint, fee: StdFee, prefix: string, signature: string, signer_address: string) => {
     const functions = new Functions(this.client);
-    const res = await functions.createExecution('sign_multisig_tx', `{ "public_key": "${public_key}", "rpc": "${rpc}", "fee": ${fee}, "prefix": "${prefix}", "signature": ${signature}, "signer_address": ${signer_address} }`, undefined, undefined, ExecutionMethod.POST);
+    const body = { public_key, rpc, fee, prefix, signature, signer_address };
+    const res = await functions.createExecution('sign_multisig_tx', JSON.stringify(body), undefined, undefined, ExecutionMethod.POST);
     if (res.responseStatusCode !== 200) {
       throw new Error(`Failed to signMultiSigTx. ${res.responseBody}`);
     }
