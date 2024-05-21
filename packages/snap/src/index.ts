@@ -13,7 +13,7 @@ import Long from "long";
 import { Key } from '@keplr-wallet/types';
 import { fromBech32 } from '@cosmjs/encoding';
 import { isTxBodyEncodeObject } from "@cosmjs/proto-signing";
-import { getBalances } from "./utils";
+import { AKASH_LEASE, ChainBalances, getBalances, getLeases } from "./utils";
 import _ from "lodash";
 import { snapNotify } from "./notification";
 
@@ -977,11 +977,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 };
 
 export const onHomePage: OnHomePageHandler = async () => {
-  // Check for notifications
-  // Get akash address
-  let akash: AccountData = await ChainState.GetAccount("akashnet-2");
-  await snapNotify(akash.address);
-
   const main: any[] = [
     heading('Metamask Extension'),
     text('Manage everything across the Cosmos!'),
@@ -993,7 +988,15 @@ export const onHomePage: OnHomePageHandler = async () => {
   const chainsP = ChainState.getChains();
   const [addresses, chainsInWallet] = await Promise.all([addressesP, chainsP]);
   const chains = _.values(_.merge(_.keyBy(addresses, 'chain_id'), _.keyBy(chainsInWallet.chains, 'chain_id')))
-  const balances = await getBalances(chains);
+  // Get akash leases
+  const akash = addresses.find(a => a.chain_id == "akashnet-2");
+  const resList: any[] = [getBalances(chains)];
+  if (akash) {
+    resList.push(getLeases(akash.address));
+  }
+  const [balancesT, leasesT] = await Promise.all(resList);
+  const balances: ChainBalances[] = balancesT;
+  const leases: AKASH_LEASE[] = leasesT;
   addresses.forEach((address) => {
     const chain = balances.find((balance) => balance.chain_id === address.chain_id);
     if (!chain) {
@@ -1012,6 +1015,14 @@ export const onHomePage: OnHomePageHandler = async () => {
     main.push(text("**Address**"))
     main.push(copyable(address.address))
     main.push(divider())
+    if (address.chain_id == "akashnet-2" && leases.length > 0) {
+      main.pop()
+      main.push(text("**Open Leases**"))
+      leases.forEach(lease => {
+        main.push(copyable(lease.lease_id))
+      })
+      main.push(divider())
+    }
   })
 
   // Direct them to the dashboard for more advanced things

@@ -7,7 +7,7 @@
     "url": "git+https://github.com/cosmos/snap.git"
   },
   "source": {
-    "shasum": "s98zY7nLr+oxsVvyQZK8tnyDGBynMCjDBOx/DeYcsnI=",
+    "shasum": "pWbnRd60ZOWB5ityNJcI03ZbaH43F5IlVtv1ySBudQM=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
