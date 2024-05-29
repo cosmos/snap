@@ -1,12 +1,11 @@
 import { DeliverTxResponse, SigningStargateClient } from "@cosmjs/stargate";
-import { encodeSecp256k1Signature, serializeSignDoc, rawSecp256k1PubkeyToRawAddress } from "@cosmjs/amino";
+import { encodeSecp256k1Signature, serializeSignDoc } from "@cosmjs/amino";
 import { Secp256k1, sha256 } from "@cosmjs/crypto";
-import { AccountData, DirectSecp256k1Wallet, DirectSignResponse, OfflineDirectSigner, makeSignBytes } from "@cosmjs/proto-signing";
+import { AccountData, DirectSignResponse, OfflineDirectSigner, makeSignBytes } from "@cosmjs/proto-signing";
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
-import { toBech32 } from "@cosmjs/encoding";
 import { Chain, Fees } from "./types/chains";
 import { ChainState } from "./state";
-import { heading, panel, text } from "@metamask/snaps-ui";
+import { heading, panel, text } from "@metamask/snaps-sdk";
 import {
   WALLET_URL,
   DEFAULT_FEES,
@@ -15,6 +14,7 @@ import {
 } from "./constants";
 import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { getAddress } from "./address";
+import { getWallet, getWalletAmino } from "./wallet";
 
 /**
  * submitTransaction Submits a transaction to the chain specified.
@@ -53,29 +53,7 @@ export const submitTransaction = async (
       };
     }
 
-    // get signer info
-    let node = await snap.request({
-      method: "snap_getBip44Entropy",
-      params: {
-        coinType: Number(chain.slip44),
-      },
-    });
-
-    if (typeof node.privateKey === "undefined") {
-      throw Error("Private key from node is undefined");
-    }
-
-    // Create bytes key
-    let pk = node.privateKey;
-    if (pk.startsWith("0x")) {
-      pk = pk.substring(2);
-    }
-
-    // create the wallet
-    let wallet = await DirectSecp256k1Wallet.fromKey(
-      Uint8Array.from(Buffer.from(pk, "hex")),
-      chain.bech32_prefix
-    );
+    let wallet = await getWallet(chain);
     let address = (await wallet.getAccounts())[0].address;
 
     // build signing client
@@ -130,29 +108,7 @@ export const sendTx = async (
       );
     }
 
-    // get signer info
-    let node = await snap.request({
-      method: "snap_getBip44Entropy",
-      params: {
-        coinType: Number(chain.slip44),
-      },
-    });
-
-    if (typeof node.privateKey === "undefined") {
-      throw Error("Private key from node is undefined");
-    }
-
-    // Create bytes key
-    let pk = node.privateKey;
-    if (pk.startsWith("0x")) {
-      pk = pk.substring(2);
-    }
-
-    // create the wallet
-    let wallet = await DirectSecp256k1Wallet.fromKey(
-      Uint8Array.from(Buffer.from(pk, "hex")),
-      chain.bech32_prefix
-    );
+    let wallet = await getWallet(chain);
 
     // build signing client
     const client = await SigningStargateClient.connectWithSigner(
@@ -198,7 +154,7 @@ export const signDirect = async (
   chain_id: string,
   signer: string,
   sign_doc: SignDoc
-): Promise<any> => {
+) => {
   try {
     // get the chain from state
     let chain = await ChainState.getChain(chain_id);
@@ -208,27 +164,7 @@ export const signDirect = async (
       );
     }
 
-    // get signer info
-    let node = await snap.request({
-      method: "snap_getBip44Entropy",
-      params: {
-        coinType: Number(chain.slip44),
-      },
-    });
-
-    if (typeof node.privateKey === "undefined") {
-      throw Error("Private key from node is undefined");
-    }
-
-    // Create bytes key
-    let pk = node.privateKey;
-    if (pk.startsWith("0x")) {
-      pk = pk.substring(2);
-    }
-    // create Buffer for pk
-    let bytesPK = new Uint8Array(Buffer.from(pk, 'hex'));
-
-    let wallet = await Wallet.fromKey(bytesPK, chain);
+    let wallet = await getWallet(chain);
 
     let response = await wallet.signDirect(signer, sign_doc);
 
@@ -265,7 +201,7 @@ export const signAmino = async (
   chain_id: string,
   signer: string,
   sign_doc: StdSignDoc
-): Promise<AminoSignResponse | undefined> => {
+) => {
   try {
     // get the chain from state
     let chain = await ChainState.getChain(chain_id);
@@ -275,27 +211,7 @@ export const signAmino = async (
       );
     }
 
-    // get signer info
-    let node = await snap.request({
-      method: "snap_getBip44Entropy",
-      params: {
-        coinType: Number(chain.slip44),
-      },
-    });
-
-    if (typeof node.privateKey === "undefined") {
-      throw new Error("Private key from node is undefined");
-    }
-
-    // Create bytes key
-    let pk = node.privateKey;
-    if (pk.startsWith("0x")) {
-      pk = pk.substring(2);
-    }
-    // create Buffer for pk
-    let bytesPK = new Uint8Array(Buffer.from(pk, 'hex'));
-
-    let wallet = await Wallet.fromKey(bytesPK, chain);
+    let wallet = await getWalletAmino(chain);
 
     let response = await wallet.signAmino(signer, sign_doc);
 
