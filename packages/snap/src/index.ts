@@ -9,6 +9,7 @@ import { COIN_TYPES, DEFAULT_FEES } from "./constants";
 import { SignDoc, TxBody, AuthInfo } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { StdSignDoc } from "@cosmjs/amino";
 import { bigintReplacer, decodeProtoMessage, decodeTxBodyIntoMessages } from "./parser";
+import { bigintReplacer, decodeProtoMessage, decodeTxBodyIntoMessages } from "./parser";
 import Long from "long";
 import { Key } from '@keplr-wallet/types';
 import { fromBech32 } from '@cosmjs/encoding';
@@ -97,7 +98,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         method: "snap_manageState",
         params: {
           operation: "update",
-          newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true },
+          newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true, hd: (request.params && request.params.hd) ? request.params.hd : true },
         },
       });
 
@@ -331,7 +332,16 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       let txBody = TxBody.decode(signDocNew.bodyBytes);
       const msgs = [];
       
+      
       for (const msg of txBody.messages) {
+        if (isTxBodyEncodeObject(msg)) {
+          const messages = await decodeTxBodyIntoMessages(msg.typeUrl, msg.value);
+          for (const message of messages) {
+            let decMsgTxBody = await decodeProtoMessage(message.typeUrl, message.value);
+            msgs.push(decMsgTxBody);
+          }
+          continue;
+        }
         if (isTxBodyEncodeObject(msg)) {
           const messages = await decodeTxBodyIntoMessages(msg.typeUrl, msg.value);
           for (const message of messages) {
@@ -350,6 +360,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       // create all msg prompts
       let ui = [
         heading("Confirm Transaction"),
+        divider(),
         divider(),
         heading("Chain"),
         text(`${request.params.chain_id}`),
