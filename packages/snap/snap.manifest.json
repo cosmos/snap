@@ -7,7 +7,7 @@
     "url": "git+https://github.com/cosmos/snap.git"
   },
   "source": {
-    "shasum": "c5530zoiQFdje3jvw2wNh2EZUc716y5G9tbxy4fybC0=",
+    "shasum": "IAYhOKh6oOz+F15fwnELYXaeR2Wqo8aeKSskdct2CQQ=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
@@ -96,7 +96,7 @@
     "endowment:cronjob": {
       "jobs": [
         {
-          "expression": "*/5 * * * *",
+          "expression": "*/30 * * * *",
           "request": {
             "method": "notification",
             "params": {}
