@@ -5,6 +5,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cosmos/snap.git"
+    "url": "git+https://github.com/cosmos/snap.git"
   },
   "source": {
     "shasum": "iy7sFNnki+rvhkmOaWGfKE5ZiaEqOYkuE1AVb5dEiN0=",
