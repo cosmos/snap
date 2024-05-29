@@ -1,21 +1,23 @@
-import { OnHomePageHandler, OnRpcRequestHandler, address, image, row } from "@metamask/snaps-sdk";
+import { OnHomePageHandler, OnRpcRequestHandler, panel, text, heading, divider, copyable, OnInstallHandler, OnCronjobHandler } from "@metamask/snaps-sdk";
 import { AccountData } from '@cosmjs/amino';
-import { panel, text, heading, divider, copyable } from "@metamask/snaps-ui";
 import { initializeChains } from "./initialize";
+import { Chain, Chains, Fees, Msg, UpdateChainParams } from "./types/chains";
 import { Chain, Chains, Fees, Msg, UpdateChainParams } from "./types/chains";
 import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 import { sendTx, signAmino, signDirect, submitTransaction } from "./transaction";
 import { COIN_TYPES, DEFAULT_FEES } from "./constants";
-import { SignDoc, TxBody } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { SignDoc, TxBody, AuthInfo } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { StdSignDoc } from "@cosmjs/amino";
+import { bigintReplacer, decodeProtoMessage, decodeTxBodyIntoMessages } from "./parser";
 import { bigintReplacer, decodeProtoMessage, decodeTxBodyIntoMessages } from "./parser";
 import Long from "long";
 import { Key } from '@keplr-wallet/types';
 import { fromBech32 } from '@cosmjs/encoding';
 import { isTxBodyEncodeObject } from "@cosmjs/proto-signing";
-import { getBalances } from "./utils";
+import { AKASH_LEASE, ChainBalances, getBalances, getLeases } from "./utils";
 import _ from "lodash";
+import { snapNotify } from "./notification";
 
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
@@ -27,6 +29,7 @@ import _ from "lodash";
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
+}) => {
 }) => {
   let res: Object = {};
   switch (request.method) {
@@ -97,7 +100,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         method: "snap_manageState",
         params: {
           operation: "update",
-          newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true },
+          newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true, hd: (request.params && request.params.hd) ? request.params.hd : true },
         },
       });
 
@@ -215,6 +218,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
         return {
           data: JSON.stringify(result),
+          data: JSON.stringify(result),
           success: true,
           statusCode: 201,
         };
@@ -232,6 +236,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         });
 
         return {
+          data: JSON.stringify(result),
           data: JSON.stringify(result),
           success: false,
           statusCode: 500,
@@ -299,6 +304,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
         return {
           data: JSON.stringify(txResponse),
+          data: JSON.stringify(txResponse),
           success: false,
           statusCode: 500,
         };
@@ -331,7 +337,16 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       let txBody = TxBody.decode(signDocNew.bodyBytes);
       const msgs = [];
       
+      
       for (const msg of txBody.messages) {
+        if (isTxBodyEncodeObject(msg)) {
+          const messages = await decodeTxBodyIntoMessages(msg.typeUrl, msg.value);
+          for (const message of messages) {
+            let decMsgTxBody = await decodeProtoMessage(message.typeUrl, message.value);
+            msgs.push(decMsgTxBody);
+          }
+          continue;
+        }
         if (isTxBodyEncodeObject(msg)) {
           const messages = await decodeTxBodyIntoMessages(msg.typeUrl, msg.value);
           for (const message of messages) {
@@ -344,9 +359,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         msgs.push(decMsg);
       }
 
+      // Lets get the fee info to display
+      let authInfo = AuthInfo.decode(signDocNew.authInfoBytes);
+
       // create all msg prompts
       let ui = [
         heading("Confirm Transaction"),
+        divider(),
         divider(),
         heading("Chain"),
         text(`${request.params.chain_id}`),
@@ -363,6 +382,13 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
           ui.push(text(JSON.stringify(bigintReplacer(item.value), null, 2)))
         }
       });
+
+      if (authInfo.fee) {
+        ui.push(divider())
+        ui.push(heading("Gas"))
+        ui.push(text(`**Amount**: ${authInfo.fee.amount[0].amount} ${authInfo.fee.amount[0].denom.toUpperCase()}`))
+        ui.push(text("**Gas Limit**: "+authInfo.fee.gasLimit.toString()))
+      }
 
       if (txBody.memo) {
         ui.push(divider())
@@ -439,9 +465,15 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       signDocAmino.msgs.map(item => {
         uiAmino.push(heading(item.type)),
-        uiAmino.push(text(JSON.stringify(bigintReplacer(item.value), null, 2))),
-        uiAmino.push(divider())
+        uiAmino.push(text(JSON.stringify(bigintReplacer(item.value), null, 2)))
       });
+
+      if (signDocAmino.fee) {
+        uiAmino.push(divider())
+        uiAmino.push(heading("Gas"))
+        uiAmino.push(text(`**Amount**: ${signDocAmino.fee.amount[0].amount} ${signDocAmino.fee.amount[0].denom.toUpperCase()}`))
+        uiAmino.push(text("**Gas Limit**: "+signDocAmino.fee.gas))
+      }
 
       // Ensure user confirms transaction
       let confirmationSignAmino = await snap.request({
@@ -570,6 +602,77 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       return {
         data: new_chains,
+        success: true,
+        statusCode: 201,
+      };
+    case "changeChain":
+      if (
+        !(
+          request.params != null &&
+          typeof request.params == "object" &&
+          "chain_id" in request.params &&
+          typeof request.params.chain_id == "string"
+        )
+      ) {
+        throw new Error("Invalid changeChain request");
+      }
+
+      // We only allow changing the rpc and the slip44 for now. So if we do not have these alert.
+      if (!request.params.rpc && !request.params.slip44) {
+        await snap.request({
+          method: "snap_dialog",
+          params: {
+            type: "alert",
+            content: panel([
+              heading("Error Occured"),
+              text(`No RPC or Coin Type changes provided. Please provide "rpc" or "slip44".`),
+            ]),
+          },
+        });
+      }
+      const changes: UpdateChainParams = {
+        slip44: request.params.slip44,
+        rpc: request.params.rpc,
+      };
+
+      // Ensure user confirms changeChain
+      let confirmChangeChain = await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "confirmation",
+          content: panel([
+            heading(`Confirm Change for Chain ${request.params.chain_id}`),
+            divider(),
+            heading("Chain Info"),
+            text(`${JSON.stringify(JSON.stringify(changes), null, 4)}`),
+            divider(),
+            text("Note: this is an advanced, experimental feature so handle it with care."),
+          ]),
+        },
+      });
+      if (!confirmChangeChain) {
+        throw new Error("Chain change was denied.");
+      }
+
+      // Update the chain in wallet state
+      await ChainState.updateChain(request.params.chain_id, changes);
+
+      await snap.request({
+        method: "snap_dialog",
+        params: {
+          type: "alert",
+          content: panel([
+            heading("Chain Changed"),
+            text(
+              `Successfully changed the following for chain ${request.params.chain_id}.`
+            ),
+            text(JSON.stringify(changes, null, 4)),
+          ]),
+        },
+      });
+
+      return {
+        data: request.params,
         success: true,
         statusCode: 201,
       };
@@ -972,20 +1075,41 @@ export const onHomePage: OnHomePageHandler = async () => {
   const chainsP = ChainState.getChains();
   const [addresses, chainsInWallet] = await Promise.all([addressesP, chainsP]);
   const chains = _.values(_.merge(_.keyBy(addresses, 'chain_id'), _.keyBy(chainsInWallet.chains, 'chain_id')))
-  const balances = await getBalances(chains);
+  // Get akash leases
+  const akash = addresses.find(a => a.chain_id == "akashnet-2");
+  const resList: any[] = [getBalances(chains)];
+  if (akash) {
+    resList.push(getLeases(akash.address));
+  }
+  const [balancesT, leasesT] = await Promise.all(resList);
+  const balances: ChainBalances[] = balancesT;
+  const leases: AKASH_LEASE[] = leasesT;
   addresses.forEach((address) => {
     const chain = balances.find((balance) => balance.chain_id === address.chain_id);
     if (!chain) {
       throw new Error(`No chain found for ${address.chain_id}`);
     }
-    main.push(heading(chain ? chain.pretty_name : address.chain_id))
-    main.push(text("**Balances**"))
-    chain.balances.forEach((balance) => {
-      main.push(copyable(`${_.round((Number(balance.amount) / 1_000_000), 2)} ${balance.display}`))
-    })
+    main.push(heading(chain ? chain.pretty_name : address.chain_id));
+    // Filter for non-zero balances only
+    const noZeroBalances = chain.balances.filter((balance) => Number(balance.amount) != 0);
+    // If there are non-zero balances, display them. Otherwise dont.
+    if (noZeroBalances.length > 0) {
+      main.push(text("**Balances**"))
+      noZeroBalances.forEach((balance) => {
+        main.push(copyable(`${_.round((Number(balance.amount) / 1_000_000), 2)} ${balance.display}`))
+      })
+    }
     main.push(text("**Address**"))
     main.push(copyable(address.address))
     main.push(divider())
+    if (address.chain_id == "akashnet-2" && leases.length > 0) {
+      main.pop()
+      main.push(text("**Open Leases**"))
+      leases.forEach(lease => {
+        main.push(copyable(lease.lease_id))
+      })
+      main.push(divider())
+    }
   })
 
   // Direct them to the dashboard for more advanced things
@@ -995,4 +1119,75 @@ export const onHomePage: OnHomePageHandler = async () => {
   return {
     content: panel(main),
   };
+};
+
+export const onInstall: OnInstallHandler = async () => {
+  // Ensure user confirms initializing Cosmos snap
+  let confirmationInit = await snap.request({
+    method: "snap_dialog",
+    params: {
+      type: "confirmation",
+      content: panel([
+        text(
+          "Would you like to add Cosmos chain support within your Metamask wallet?"
+        ),
+      ]),
+    },
+  });
+  if (!confirmationInit) {
+    throw new Error("Initialize Cosmos chain support was denied.");
+  }
+  // Make sure not initialized already
+  let checkInit = await snap.request({
+    method: "snap_manageState",
+    params: { operation: "get" },
+  });
+  if (checkInit != null && checkInit.initialized) {
+    await snap.request({
+      method: "snap_dialog",
+      params: {
+        type: "alert",
+        content: panel([
+          heading("Already Initialized"),
+          text(
+            "The Cosmos Snap has already been initialized."
+          ),
+        ]),
+      },
+    });
+    throw new Error("The Cosmos Snap has already been initialized.");
+  };
+
+  let chainList = await initializeChains();
+  let chains = new Chains(chainList);
+  // Initialize with initial state
+  await snap.request({
+    method: "snap_manageState",
+    params: {
+      operation: "update",
+      newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true },
+    },
+  });
+
+  await snap.request({
+    method: "snap_dialog",
+    params: {
+      type: "alert",
+      content: panel([
+        heading("Initialization Successful"),
+        text(
+          "Cosmos has been added and initialized into your Metamask wallet."
+        ),
+      ]),
+    },
+  });
+};
+
+export const onCronjob: OnCronjobHandler = async ({ request }) => {
+  switch (request.method) {
+    case "notification":
+      // Get akash address
+      let akash: AccountData = await ChainState.GetAccount("akashnet-2");
+      await snapNotify(akash.address);
+  }
 };

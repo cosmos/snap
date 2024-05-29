@@ -5,7 +5,7 @@ import { AccountData, DirectSignResponse, OfflineDirectSigner, makeSignBytes } f
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { Chain, Fees } from "./types/chains";
 import { ChainState } from "./state";
-import { heading, panel, text } from "@metamask/snaps-ui";
+import { heading, panel, text } from "@metamask/snaps-sdk";
 import {
   WALLET_URL,
   DEFAULT_FEES,
@@ -154,7 +154,7 @@ export const signDirect = async (
   chain_id: string,
   signer: string,
   sign_doc: SignDoc
-): Promise<any> => {
+) => {
   try {
     // get the chain from state
     let chain = await ChainState.getChain(chain_id);
@@ -201,7 +201,7 @@ export const signAmino = async (
   chain_id: string,
   signer: string,
   sign_doc: StdSignDoc
-): Promise<AminoSignResponse | undefined> => {
+) => {
   try {
     // get the chain from state
     let chain = await ChainState.getChain(chain_id);
