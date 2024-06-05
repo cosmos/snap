@@ -2069,7 +2069,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@cosmsnap/snapper@^0.1.29, @cosmsnap/snapper@workspace:packages/snapper":
+"@cosmsnap/snapper@^0.2.1, @cosmsnap/snapper@workspace:packages/snapper":
   version: 0.0.0-use.local
   resolution: "@cosmsnap/snapper@workspace:packages/snapper"
   dependencies:
@@ -2111,7 +2111,7 @@ __metadata:
     "@cosmjs/proto-signing": ^0.31.3
     "@cosmjs/stargate": ^0.31.3
     "@cosmjs/tendermint-rpc": ^0.31.3
-    "@cosmsnap/snapper": ^0.1.29
+    "@cosmsnap/snapper": ^0.2.1
     "@fullhuman/postcss-purgecss": ^5.0.0
     "@keplr-wallet/types": 0.12.12
     "@metamask/detect-provider": ^2.0.0
