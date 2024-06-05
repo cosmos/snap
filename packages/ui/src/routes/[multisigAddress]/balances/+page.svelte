@@ -11,7 +11,7 @@
 	import { getClient } from "../../../utils/tx";
 	import { toBase64 } from "@cosmjs/encoding";
 	import { addTransaction } from "../../../store/transactions";
-	import { sendTxAlert } from "../../../../../snapper/src";
+	import { sendTxAlert } from "@cosmsnap/snapper";
 	import { snapId } from "../../../utils/snap";
 	import type { StdFee } from "@cosmjs/amino";
 	import Confirm from "../../../components/Confirm.svelte";

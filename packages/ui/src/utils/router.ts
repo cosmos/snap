@@ -8,7 +8,7 @@ import type { SigningStargateClient, StdFee } from '@cosmjs/stargate';
 import { toUtf8 } from '@cosmjs/encoding';
 import type { EncodeObject } from '@cosmjs/proto-signing';
 import { getClient } from './tx';
-import type { Chain } from '../../../snapper/src/index';
+import type { Chain } from '@cosmsnap/snapper';
 import _ from 'lodash';
 
 export interface RouteChain {

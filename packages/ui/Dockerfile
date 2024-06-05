@@ -1,35 +1,23 @@
-# Use the official Node.js 18 image as a parent image
+# Use the official Node.js image as the base
 FROM node:18
 
-ARG VITE_SNAP_VERSION
-ENV VITE_SNAP_VERSION=0.1.17
-ARG VITE_RHINO_API_KEY
-ENV VITE_RHINO_API_KEY=${VITE_RHINO_API_KEY}
-ARG VITE_NUMIA_API_KEY
-ENV VITE_NUMIA_API_KEY=${VITE_NUMIA_API_KEY}
-ARG VITE_DENO_SERVERLESS_URL
-ENV VITE_DENO_SERVERLESS_URL=https://api.mysticlabs.xyz
+# Set the working directory inside the container
+WORKDIR /app
 
-# Change to the UI package directory
-WORKDIR /app/packages/ui
+# Copy package.json and yarn.lock to the working directory
+COPY package.json ./
 
-# Copy the entire monorepo to the container
-COPY . .
-
-# Install the dependencies using Yarn
+# Install dependencies using Yarn
 RUN yarn install
 
-# Install PM2 globally
-RUN npm i --global pm2
+# Copy the rest of the application code to the working directory
+COPY . .
 
-# Build the SvelteKit app
-RUN yarn run build
+# Build the SvelteKit app using Yarn
+RUN yarn build
 
-# Set the environment to production
-ENV NODE_ENV=production
+# Expose the port on which your app will run (change it if needed)
+EXPOSE 3000
 
-# Expose the port that the app will run on
-EXPOSE 5000
-
-# Set the command to run the app using PM2 when the container starts
-CMD ["npm", "run", "start"]
+# Set the command to run your app using Yarn
+CMD ["yarn", "start"]

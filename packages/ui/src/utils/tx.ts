@@ -1,7 +1,7 @@
 import { SigningStargateClient, defaultRegistryTypes, createDefaultAminoConverters, AminoTypes } from '@cosmjs/stargate';
 import { wasmTypes, createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { Registry, type GeneratedType } from '@cosmjs/proto-signing';
-import type { Chain } from '../../../snapper/src/index';
+import type { Chain } from '@cosmsnap/snapper';
 import _ from 'lodash';
 import rpcs from '../apis.json';
 

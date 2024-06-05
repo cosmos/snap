@@ -1,5 +1,5 @@
 import { Client, ExecutionMethod, Functions } from 'appwrite';
-import type { SinglePubkey, StdFee, StdSignature, MultisigThresholdPubkey } from '@cosmjs/amino';
+import type { SinglePubkey, StdFee, MultisigThresholdPubkey } from '@cosmjs/amino';
 import { HttpEndpoint } from "@cosmjs/stargate";
 
 enum MultisigTxStatus {

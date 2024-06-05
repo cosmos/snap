@@ -2,12 +2,12 @@ import { AccountData, ChainInfo, Key, OfflineAminoSigner, OfflineDirectSigner, S
 import { DirectSignResponse } from "@cosmjs/proto-signing";
 import { AminoSignResponse, SinglePubkey, StdFee, StdSignDoc, MultisigThresholdPubkey } from "@cosmjs/amino";
 import { Long } from 'long';
-import { Address, Chain, CosmosAddress, Fees, Msg } from './types';
+import { Address, Chain, CosmosAddress, Fees, Msg } from './types.js';
 import { DeliverTxResponse } from "@cosmjs/stargate";
 import { DEFAULT_SNAP_ID, addAddressToBook, deleteAddressFromBook, deleteChain, getAccountInfo, getAddressBook, getBech32Address, getBech32Addresses, getChains, getKey, installSnap, sendTx, sign, signAmino, signAndBroadcast, signDirect, suggestChain } from './snap.js';
 import { CosmJSOfflineSigner } from './signer.js';
-import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
-import { Appwrite } from './appwrite';
+import { SignDoc } from 'cosmjs-types/cosmos/tx/v1beta1/tx.js';
+import { Appwrite } from './appwrite.js';
 import { HttpEndpoint } from "@cosmjs/stargate";
 
 declare global {

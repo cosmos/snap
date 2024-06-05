@@ -1,5 +1,5 @@
 import type { Coin, HttpEndpoint } from "@cosmjs/stargate";
-import type { Chain } from "../../../snapper/src/index";
+import type { Chain } from "@cosmsnap/snapper";
 
 export type SkipToken = {
   denom: string;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { Chain } from "../../../snapper/src/index";
+  import type { Chain } from "@cosmsnap/snapper";
   import { chains } from "../store/chains";
 
   let isOpen = false;

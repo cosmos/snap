@@ -4,7 +4,7 @@
 	import { getAddressBook, addressbook } from "../../../store/addressbook";
 	import { copyToClipboard } from "../../../utils/general";
 	import lunr from "lunr";
-	import type { Address } from "../../../../../snapper/src/index";
+	import type { Address } from "@cosmsnap/snapper";
 
   let search_value = "";
   let searchResults: lunr.Index.Result[] = [];

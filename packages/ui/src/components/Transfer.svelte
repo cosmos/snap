@@ -4,12 +4,12 @@
 	import { balances, forceUpdate } from "../store/balances";
   import { getSkipRecommendation, getMsgs, type CoinIBC } from '../utils/skip';
 	import { state } from "../store/state";
-	import type { Chain, Msg } from "../../../snapper/src/index";
+	import type { Chain, Msg } from "@cosmsnap/snapper";
   import _ from 'lodash';
 	import { getClient } from "../utils/tx";
 	import { addTransaction } from "../store/transactions";
 	import Button from "./Button.svelte";
-  import { sendTxAlert } from "../../../snapper/src/index";
+  import { sendTxAlert } from "@cosmsnap/snapper";
   import Select from "./Select.svelte";
 	import { snapId } from "../utils/snap";
 	import { onMount } from "svelte";
