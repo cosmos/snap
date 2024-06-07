@@ -13,9 +13,9 @@ declare global {
   }
 }
 
-export const snapId = import.meta.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
+export const snapId = process.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
 const initialJsonString = "{}";
-const snapVersion = import.meta.env.VITE_SNAP_VERSION;
+const snapVersion = process.env.VITE_SNAP_VERSION;
 if (!snapVersion) {
   throw new Error("VITE_SNAP_VERSION has to be set.");
 }
