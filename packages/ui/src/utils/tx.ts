@@ -5,7 +5,7 @@ import type { Chain } from '@cosmsnap/snapper';
 import _ from 'lodash';
 import rpcs from '../apis.json';
 
-let keyNumia = process.env.VITE_NUMIA_API_KEY;
+let keyNumia = import.meta.env.VITE_NUMIA_API_KEY;
 
 export interface Transaction {
   address: string;

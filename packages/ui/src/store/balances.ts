@@ -3,10 +3,10 @@ import type { Chain } from '../../../snap/src/types/chains';
 import { chains } from './chains'; 
 import type { CoinIBC } from '../utils/skip';
 
-if (!process.env.VITE_DENO_SERVERLESS_URL) {
+if (!import.meta.env.VITE_DENO_SERVERLESS_URL) {
     throw new Error("VITE_DENO_SERVERLESS_URL not set...");
 }
-export const denoUrl = process.env.VITE_DENO_SERVERLESS_URL;
+export const denoUrl = import.meta.env.VITE_DENO_SERVERLESS_URL;
 
 export interface ChainBalances extends Chain {
     balances: CoinIBC[];
