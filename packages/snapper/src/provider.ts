@@ -74,11 +74,17 @@ export class CosmosSnap implements SnapProvider {
     }
     async getAccount(chain_id: string): Promise<AccountData> {
         let account = await getAccountInfo(chain_id, this.snap_id);
-        return account
+        return {
+            ...account,
+            pubkey: new Uint8Array(Object.values(account.pubkey))
+        }
     }
     async getKey(chain_id: string): Promise<Key> {
         let key = await getKey(chain_id, this.snap_id);
-        return key
+        return {
+            ...key,
+            pubKey: new Uint8Array(Object.values(key.pubKey))
+        }
     }
     async deleteChain(chain_id: string): Promise<void> {
         await deleteChain(chain_id, this.snap_id);
