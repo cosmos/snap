@@ -177,7 +177,14 @@ export class CosmosSnap implements SnapProvider {
     }
     async signDirect(chainId: string, signer: string, signDoc: SignDoc): Promise<DirectSignResponse> {
         let res = await signDirect(chainId, signer, signDoc, this.snap_id);
-        return res;
+        return {
+            signature: res.signature,
+            signed: {
+                ...res.signed,
+                bodyBytes: new Uint8Array(Object.values(res.signed.bodyBytes)),
+                authInfoBytes: new Uint8Array(Object.values(res.signed.authInfoBytes))
+            }
+        };
     }
     async signArbitrary(chainId: string, signer: string, data: string | Uint8Array): Promise<StdSignature> {
         let dataBase64: string = typeof data != "string" ? Buffer.from(signer).toString('base64') : data;
