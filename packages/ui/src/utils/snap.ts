@@ -1,23 +1,27 @@
-import type { Address } from '../../../snap/src/types/address';
-import type { Chain, CosmosAddress } from '../../../snap/src/types/chains';
+import type { Address, Chain, CosmosAddress } from '@cosmsnap/snapper';
+import type { CosmosSnap } from '@cosmsnap/snapper';
 import { fetchChains } from '../store/chains';
 import { CELESTIA_CHAIN_REGISTRY_URL } from './constants';
 import { LOCAL_STORAGE_INIT } from './general';
 import type { ChainInfo } from '@keplr-wallet/types';
 import { pubkeyToAddress, createMultisigThresholdPubkey } from "@cosmjs/amino";
 import type { Multisig } from './appwrite';
+import { browser } from '$app/environment';
 
 declare global {
   interface Window {
     ethereum?: any
+    cosmos: CosmosSnap
   }
 }
 
-export const snapId = import.meta.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
+export const snapId = process.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
 const initialJsonString = "{}";
-const snapVersion = import.meta.env.VITE_SNAP_VERSION;
-if (!snapVersion) {
-  throw new Error("VITE_SNAP_VERSION has to be set.");
+const snapVersion = process.env.VITE_SNAP_VERSION;
+if (browser) {
+  if (!snapVersion) {
+    throw new Error("VITE_SNAP_VERSION has to be set.");
+  }
 }
 const installParams = JSON.parse(initialJsonString);
 installParams[snapId] = { version: snapVersion };
@@ -271,7 +275,6 @@ export const chainInfoToChain = (chainInfo: ChainInfo): Chain => {
         provider: chainInfo.nodeProvider?.name  
       }]
     },
-    type: "cosmos",
     address: undefined
   }
 }

@@ -2069,7 +2069,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@cosmsnap/snapper@^0.2.1, @cosmsnap/snapper@workspace:packages/snapper":
+"@cosmsnap/snapper@^0.2.4, @cosmsnap/snapper@workspace:packages/snapper":
   version: 0.0.0-use.local
   resolution: "@cosmsnap/snapper@workspace:packages/snapper"
   dependencies:
@@ -2111,7 +2111,7 @@ __metadata:
     "@cosmjs/proto-signing": ^0.31.3
     "@cosmjs/stargate": ^0.31.3
     "@cosmjs/tendermint-rpc": ^0.31.3
-    "@cosmsnap/snapper": ^0.2.1
+    "@cosmsnap/snapper": ^0.2.4
     "@fullhuman/postcss-purgecss": ^5.0.0
     "@keplr-wallet/types": 0.12.12
     "@metamask/detect-provider": ^2.0.0
@@ -2123,7 +2123,9 @@ __metadata:
     "@types/lunr": ^2.3.5
     appwrite: ^14.0.0
     autoprefixer: latest
+    dotenv: ^16.4.5
     ethers: ^5.7.0
+    express: ^4.19.2
     flowbite-svelte: ^0.44.4
     flowbite-svelte-icons: ^0.4.3
     gridjs: 5.0.2
@@ -7995,6 +7997,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dotenv@npm:^16.4.5":
+  version: 16.4.5
+  resolution: "dotenv@npm:16.4.5"
+  checksum: 301a12c3d44fd49888b74eb9ccf9f07a1f5df43f489e7fcb89647a2edcd84c42d6bc349dc8df099cd18f07c35c7b04685c1a4f3e6a6a9e6b30f8d48c15b7f49c
+  languageName: node
+  linkType: hard
+
 "duplexer2@npm:^0.1.2, duplexer2@npm:~0.1.0, duplexer2@npm:~0.1.2":
   version: 0.1.4
   resolution: "duplexer2@npm:0.1.4"
@@ -8935,7 +8944,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^4.18.2":
+"express@npm:^4.18.2, express@npm:^4.19.2":
   version: 4.19.2
   resolution: "express@npm:4.19.2"
   dependencies:

@@ -2,11 +2,14 @@ import { writable, derived, type Writable, type Readable } from 'svelte/store';
 import type { Chain } from '../../../snap/src/types/chains';
 import { chains } from './chains'; 
 import type { CoinIBC } from '../utils/skip';
+import { browser } from '$app/environment';
 
-if (!import.meta.env.VITE_DENO_SERVERLESS_URL) {
-    throw new Error("VITE_DENO_SERVERLESS_URL not set...");
+if (browser) {
+    if (!process.env.VITE_DENO_SERVERLESS_URL) {
+        throw new Error("VITE_DENO_SERVERLESS_URL not set...");
+    }
 }
-export const denoUrl = import.meta.env.VITE_DENO_SERVERLESS_URL;
+const denoUrl = process.env.VITE_DENO_SERVERLESS_URL;
 
 export interface ChainBalances extends Chain {
     balances: CoinIBC[];
