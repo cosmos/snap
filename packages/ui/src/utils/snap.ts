@@ -7,6 +7,7 @@ import type { ChainInfo } from '@keplr-wallet/types';
 import { pubkeyToAddress, createMultisigThresholdPubkey } from "@cosmjs/amino";
 import type { Multisig } from './appwrite';
 import { browser } from '$app/environment';
+import { env } from '$env/dynamic/public';
 
 declare global {
   interface Window {
@@ -15,12 +16,12 @@ declare global {
   }
 }
 
-export const snapId = process.env.VITE_SNAP_ID ?? `npm:@cosmsnap/snap`;
+export const snapId = env.PUBLIC_SNAP_ID ?? `npm:@cosmsnap/snap`;
 const initialJsonString = "{}";
-const snapVersion = process.env.VITE_SNAP_VERSION;
+const snapVersion = env.PUBLIC_SNAP_VERSION;
 if (browser) {
   if (!snapVersion) {
-    throw new Error("VITE_SNAP_VERSION has to be set.");
+    throw new Error("PUBLIC_SNAP_VERSION has to be set.");
   }
 }
 const installParams = JSON.parse(initialJsonString);

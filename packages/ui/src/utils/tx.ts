@@ -4,8 +4,9 @@ import { Registry, type GeneratedType } from '@cosmjs/proto-signing';
 import type { Chain } from '@cosmsnap/snapper';
 import _ from 'lodash';
 import rpcs from '../apis.json';
+import { env } from '$env/dynamic/public';
 
-let keyNumia = import.meta.env.VITE_NUMIA_API_KEY;
+let keyNumia = env.PUBLIC_NUMIA_API_KEY;
 
 export interface Transaction {
   address: string;

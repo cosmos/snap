@@ -3,13 +3,14 @@ import type { Chain } from '../../../snap/src/types/chains';
 import { chains } from './chains'; 
 import type { CoinIBC } from '../utils/skip';
 import { browser } from '$app/environment';
+import { env } from '$env/dynamic/public';
 
 if (browser) {
-    if (!process.env.VITE_DENO_SERVERLESS_URL) {
-        throw new Error("VITE_DENO_SERVERLESS_URL not set...");
+    if (!env.PUBLIC_DENO_SERVERLESS_URL) {
+        throw new Error("PUBLIC_DENO_SERVERLESS_URL not set...");
     }
 }
-export const denoUrl = process.env.VITE_DENO_SERVERLESS_URL;
+export const denoUrl = env.PUBLIC_DENO_SERVERLESS_URL;
 
 export interface ChainBalances extends Chain {
     balances: CoinIBC[];

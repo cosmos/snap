@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { env } from '$env/dynamic/public';
 
 export interface Multisig {
   threshold: number;
@@ -10,13 +11,13 @@ export interface Multisig {
   $id: string;
 }
 
-export const appwrite_url = process.env.VITE_APPWRITE_URL;
-export const project_id = process.env.VITE_APPWRITE_FUNCTION_PROJECT_ID;
+export const appwrite_url = env.PUBLIC_APPWRITE_URL;
+export const project_id = env.PUBLIC_APPWRITE_FUNCTION_PROJECT_ID;
 if (browser) {
   if (!appwrite_url) {
-    throw new Error("VITE_APPWRITE_URL is not defined");
+    throw new Error("PUBLIC_APPWRITE_URL is not defined");
   }
   if (!project_id) {
-    throw new Error("VITE_APPWRITE_FUNCTION_PROJECT_ID is not defined");
+    throw new Error("PUBLIC_APPWRITE_FUNCTION_PROJECT_ID is not defined");
   }
 }
