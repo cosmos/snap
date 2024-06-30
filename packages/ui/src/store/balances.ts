@@ -9,7 +9,7 @@ if (browser) {
         throw new Error("VITE_DENO_SERVERLESS_URL not set...");
     }
 }
-const denoUrl = process.env.VITE_DENO_SERVERLESS_URL;
+export const denoUrl = process.env.VITE_DENO_SERVERLESS_URL;
 
 export interface ChainBalances extends Chain {
     balances: CoinIBC[];
