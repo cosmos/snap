@@ -4,6 +4,8 @@ This guide provides instructions on how to set up Appwrite to self host your mul
 
 ## Prerequisites
 
+You have an Appwrite instance running either locally or on a server and have the Project ID, Project Endpoint and Project Key for that instance.
+
 1. **Appwrite CLI**: Ensure you have the Appwrite CLI [installed](https://appwrite.io/docs/tooling/command-line/installation). You can install it using npm:
 
     ```bash
