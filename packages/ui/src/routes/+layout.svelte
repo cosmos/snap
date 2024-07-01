@@ -14,7 +14,7 @@
     window.cosmos.changeSnapId(snapId);
     await updateDirectory();
     $state.connected = await checkSnapPermissions();
-    window.cosmos.setupAppwrite(appwrite_url, project_id);
+    window.cosmos.setupAppwrite(appwrite_url!, project_id!);
   });
 </script>
 
