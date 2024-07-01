@@ -36,13 +36,18 @@ This guide provides instructions on how to set up Appwrite to self host your mul
 
 ## Functions Deployment
 
-Ensure each function has a `function.json` file in its respective directory under `./packages/appwrite/functions/`. The script will use these files to deploy the functions to Appwrite.
+Ensure the `appwrite.json` file is in its respective location under `./packages/appwrite/` and the `projectId` key is your project id. The script will use these files to deploy the functions to Appwrite.
 
 The structure should look like this:
 
 ./packages/appwrite/functions/
+
 ├── create_multisig
+
 ├── create_multisig_tx
+
 ├── delete_multisig_tx
+
 ├── get_multisigs
+
 └── sign_multisig_tx
