@@ -12,7 +12,7 @@ services:
           - global: true
     env:
       - PUBLIC_SNAP_VERSION=
-      - PUBLIC_APPWRIcurTE_URL=
+      - PUBLIC_APPWRITE_URL=
       - PUBLIC_DENO_SERVERLESS_URL=
       - PUBLIC_APPWRITE_FUNCTION_PROJECT_ID=
       - PUBLIC_NUMIA_API_KEY=
