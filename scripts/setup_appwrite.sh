@@ -110,6 +110,26 @@ create_relationship_attribute() {
     echo $RESPONSE
 }
 
+# Function to deploy an Appwrite function
+deploy_function() {
+    FUNCTION_NAME=$1
+    FUNCTION_PATH="./packages/appwrite/functions/$FUNCTION_NAME"
+    FUNCTION_FILE="$FUNCTION_PATH/function.json"
+
+    if [[ ! -f $FUNCTION_FILE ]]; then
+        echo "Error: $FUNCTION_FILE not found."
+        return 1
+    fi
+
+    RESPONSE=$(appwrite functions create \
+        --projectId $PROJECT_ID \
+        --endpoint $ENDPOINT \
+        --key $API_KEY \
+        --file $FUNCTION_FILE \
+        --name $FUNCTION_NAME)
+    echo $RESPONSE
+}
+
 # Create Transactions collection
 create_collection "transactions"
 
@@ -135,4 +155,11 @@ create_string_attribute "multisig" "members" 0 false
 # Create relationship attribute for Multisig collection
 create_relationship_attribute "multisig" "transactions" "transactions" "oneToMany"
 
-echo "Database structure created successfully. Appwrite collections and attributes are created."
+# Deploy functions
+deploy_function "create_multisig"
+deploy_function "create_multisig_tx"
+deploy_function "delete_multisig_tx"
+deploy_function "get_multisigs"
+deploy_function "sign_multisig_tx"
+
+echo "Appwrite setup successfully."
