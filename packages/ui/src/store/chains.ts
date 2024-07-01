@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import { getChainAddresses, getChains } from '../utils/snap';
-import type { Chain } from '../../../snap/src/types/chains';
+import type { Chain } from '@cosmsnap/snapper';
 import { LOCAL_STORAGE_CHAINS } from '../utils/general';
 import type { Multisig } from '../utils/appwrite';
 

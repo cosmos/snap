@@ -1,5 +1,5 @@
 import { StargateClient } from "@cosmjs/stargate";
-import type { Chain } from "../../../snap/src/types/chains";
+import type { Chain } from "@cosmsnap/snapper";
 
 export interface ChainClient extends Chain {
     client: StargateClient | null;

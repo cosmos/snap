@@ -1,5 +1,5 @@
 import { writable, derived, type Writable, type Readable } from 'svelte/store';
-import type { Chain } from '../../../snap/src/types/chains';
+import type { Chain } from '@cosmsnap/snapper';
 import { chains } from './chains'; 
 import type { CoinIBC } from '../utils/skip';
 import { browser } from '$app/environment';
