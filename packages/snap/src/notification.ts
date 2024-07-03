@@ -75,28 +75,34 @@ export class Notifications {
     }
 }
 
+// IMPORTANT: The notification cannot have characters larger than 50 characters
 export const snapNotify = async (akash_address: string) => {
-    const notifications = new Notifications();
-    // Update the notifications in Appwrite database
-    await notifications.updateAkashNotifications(akash_address);
-    // Get the notifications that are unread in Appwrite database
-    const notifs = await notifications.getAkashNotifications(akash_address);
-    if (!Array.isArray(notifs)) {
-        throw new Error("Expected an array of notifications, received:", notifs);
-    }
-    // Post notifications to Metamask after filtering for unread
-    const filtered = notifs.filter((notif) => !notif.read);
-    for (const notif of filtered) {
-        await snap.request({
-            method: "snap_notify",
-            params: {
-                type: "inApp",
-                message: notif.notification,
-            },
-        });
-        // Update notification as read
-        await notifications.markNotificationRead(
-            notif.$id
-        );
-    }
+    try {
+        const notifications = new Notifications();
+        // Update the notifications in Appwrite database
+        await notifications.updateAkashNotifications(akash_address);
+        // Get the notifications that are unread in Appwrite database
+        const notifs = await notifications.getAkashNotifications(akash_address);
+        if (!Array.isArray(notifs)) {
+            throw new Error("Expected an array of notifications, received:", notifs);
+        }
+        // Post notifications to Metamask after filtering for unread
+        const filtered = notifs.filter((notif) => !notif.read);
+        for (const notif of filtered) {
+            await snap.request({
+                method: "snap_notify",
+                params: {
+                    type: "inApp",
+                    message: notif.notification,
+                },
+            });
+            // Update notification as read
+            await notifications.markNotificationRead(
+                notif.$id
+            );
+        }
+    } catch (err) {
+        console.error(err);
+        throw new Error(`${err}`);
+    } 
 };

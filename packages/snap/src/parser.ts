@@ -8,6 +8,13 @@ import {
     osmosisProtoRegistry
 } from 'osmojs';
 
+import { getAkashTypeRegistry } from "@akashnetwork/akashjs/build/stargate/index";
+
+import {
+  MsgProvision,
+  MsgWalletSpendAction,
+} from '@agoric/cosmic-proto/swingset/msgs.js';
+
 export const bigintReplacer = (value: any): any => {
   if (typeof value === 'bigint') {
     return value.toString();
@@ -36,15 +43,23 @@ export const bigintReplacerObject = (value: any): any => {
 
 export const decodeProtoMessage = async (typeUrl: string, value: Uint8Array) => {
 
+    const akashRegistryTypes = getAkashTypeRegistry();
 
-    const protoRegistry: ReadonlyArray<[string, GeneratedType]> = [
+    const agoricRegistryTypes: [string, GeneratedType][] = [
+      ['/agoric.swingset.MsgWalletSpendAction', MsgWalletSpendAction as any],
+      ['/agoric.swingset.MsgProvision', MsgProvision as any],
+    ];
+
+    const protoRegistry = [
         ...cosmosProtoRegistry,
         ...cosmwasmProtoRegistry,
         ...ibcProtoRegistry,
-        ...osmosisProtoRegistry
+        ...osmosisProtoRegistry,
+        ...akashRegistryTypes,
+        ...agoricRegistryTypes,
     ];
     
-    const registry = new Registry(protoRegistry);
+    const registry = new Registry(protoRegistry as Iterable<[string, GeneratedType]>);
 
     // Get the proto type from the registry
     let protoType = registry.lookupType(typeUrl);

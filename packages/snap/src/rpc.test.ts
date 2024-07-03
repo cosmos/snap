@@ -5,9 +5,11 @@ import { Chain } from './types/chains';
 
 describe('Snap Calls', () => {
   let request: (request: RequestOptions) => SnapRequest;
+  let onCronjob : (request: RequestOptions) => SnapRequest;
   beforeEach(async () => {
     const install = await installSnap();
     request = install.request;
+    onCronjob = install.onCronjob;
     const response = request({
       method: 'initialize',
     });
@@ -117,5 +119,22 @@ describe('Snap Calls', () => {
     expect(chains.length > 0).toBe(true);
     const chain = chains.find(c => c.chain_id === params.chain_id);
     expect(chain?.slip44).toBe(Number(params.slip44));
+  }, 50000)
+
+  test('notification cron job', async () => {
+    // NOTE: for this test to pass we need a test notification assigned to akash1fwxt2qmvtgvn6gkvxum50wxhgf63dvetvlts60 thats read=false in the DB
+    const response = await request({
+      method: 'getChainAddress',
+      params: {
+        chain_id: "akashnet-2"
+      }
+    })
+    const res = response.response as any;
+    console.log(res['result']['data']['address']['address']);
+    const response2 = await onCronjob({
+      method: 'notification',
+      params: {}
+    });
+    expect(response2).toSendNotification("This is a test notification.", "inApp");
   }, 50000)
 });

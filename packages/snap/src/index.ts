@@ -2,14 +2,12 @@ import { OnHomePageHandler, OnRpcRequestHandler, panel, text, heading, divider, 
 import { AccountData } from '@cosmjs/amino';
 import { initializeChains } from "./initialize";
 import { Chain, Chains, Fees, Msg, UpdateChainParams } from "./types/chains";
-import { Chain, Chains, Fees, Msg, UpdateChainParams } from "./types/chains";
 import { Address } from "./types/address";
 import { ChainState, AddressState } from "./state";
 import { sendTx, signAmino, signDirect, submitTransaction } from "./transaction";
 import { COIN_TYPES, DEFAULT_FEES } from "./constants";
 import { SignDoc, TxBody, AuthInfo } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { StdSignDoc } from "@cosmjs/amino";
-import { bigintReplacer, decodeProtoMessage, decodeTxBodyIntoMessages } from "./parser";
 import { bigintReplacer, decodeProtoMessage, decodeTxBodyIntoMessages } from "./parser";
 import Long from "long";
 import { Key } from '@keplr-wallet/types';
@@ -29,7 +27,6 @@ import { snapNotify } from "./notification";
  */
 export const onRpcRequest: OnRpcRequestHandler = async ({
   request,
-}) => {
 }) => {
   let res: Object = {};
   switch (request.method) {
@@ -100,7 +97,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         method: "snap_manageState",
         params: {
           operation: "update",
-          newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true, hd: (request.params && request.params.hd) ? request.params.hd : true },
+          newState: { chains: chains.string(), addresses: JSON.stringify([]), initialized: true },
         },
       });
 
@@ -218,7 +215,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
         return {
           data: JSON.stringify(result),
-          data: JSON.stringify(result),
           success: true,
           statusCode: 201,
         };
@@ -236,7 +232,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
         });
 
         return {
-          data: JSON.stringify(result),
           data: JSON.stringify(result),
           success: false,
           statusCode: 500,
@@ -304,7 +299,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
         return {
           data: JSON.stringify(txResponse),
-          data: JSON.stringify(txResponse),
           success: false,
           statusCode: 500,
         };
@@ -337,16 +331,7 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       let txBody = TxBody.decode(signDocNew.bodyBytes);
       const msgs = [];
       
-      
       for (const msg of txBody.messages) {
-        if (isTxBodyEncodeObject(msg)) {
-          const messages = await decodeTxBodyIntoMessages(msg.typeUrl, msg.value);
-          for (const message of messages) {
-            let decMsgTxBody = await decodeProtoMessage(message.typeUrl, message.value);
-            msgs.push(decMsgTxBody);
-          }
-          continue;
-        }
         if (isTxBodyEncodeObject(msg)) {
           const messages = await decodeTxBodyIntoMessages(msg.typeUrl, msg.value);
           for (const message of messages) {
@@ -365,7 +350,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
       // create all msg prompts
       let ui = [
         heading("Confirm Transaction"),
-        divider(),
         divider(),
         heading("Chain"),
         text(`${request.params.chain_id}`),
@@ -602,77 +586,6 @@ export const onRpcRequest: OnRpcRequestHandler = async ({
 
       return {
         data: new_chains,
-        success: true,
-        statusCode: 201,
-      };
-    case "changeChain":
-      if (
-        !(
-          request.params != null &&
-          typeof request.params == "object" &&
-          "chain_id" in request.params &&
-          typeof request.params.chain_id == "string"
-        )
-      ) {
-        throw new Error("Invalid changeChain request");
-      }
-
-      // We only allow changing the rpc and the slip44 for now. So if we do not have these alert.
-      if (!request.params.rpc && !request.params.slip44) {
-        await snap.request({
-          method: "snap_dialog",
-          params: {
-            type: "alert",
-            content: panel([
-              heading("Error Occured"),
-              text(`No RPC or Coin Type changes provided. Please provide "rpc" or "slip44".`),
-            ]),
-          },
-        });
-      }
-      const changes: UpdateChainParams = {
-        slip44: request.params.slip44,
-        rpc: request.params.rpc,
-      };
-
-      // Ensure user confirms changeChain
-      let confirmChangeChain = await snap.request({
-        method: "snap_dialog",
-        params: {
-          type: "confirmation",
-          content: panel([
-            heading(`Confirm Change for Chain ${request.params.chain_id}`),
-            divider(),
-            heading("Chain Info"),
-            text(`${JSON.stringify(JSON.stringify(changes), null, 4)}`),
-            divider(),
-            text("Note: this is an advanced, experimental feature so handle it with care."),
-          ]),
-        },
-      });
-      if (!confirmChangeChain) {
-        throw new Error("Chain change was denied.");
-      }
-
-      // Update the chain in wallet state
-      await ChainState.updateChain(request.params.chain_id, changes);
-
-      await snap.request({
-        method: "snap_dialog",
-        params: {
-          type: "alert",
-          content: panel([
-            heading("Chain Changed"),
-            text(
-              `Successfully changed the following for chain ${request.params.chain_id}.`
-            ),
-            text(JSON.stringify(changes, null, 4)),
-          ]),
-        },
-      });
-
-      return {
-        data: request.params,
         success: true,
         statusCode: 201,
       };
