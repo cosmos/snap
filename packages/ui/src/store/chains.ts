@@ -9,10 +9,6 @@ export const chains = writable<Chain[]>([]);
 export async function fetchChains(multisig: Multisig) {
   let allChains: Chain[] = [];
   try {
-    let cacheChains = localStorage.getItem(LOCAL_STORAGE_CHAINS);
-    if (cacheChains) {
-      chains.set(JSON.parse(cacheChains));
-    }
     allChains = await getChains();
     const allAddresses = await getChainAddresses(allChains, multisig);
     for (let i = 0; i < allChains.length; i++) {
