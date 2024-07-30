@@ -207,8 +207,6 @@ export const installSnap = async () => {
 
 export const initSnap = async (): Promise<Chain[]> => {
   try {
-    // save in local storage for cache
-    localStorage.setItem(LOCAL_STORAGE_INIT, "true");
     let res = await window.ethereum.request({
       method: 'wallet_invokeSnap',
       params: {

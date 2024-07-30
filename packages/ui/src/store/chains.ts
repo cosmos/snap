@@ -19,8 +19,6 @@ export async function fetchChains(multisig: Multisig) {
       allChains[i].address = item[0].address
     }
 
-    // save in local storage for cache
-    localStorage.setItem(LOCAL_STORAGE_CHAINS, JSON.stringify(allChains));
     chains.set(allChains);
   } catch(err) {
     console.error(err);
