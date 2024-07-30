@@ -103,7 +103,7 @@
 
   onMount(async () => {
     if ($state.connected) {
-      fetchChains($state.currentMultiSig as Multisig)
+      await fetchChains($state.currentMultiSig as Multisig)
     }
     if ($state.currentMultiSig.transactions.length > 0) {
       let account = await window.cosmos.getAccount($state.currentMultiSig.transactions[0].chain_id);
