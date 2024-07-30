@@ -119,22 +119,27 @@
             const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
             const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify([msg]), fromChain.chain_id, account.address, fee);
             await updateMultisig();
-
-            if (tx.code == 0) {
-              await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
-              await sendTxAlert(source!.chain_id, tx.transactionHash, snapId);
-              forceUpdate();
-            } else {
-              if (tx.rawLog) {
-                $state.alertText = tx.rawLog
-              } else {
-                $state.alertText = tx ?? "There was an issue while submitting your transaction. Check your transaction."
-              }
-              $state.alertType = "danger"
-              $state.showAlert = true
-            }
-
             loading = false;
+            if ('code' in tx) {
+                if (tx.code == 0) {
+                  await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
+                  await sendTxAlert(source!.chain_id, tx.transactionHash, snapId);
+                  forceUpdate();
+                } else {
+                    if (tx.rawLog) {
+                        $state.alertText = tx.rawLog
+                    } else {
+                        $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
+                    }
+                    $state.alertType = "danger"
+                    $state.showAlert = true
+                }
+            }
+            if ('signer_count' in tx) {
+                $state.alertText = `Multisig transaction was created. There are currently ${tx.signer_count} signers of the transaction with ${tx.threshold} needed. Have the other signers complete the transaction to execute.`
+                $state.alertType = "success"
+                $state.showAlert = true
+            }
 
             return tx
           }
@@ -192,22 +197,28 @@
           const base64BodyBytes = toBase64(sig.bodyBytes);
           const ms: MultisigThresholdPubkey = JSON.parse($state.currentMultiSig.public_key);
           const tx = await window.cosmos.createMultisigTx(ms, fromChain.apis.rpc[0].address, fromChain.bech32_prefix, base64Signature, base64BodyBytes, JSON.stringify(messages), fromChain.chain_id, account.address, fee);
-
-          if (tx.code == 0) {
-            await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
-            await sendTxAlert(source!.chain_id, tx.transactionHash, snapId);
-            forceUpdate();
-          } else {
-            if (tx.rawLog) {
-              $state.alertText = tx.rawLog
-            } else {
-              $state.alertText = tx ?? "There was an issue while submitting your transaction. Check your transaction."
-            }
-            $state.alertType = "danger"
-            $state.showAlert = true
-          }
-
+          await updateMultisig();
           loading = false;
+          if ('code' in tx) {
+              if (tx.code == 0) {
+                await addTransaction({address: fromAddress, chain: source!.chain_id, when: new Date().toLocaleString(), tx_hash: tx.transactionHash});
+                await sendTxAlert(source!.chain_id, tx.transactionHash, snapId);
+                forceUpdate();
+              } else {
+                  if (tx.rawLog) {
+                      $state.alertText = tx.rawLog
+                  } else {
+                      $state.alertText = "There was an issue while submitting your transaction. View explorer for more details."
+                  }
+                  $state.alertType = "danger"
+                  $state.showAlert = true
+              }
+          }
+          if ('signer_count' in tx) {
+              $state.alertText = `Multisig transaction was created. There are currently ${tx.signer_count} signers of the transaction with ${tx.threshold} needed. Have the other signers complete the transaction to execute.`
+              $state.alertType = "success"
+              $state.showAlert = true
+          }
 
           return tx
 
