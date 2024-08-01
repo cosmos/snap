@@ -180,7 +180,8 @@ export class CosmosSnap implements SnapProvider {
         return {
             signature: res.signature,
             signed: {
-                ...res.signed,
+                chainId: res.signed.chainId,
+                accountNumber: signDoc.accountNumber,
                 bodyBytes: new Uint8Array(Object.values(res.signed.bodyBytes)),
                 authInfoBytes: new Uint8Array(Object.values(res.signed.authInfoBytes))
             }
