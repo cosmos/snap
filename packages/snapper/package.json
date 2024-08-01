@@ -1,10 +1,10 @@
 {
   "name": "@cosmsnap/snapper",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A helper package with utilities to interact with the Cosmos Extension for MetaMask.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cosmos/snap.git"
+    "url": "git+https://github.com/cosmos/snap.git"
   },
   "type": "module",
   "license": "MIT",
