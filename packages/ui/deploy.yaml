@@ -2,7 +2,7 @@
 version: "2.0"
 services:
   web:
-    image: schnetzlerjoe/snap:v0.1.0
+    image: mysticlabss/multisig:v0.1.1
     expose:
       - port: 3000
         as: 80
