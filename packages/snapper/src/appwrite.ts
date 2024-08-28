@@ -105,30 +105,4 @@ export class Appwrite {
     return data.data;
   };
 
-  getAkashNotifications = async (address: string) => {
-      const functions = new Functions(this.client);
-      const res = await functions.createExecution('659e1d905dde5ef4504f', undefined, undefined, `?address=${address}`, ExecutionMethod.GET);
-      if (res.responseStatusCode !== 200) {
-        throw new Error(`Failed to getAkashNotifications. ${res.responseBody}`);
-      }
-      const data = JSON.parse(res.responseBody);
-      if (data.success === false) {
-        throw new Error(`Error Occured: ${data.data}`);
-      }
-      return data;
-  };
-
-  updateAkashNotifications = async (address: string) => {
-      const functions = new Functions(this.client);
-      const res = await functions.createExecution('659e1d905dde5ef4504f', '{ "address": "{address}" }'.replace("{address}", address), undefined, undefined, ExecutionMethod.POST);
-      if (res.responseStatusCode !== 200) {
-        throw new Error(`Failed to updateAkashNotifications. ${res.responseBody}`);
-      }
-      const data = JSON.parse(res.responseBody);
-      if (data.success === false) {
-        throw new Error(`Error Occured: ${data.data}`);
-      }
-      return data.data;
-  };
-
 }
