@@ -173,6 +173,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cosmjs/cosmwasm-stargate@npm:^0.31.3":
+  version: 0.31.3
+  resolution: "@cosmjs/cosmwasm-stargate@npm:0.31.3"
+  dependencies:
+    "@cosmjs/amino": ^0.31.3
+    "@cosmjs/crypto": ^0.31.3
+    "@cosmjs/encoding": ^0.31.3
+    "@cosmjs/math": ^0.31.3
+    "@cosmjs/proto-signing": ^0.31.3
+    "@cosmjs/stargate": ^0.31.3
+    "@cosmjs/tendermint-rpc": ^0.31.3
+    "@cosmjs/utils": ^0.31.3
+    cosmjs-types: ^0.8.0
+    long: ^4.0.0
+    pako: ^2.0.2
+  checksum: 7f5a4c809fb3b54fa70887a2e7cf2bc9c2a460891a1cd01f6721f8dbe43efa0d6611b642c2e3601c779295008dbe922e8a9985ffecc3bca55533fb43d83d000d
+  languageName: node
+  linkType: hard
+
 "@cosmjs/cosmwasm-stargate@npm:^0.32.2":
   version: 0.32.3
   resolution: "@cosmjs/cosmwasm-stargate@npm:0.32.3"
@@ -459,6 +478,7 @@ __metadata:
   dependencies:
     "@0xsquid/sdk": ^1.14.8
     "@cosmjs/amino": ^0.31.3
+    "@cosmjs/cosmwasm-stargate": ^0.31.3
     "@cosmjs/crypto": ^0.31.1
     "@cosmjs/encoding": ^0.31.3
     "@cosmjs/proto-signing": ^0.31.3
