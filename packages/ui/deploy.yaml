@@ -9,12 +9,10 @@ services:
         to:
           - global: true
     env:
-      - VITE_DENO_SERVERLESS_URL=
-      - VITE_SNAP_VERSION=
-      - VITE_RHINO_API_KEY=
-      - VITE_NUMIA_API_KEY=
-      - VITE_APPWRITE_URL=
-      - VITE_APPWRITE_FUNCTION_PROJECT_ID=
+      - PUBLIC_DENO_SERVERLESS_URL=https://api.mysticlabs.xyz
+      - PUBLIC_SNAP_VERSION=0.1.22
+      - PUBLIC_APPWRITE_URL=your-appwrite-url
+      - PUBLIC_APPWRITE_FUNCTION_PROJECT_ID=your-project-id
 profiles:
   compute:
     web:
