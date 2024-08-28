@@ -1,12 +1,8 @@
-import { SigningStargateClient, defaultRegistryTypes, createDefaultAminoConverters, AminoTypes } from '@cosmjs/stargate';
+import { SigningStargateClient, defaultRegistryTypes, createDefaultAminoConverters, AminoTypes, HttpEndpoint } from '@cosmjs/stargate';
 import { wasmTypes, createWasmAminoConverters } from '@cosmjs/cosmwasm-stargate';
 import { Registry, type GeneratedType } from '@cosmjs/proto-signing';
-import type { Chain } from '@cosmsnap/snapper';
+import type { Chain } from "@cosmsnap/snapper";
 import _ from 'lodash';
-import rpcs from '../apis.json';
-import { env } from '$env/dynamic/public';
-
-let keyNumia = env.PUBLIC_NUMIA_API_KEY;
 
 export interface Transaction {
   address: string;
@@ -23,29 +19,37 @@ export interface ChainConfig {
 }
 
 export const getClient = async (chain: Chain) => {
-  let chainRpc = rpcs.apis.find(item => item.chain_id == chain.chain_id);
-  let signer = window.cosmos.getOfflineSignerOnlyAmino(chain.chain_id);
-  // if we dont have a production rpc bank on public registry
-  if (chainRpc && keyNumia) {
-    const signingClient = await SigningStargateClient.connectWithSigner(
-      { url: chainRpc.rpc, headers: { "Authorization": `Bearer ${keyNumia}` } },
-      signer,
-      {
-        registry: new Registry([...defaultRegistryTypes, ...wasmTypes] as Iterable<[string, GeneratedType]>),
-        aminoTypes: new AminoTypes({...createDefaultAminoConverters(), ...createWasmAminoConverters()})
-      }
-    );
-    return signingClient
+  const signer = window.cosmos.getOfflineSignerOnlyAmino(chain.chain_id);
+  
+  let rpcUrl: string | HttpEndpoint = '';
+  
+  try {
+    // Fetch chain info from chains.cosmos.directory
+    const response = await fetch(`https://chains.cosmos.directory/${chain.chain_name.toLowerCase()}`);
+    if (!response.ok) throw new Error('Network response was not ok');
+    const chainInfo = await response.json();
+    
+    if (chainInfo.chain.proxy_status.rpc) {
+      // Use the proxy/load balancer RPC
+      rpcUrl = `https://rpc.cosmos.directory/${chain.chain_name.toLowerCase()}`;
+    } else {
+      // Fall back to chain.apis RPC
+      rpcUrl = chain.apis.rpc[0].address;
+    }
+  } catch (error) {
+    console.error('Error fetching chain info:', error);
+    // Fall back to chain.apis RPC if there's an error
+    rpcUrl = chain.apis.rpc[0].address;
   }
 
   const signingClient = await SigningStargateClient.connectWithSigner(
-      chain.apis.rpc[0].address,
-      signer,
-      {
-        registry: new Registry([...defaultRegistryTypes, ...wasmTypes] as Iterable<[string, GeneratedType]>),
-        aminoTypes: new AminoTypes({...createDefaultAminoConverters(), ...createWasmAminoConverters()})
-      }
+    rpcUrl,
+    signer,
+    {
+      registry: new Registry([...defaultRegistryTypes, ...wasmTypes] as Iterable<[string, GeneratedType]>),
+      aminoTypes: new AminoTypes({...createDefaultAminoConverters(), ...createWasmAminoConverters()})
+    }
   );
 
-  return signingClient
+  return signingClient;
 }

@@ -3,7 +3,6 @@ import type { CoinIBC } from "./skip";
 import type { ChainInfo } from "@keplr-wallet/types";
 import { ethers } from "ethers";
 import { StargateClient } from "@cosmjs/stargate";
-import rpcs from '../apis.json';
 import type { ChainDirectory } from "../store/directory";
 
 export const LOCAL_STORAGE_CHAINS = "cosmsnap:chains";
