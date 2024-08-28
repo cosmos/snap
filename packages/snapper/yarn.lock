@@ -86,6 +86,7 @@ __metadata:
     eslint-plugin-jsdoc: ^39.2.9
     eslint-plugin-node: ^11.1.0
     eslint-plugin-prettier: ^4.2.1
+    node-appwrite: ^14.0.0
     node-fetch: 2
     prettier: ^2.2.1
     prettier-plugin-packagejson: ^2.2.11
@@ -3608,6 +3609,22 @@ __metadata:
   version: 0.6.3
   resolution: "negotiator@npm:0.6.3"
   checksum: b8ffeb1e262eff7968fc90a2b6767b04cfd9842582a9d0ece0af7049537266e7b2506dfb1d107a32f06dd849ab2aea834d5830f7f4d0e5cb7d36e1ae55d021d9
+  languageName: node
+  linkType: hard
+
+"node-appwrite@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "node-appwrite@npm:14.0.0"
+  dependencies:
+    node-fetch-native-with-agent: 1.7.2
+  checksum: 34d4b70ef345b66d0a3e4a8e71b78ec00431ba680fa74f9afbb5dc6f18f03e99c021f17eb7e06c36e4cd28b36021fa8064230a47a85e22c8d2a23057fe37ba58
+  languageName: node
+  linkType: hard
+
+"node-fetch-native-with-agent@npm:1.7.2":
+  version: 1.7.2
+  resolution: "node-fetch-native-with-agent@npm:1.7.2"
+  checksum: 04fc6b71ad4e5c20e7ac74db7d522906c2573a7abb5275e004cf039042cf31e57d95d2c78039b3e23ef1035f7094c75586612e06d5d22b02e71394c66f99f89e
   languageName: node
   linkType: hard
 

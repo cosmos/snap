@@ -1,6 +1,6 @@
 {
   "name": "@cosmsnap/snapper",
-  "version": "0.2.5",
+  "version": "0.2.7",
   "description": "A helper package with utilities to interact with the Cosmos Extension for MetaMask.",
   "repository": {
     "type": "git",
@@ -48,6 +48,7 @@
     "@keplr-wallet/proto-types": "0.12.12",
     "@keplr-wallet/types": "0.12.12",
     "appwrite": "^14.0.0",
+    "node-appwrite": "^14.0.0",
     "ses": "^0.18.4"
   },
   "devDependencies": {
