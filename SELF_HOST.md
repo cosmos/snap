@@ -53,3 +53,33 @@ The structure should look like this:
 ├── get_multisigs
 
 └── sign_multisig_tx
+
+
+## Akash Deployment
+
+Now deploy the Multisig using Akash Console, follow these steps:
+
+1. **Prerequisites**: 
+   - Ensure you have an Akash account with sufficient AKT tokens for deployment.
+   - Have the `deploy.yaml` file ready from `packages/ui/deploy.yaml` in the [cosmos/snap repository](https://github.com/cosmos/snap/blob/multisig/packages/ui/deploy.yaml). Make sure to change the environment variables to your own Appwrite instance.
+
+2. **Access Akash Console**:
+   - Go to [Akash Console](https://console.akash.network/) and connect your wallet.
+
+3. **Create a new deployment**:
+   - Click on "Create Deployment" in the Akash Console.
+   - Copy the contents of the [deploy.yaml](https://github.com/cosmos/snap/blob/multisig/packages/ui/deploy.yaml) file into the SDL editor in the console.
+
+4. **Configure and deploy**:
+   - Review and adjust any settings as needed in the Akash Console interface.
+   - Follow the prompts to create your deployment.
+
+5. **Select a provider**:
+   - Once bids are received, select a provider that meets your requirements.
+
+6. **Access your deployed UI**:
+   - After the deployment is complete, Akash Console will provide you with the access URL for your deployed Snap UI.
+
+For more detailed instructions on using Akash Console, refer to the [Akash documentation](https://docs.akash.network/).
+
+Congratulations! You have successfully self hosted your own Multisig to Akash.
